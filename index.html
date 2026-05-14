@@ -3262,7 +3262,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAnalytics, isSupported as isAnalyticsSupported } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js";
-    import { getAuth, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signInWithRedirect, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import { getFirestore, doc, onSnapshot, runTransaction, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -7036,8 +7036,8 @@
     async function signInWithGoogle() {
       try {
         elements.googleSignIn.disabled = true;
-        setAuthStatus("Google 로그인 페이지로 이동합니다.");
-        await signInWithRedirect(auth, googleProvider);
+        setAuthStatus("Google 로그인 창을 여는 중입니다.");
+        await signInWithPopup(auth, googleProvider);
       } catch (error) {
         console.error("google sign in failed", error);
         elements.googleSignIn.disabled = false;
@@ -7056,8 +7056,11 @@
       if (code.includes("operation-not-allowed")) {
         return "Firebase Authentication에서 Google 로그인을 활성화해야 합니다.";
       }
-      if (code.includes("popup")) {
-        return "팝업 로그인이 차단되었습니다. 다시 누르면 Google 로그인 페이지로 이동합니다.";
+      if (code.includes("popup-blocked")) {
+        return "브라우저에서 Google 로그인 팝업이 차단되었습니다. 이 사이트의 팝업을 허용한 뒤 다시 로그인하세요.";
+      }
+      if (code.includes("popup-closed-by-user") || code.includes("cancelled-popup-request")) {
+        return "Google 로그인 창이 닫혔습니다. 다시 로그인 버튼을 눌러 진행하세요.";
       }
       if (code.includes("network")) {
         return "네트워크 문제로 로그인에 실패했습니다. 인터넷 연결을 확인하세요.";
@@ -7105,13 +7108,6 @@
     }
 
     function watchAuthState() {
-      getRedirectResult(auth).catch((error) => {
-        console.error("redirect sign in failed", error);
-        setAuthStatus(authErrorMessage(error));
-        elements.googleSignIn.disabled = false;
-        elements.googleSignIn.hidden = false;
-        elements.googleSignOut.hidden = true;
-      });
       onAuthStateChanged(auth, async (user) => {
         stopDataSubscriptions();
         resetDataReady();
