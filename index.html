@@ -1776,6 +1776,10 @@
           <i data-lucide="folder-open"></i>
           <span>문서함</span>
         </button>
+        <button class="nav-button" type="button" data-view-target="administration" data-permission="manage-users" hidden>
+          <i data-lucide="shield-check"></i>
+          <span>운영자 관리</span>
+        </button>
         <button class="nav-button" type="button" data-view-target="settings">
           <i data-lucide="settings"></i>
           <span>운영 설정</span>
@@ -2773,6 +2777,133 @@
           </section>
         </section>
 
+        <section class="view" id="administration" aria-labelledby="administration-title">
+          <div class="section-head">
+            <div>
+              <h2 id="administration-title">운영자 관리</h2>
+              <p>Google 계정 접근 승인, 역할 부여, 주요 변경 로그를 관리합니다.</p>
+            </div>
+          </div>
+
+          <div class="grid kpi-grid" aria-label="운영자 관리 지표">
+            <article class="metric-card">
+              <div class="metric-top">
+                <span class="metric-label">소유자 계정</span>
+                <span class="metric-icon"><i data-lucide="crown"></i></span>
+              </div>
+              <p class="metric-value" id="adminOwnerCount">1</p>
+              <span class="metric-note" id="adminOwnerLabel">-</span>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top">
+                <span class="metric-label">활성 운영자</span>
+                <span class="metric-icon"><i data-lucide="users-round"></i></span>
+              </div>
+              <p class="metric-value" id="adminActiveUsers">0</p>
+              <span class="metric-note">승인된 Google 계정</span>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top">
+                <span class="metric-label">승인 대기</span>
+                <span class="metric-icon"><i data-lucide="user-round-plus"></i></span>
+              </div>
+              <p class="metric-value" id="adminPendingRequests">0</p>
+              <span class="metric-note">접근 요청 계정</span>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top">
+                <span class="metric-label">최근 로그</span>
+                <span class="metric-icon"><i data-lucide="clipboard-list"></i></span>
+              </div>
+              <p class="metric-value" id="adminRecentLogs">0</p>
+              <span class="metric-note">최근 50건 표시</span>
+            </article>
+          </div>
+
+          <div class="grid two-column">
+            <section class="panel" aria-labelledby="access-request-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="access-request-title">접근 승인 요청</h2>
+                  <p>미승인 Google 사용자가 로그인하면 자동으로 요청 목록에 등록됩니다.</p>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <caption class="sr-only">접근 승인 요청 목록</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">요청 계정</th>
+                      <th scope="col">요청일</th>
+                      <th scope="col">상태</th>
+                      <th scope="col">처리</th>
+                    </tr>
+                  </thead>
+                  <tbody id="accessRequestTable"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel" aria-labelledby="role-policy-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="role-policy-title">권한 기준</h2>
+                  <p>운영 권한은 최소 권한 원칙으로 부여합니다.</p>
+                </div>
+              </div>
+              <ul class="insight-list" id="rolePolicyList"></ul>
+            </section>
+          </div>
+
+          <section class="panel" aria-labelledby="operator-table-title">
+            <div class="section-head">
+              <div>
+                <h2 id="operator-table-title">운영자 계정</h2>
+                <p>승인된 사용자별 역할과 활성 상태를 관리합니다. 소유자 계정은 변경할 수 없습니다.</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">운영자 계정 목록</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">계정</th>
+                    <th scope="col">역할</th>
+                    <th scope="col">상태</th>
+                    <th scope="col">승인일</th>
+                    <th scope="col">처리</th>
+                  </tr>
+                </thead>
+                <tbody id="operatorTable"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel" aria-labelledby="audit-log-title">
+            <div class="section-head">
+              <div>
+                <h2 id="audit-log-title">운영 로그</h2>
+                <p>로그인, 데이터 저장, 권한 변경 등 주요 작업을 최근순으로 확인합니다.</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">운영 로그 목록</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">일시</th>
+                    <th scope="col">계정</th>
+                    <th scope="col">작업</th>
+                    <th scope="col">대상</th>
+                    <th scope="col">상세</th>
+                  </tr>
+                </thead>
+                <tbody id="auditLogTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
         <section class="view" id="settings" aria-labelledby="settings-title">
           <div class="section-head">
             <div>
@@ -3263,7 +3394,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAnalytics, isSupported as isAnalyticsSupported } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js";
     import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot, runTransaction, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getFirestore, addDoc, collection, doc, onSnapshot, runTransaction, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAP5dZHK5fhgVrfZO4GVX3nFxx4lZf9Yjg",
@@ -3794,8 +3925,12 @@
       settings: { ...defaultSettings },
       certificates: [],
       operationRecords: {},
+      members: [],
+      accessRequests: [],
+      auditLogs: [],
       user: null,
       owner: null,
+      currentRole: "",
       unsubscribeData: [],
       dataReady: {
         settings: false,
@@ -3831,7 +3966,42 @@
       reviews: ["Review", "평가/보상"],
       statistics: ["Analytics", "인사 통계"],
       documents: ["Documents", "문서함"],
+      administration: ["Administration", "운영자 관리"],
       settings: ["Administration", "운영 설정"]
+    };
+
+    const roleDefinitions = {
+      owner: {
+        label: "소유자",
+        description: "최초 운영자 계정입니다. 권한 관리, 데이터 관리, 로그 열람을 모두 수행합니다.",
+        variant: "success"
+      },
+      admin: {
+        label: "관리자",
+        description: "사원정보, 조직, 증명서, 운영 데이터를 등록·수정할 수 있습니다. 권한 부여는 소유자만 수행합니다.",
+        variant: "success"
+      },
+      hr_manager: {
+        label: "인사담당",
+        description: "일상 인사 운영 데이터를 등록·수정할 수 있습니다. 권한 관리 메뉴는 사용할 수 없습니다.",
+        variant: "warning"
+      },
+      viewer: {
+        label: "조회전용",
+        description: "인사 데이터를 조회하고 CSV를 내려받을 수 있지만 저장 작업은 제한됩니다.",
+        variant: ""
+      }
+    };
+
+    const memberStatuses = {
+      active: ["활성", "success"],
+      revoked: ["중지", "danger"]
+    };
+
+    const accessRequestStatuses = {
+      pending: ["승인 대기", "warning"],
+      approved: ["승인 완료", "success"],
+      rejected: ["반려", "danger"]
     };
 
     const operationConfigs = {
@@ -4025,6 +4195,15 @@
       documentBars: document.querySelector("#documentBars"),
       documentChecklist: document.querySelector("#documentChecklist"),
       documentTable: document.querySelector("#documentTable"),
+      adminOwnerCount: document.querySelector("#adminOwnerCount"),
+      adminOwnerLabel: document.querySelector("#adminOwnerLabel"),
+      adminActiveUsers: document.querySelector("#adminActiveUsers"),
+      adminPendingRequests: document.querySelector("#adminPendingRequests"),
+      adminRecentLogs: document.querySelector("#adminRecentLogs"),
+      accessRequestTable: document.querySelector("#accessRequestTable"),
+      rolePolicyList: document.querySelector("#rolePolicyList"),
+      operatorTable: document.querySelector("#operatorTable"),
+      auditLogTable: document.querySelector("#auditLogTable"),
       kpiActive: document.querySelector("#kpiActive"),
       kpiTotalNote: document.querySelector("#kpiTotalNote"),
       kpiDepartment: document.querySelector("#kpiDepartment"),
@@ -4171,6 +4350,18 @@
       return doc(db, "artifacts", APP_ID, "public", "data", "appMeta", name);
     }
 
+    function firestorePublicCollection(name) {
+      return collection(db, "artifacts", APP_ID, "public", "data", name);
+    }
+
+    function firestoreUserDoc(uid) {
+      return doc(db, "artifacts", APP_ID, "public", "data", "appUsers", uid);
+    }
+
+    function firestoreAccessRequestDoc(uid) {
+      return doc(db, "artifacts", APP_ID, "public", "data", "accessRequests", uid);
+    }
+
     function defaultSettingsValue() {
       return normalizeSettings(defaultSettings);
     }
@@ -4191,14 +4382,79 @@
       return merged;
     }
 
+    function roleLabel(role) {
+      return roleDefinitions[role]?.label || "미지정";
+    }
+
+    function currentRole() {
+      if (state.owner?.ownerUid && state.user?.uid === state.owner.ownerUid) return "owner";
+      return state.currentRole || "";
+    }
+
+    function canManageUsers() {
+      return currentRole() === "owner";
+    }
+
+    function canReadData() {
+      return ["owner", "admin", "hr_manager", "viewer"].includes(currentRole());
+    }
+
+    function canWriteData() {
+      return ["owner", "admin", "hr_manager"].includes(currentRole());
+    }
+
+    function requireWritePermission() {
+      if (canWriteData()) return true;
+      showToast("현재 계정은 조회 권한입니다. 저장 작업은 운영자에게 요청하세요.");
+      return false;
+    }
+
+    function auditActionLabel(action) {
+      return {
+        login: "로그인",
+        "data:update": "데이터 저장",
+        "user:approve": "계정 승인",
+        "user:reject": "접근 반려",
+        "user:update": "권한 변경"
+      }[action] || action;
+    }
+
+    function addAuditLog(action, target = "", detail = "") {
+      if (!state.user || !canReadData()) return Promise.resolve();
+      return addDoc(firestorePublicCollection("auditLogs"), {
+        action,
+        actionLabel: auditActionLabel(action),
+        target,
+        detail,
+        actorUid: state.user.uid,
+        actorEmail: state.user.email || "",
+        actorName: state.user.displayName || "",
+        createdAt: serverTimestamp()
+      }).catch((error) => {
+        console.error("audit log failed", error);
+      });
+    }
+
     function persistDoc(name, value) {
       if (!state.user) return Promise.resolve();
+      if (!canWriteData()) {
+        showToast("현재 계정은 조회 권한입니다. Firebase 저장은 차단되었습니다.");
+        return Promise.resolve();
+      }
       return setDoc(firestoreDataDoc(name), {
         value,
         updatedAt: serverTimestamp(),
         updatedBy: state.user.uid,
         updatedByEmail: state.user.email || ""
-      }, { merge: true }).catch((error) => {
+      }, { merge: true }).then(() => {
+        const labels = {
+          settings: "운영 설정",
+          employees: "사원 정보",
+          certificates: "증명서",
+          operationRecords: "업무 기록"
+        };
+        return addAuditLog("data:update", labels[name] || name, `${labels[name] || name} 저장`);
+      }).catch((error) => {
         console.error(`${name} save failed`, error);
         showToast("Firebase 저장 중 오류가 발생했습니다.");
       });
@@ -4256,9 +4512,87 @@
       state.unsubscribeData.push(unsubscribe);
     }
 
+    function normalizeMember(id, data = {}) {
+      return {
+        uid: data.uid || id,
+        email: data.email || "",
+        displayName: data.displayName || data.name || "",
+        photoURL: data.photoURL || "",
+        role: data.role || "viewer",
+        status: data.status || "active",
+        approvedAt: data.approvedAt || data.createdAt || null,
+        approvedByEmail: data.approvedByEmail || "",
+        updatedAt: data.updatedAt || null
+      };
+    }
+
+    function normalizeAccessRequest(id, data = {}) {
+      return {
+        uid: data.uid || id,
+        email: data.email || "",
+        displayName: data.displayName || data.name || "",
+        photoURL: data.photoURL || "",
+        status: data.status || "pending",
+        role: data.role || "",
+        requestedAt: data.requestedAt || null,
+        reviewedAt: data.reviewedAt || null,
+        reviewedByEmail: data.reviewedByEmail || ""
+      };
+    }
+
+    function normalizeAuditLog(id, data = {}) {
+      return {
+        id,
+        action: data.action || "",
+        actionLabel: data.actionLabel || auditActionLabel(data.action || ""),
+        target: data.target || "",
+        detail: data.detail || "",
+        actorUid: data.actorUid || "",
+        actorEmail: data.actorEmail || "",
+        actorName: data.actorName || "",
+        createdAt: data.createdAt || null
+      };
+    }
+
+    function subscribeAdminCollections() {
+      if (!canManageUsers()) {
+        state.members = [];
+        state.accessRequests = [];
+        state.auditLogs = [];
+        return;
+      }
+
+      const subscriptions = [
+        ["appUsers", (docs) => {
+          state.members = docs.map((item) => normalizeMember(item.id, item.data()));
+        }],
+        ["accessRequests", (docs) => {
+          state.accessRequests = docs.map((item) => normalizeAccessRequest(item.id, item.data()));
+        }],
+        ["auditLogs", (docs) => {
+          state.auditLogs = docs.map((item) => normalizeAuditLog(item.id, item.data()));
+        }]
+      ];
+
+      subscriptions.forEach(([name, applyValue]) => {
+        const unsubscribe = onSnapshot(firestorePublicCollection(name), (snapshot) => {
+          applyValue(snapshot.docs);
+          if (state.appEventsBound && document.body.classList.contains("is-authenticated")) {
+            renderAdministration();
+            if (window.lucide) window.lucide.createIcons();
+          }
+        }, (error) => {
+          console.error(`${name} subscription failed`, error);
+          showToast("운영자 관리 데이터를 불러오지 못했습니다. Firestore 규칙을 확인하세요.");
+        });
+        state.unsubscribeData.push(unsubscribe);
+      });
+    }
+
     function subscribeAppData() {
       stopDataSubscriptions();
       resetDataReady();
+      subscribeAdminCollections();
       subscribeDataDoc("settings", defaultSettingsValue, (value) => {
         state.settings = normalizeSettings(value || defaultSettings);
       });
@@ -4288,7 +4622,8 @@
       }
       document.body.classList.remove("is-auth-loading");
       document.body.classList.add("is-authenticated");
-      setAuthStatus("로그인되었습니다.");
+      setAuthStatus(`${roleLabel(currentRole())} 권한으로 로그인되었습니다.`);
+      if (state.user) updateSessionUser(state.user);
       if (!state.appEventsBound) {
         bindEvents();
         state.appEventsBound = true;
@@ -4394,6 +4729,10 @@
     }
 
     function switchView(viewId) {
+      if (viewId === "administration" && !canManageUsers()) {
+        showToast("운영자 관리 메뉴는 소유자 계정만 사용할 수 있습니다.");
+        viewId = "dashboard";
+      }
       state.currentView = viewId;
       const title = titles[viewId] || titles.dashboard;
       elements.pageKicker.textContent = title[0];
@@ -4478,8 +4817,11 @@
         ["statistics", renderStatistics],
         ["documents", renderDocuments],
         ["operation records", renderOperationRecords],
+        ["administration", renderAdministration],
         ["settings", renderSettings]
       ].forEach(([label, callback]) => runRender(label, callback));
+
+      applyRoleUi();
 
       if (window.lucide) {
         window.lucide.createIcons();
@@ -4756,6 +5098,7 @@
       edit.type = "button";
       edit.setAttribute("aria-label", `${employee.name} 정보 수정`);
       edit.append(makeIcon("pencil"));
+      edit.disabled = !canWriteData();
       edit.addEventListener("click", () => openEmployeeModal(employee.id));
 
       const remove = document.createElement("button");
@@ -4763,6 +5106,7 @@
       remove.type = "button";
       remove.setAttribute("aria-label", `${employee.name} 삭제`);
       remove.append(makeIcon("trash-2"));
+      remove.disabled = !canWriteData();
       remove.addEventListener("click", () => deleteEmployee(employee.id));
 
       wrap.append(edit, remove);
@@ -5082,6 +5426,7 @@
     }
 
     function startOrganizationNodeCreate(mode = "child") {
+      if (!requireWritePermission()) return;
       const selected = findOrgNode(state.selectedOrgNodeId);
       const parentId = mode === "sibling" && selected.id !== ROOT_ORG_ID ? selected.parentId : selected.id;
       elements.orgNodeId.value = "";
@@ -5097,6 +5442,7 @@
 
     function saveOrganizationNode(event) {
       event.preventDefault();
+      if (!requireWritePermission()) return;
       const id = elements.orgNodeId.value;
       const name = elements.orgNodeName.value.trim();
       const parentId = elements.orgNodeParent.value || ROOT_ORG_ID;
@@ -5147,6 +5493,7 @@
     }
 
     function moveSelectedOrganizationNode(direction) {
+      if (!requireWritePermission()) return;
       const node = findOrgNode(state.selectedOrgNodeId);
       if (!node || node.id === ROOT_ORG_ID) {
         showToast("최상위 회사 조직은 이동할 수 없습니다.");
@@ -5169,6 +5516,7 @@
     }
 
     function moveDraggedOrgNode(targetNodeId) {
+      if (!requireWritePermission()) return;
       const dragged = findOrgNode(state.draggedOrgNodeId);
       const target = findOrgNode(targetNodeId);
       if (!dragged || !target || dragged.id === ROOT_ORG_ID || dragged.id === target.id) return;
@@ -5199,6 +5547,7 @@
     }
 
     function deleteSelectedOrganizationNode() {
+      if (!requireWritePermission()) return;
       const node = findOrgNode(state.selectedOrgNodeId);
       if (!node || node.id === ROOT_ORG_ID) {
         showToast("최상위 회사 조직은 삭제할 수 없습니다.");
@@ -5331,6 +5680,7 @@
 
     function createOperationRecord(event, key) {
       event.preventDefault();
+      if (!requireWritePermission()) return;
       const form = event.currentTarget;
       const employeeId = form.elements.employeeId.value;
       if (!employeeId) {
@@ -5392,7 +5742,12 @@
             const statusCell = document.createElement("td");
             const statusSelect = makeOperationSelect("rowStatus", config.statuses);
             statusSelect.value = record.status;
+            statusSelect.disabled = !canWriteData();
             statusSelect.addEventListener("change", () => {
+              if (!requireWritePermission()) {
+                statusSelect.value = record.status;
+                return;
+              }
               record.status = statusSelect.value;
               saveOperationRecords();
               renderAll();
@@ -5406,6 +5761,7 @@
             remove.type = "button";
             remove.setAttribute("aria-label", "업무 기록 삭제");
             remove.append(makeIcon("trash-2"));
+            remove.disabled = !canWriteData();
             remove.addEventListener("click", () => deleteOperationRecord(key, record.id));
             actionCell.append(remove);
 
@@ -5423,6 +5779,7 @@
     }
 
     function deleteOperationRecord(key, id) {
+      if (!requireWritePermission()) return;
       const ok = window.confirm("이 업무 기록을 삭제할까요?");
       if (!ok) return;
       state.operationRecords[key] = state.operationRecords[key].filter((record) => record.id !== id);
@@ -5564,6 +5921,7 @@
 
     function createCertificateRecord(event) {
       event.preventDefault();
+      if (!requireWritePermission()) return;
       if (!elements.certificateEmployee.value) {
         showToast("증명서 대상 사원을 선택하세요.");
         return;
@@ -5993,6 +6351,7 @@
 
     function createAssignmentRecord(event) {
       event.preventDefault();
+      if (!requireWritePermission()) return;
       const employee = state.employees.find((item) => item.id === elements.assignmentEmployee.value);
       if (!employee) {
         showToast("발령/계약 변경 대상 사원을 선택하세요.");
@@ -6135,13 +6494,14 @@
       apply.type = "button";
       apply.setAttribute("aria-label", "사원정보에 반영");
       apply.append(makeIcon("check"));
-      apply.disabled = record.appliedToEmployee;
+      apply.disabled = record.appliedToEmployee || !canWriteData();
       apply.addEventListener("click", () => applyAssignmentRecord(record.id));
       const remove = document.createElement("button");
       remove.className = "icon-button";
       remove.type = "button";
       remove.setAttribute("aria-label", "발령 이력 삭제");
       remove.append(makeIcon("trash-2"));
+      remove.disabled = !canWriteData();
       remove.addEventListener("click", () => deleteAssignmentRecord(record.id));
       wrap.append(apply, remove);
       td.append(wrap);
@@ -6149,6 +6509,7 @@
     }
 
     function applyAssignmentRecord(id, options = {}) {
+      if (!requireWritePermission()) return;
       const record = assignmentRecords().find((item) => item.id === id);
       const employee = record ? state.employees.find((item) => item.id === record.employeeId) : null;
       if (!record || !employee) {
@@ -6172,6 +6533,7 @@
     }
 
     function deleteAssignmentRecord(id) {
+      if (!requireWritePermission()) return;
       const ok = window.confirm("이 발령/계약 변경 이력을 삭제할까요?");
       if (!ok) return;
       state.operationRecords.assignments = assignmentRecords().filter((record) => record.id !== id);
@@ -6274,6 +6636,302 @@
         );
         elements.documentTable.append(tr);
       });
+    }
+
+    function applyRoleUi() {
+      const canManage = canManageUsers();
+      const writable = canWriteData();
+      elements.navButtons.forEach((button) => {
+        if (button.dataset.permission === "manage-users") {
+          button.hidden = !canManage;
+        }
+      });
+      document.querySelectorAll([
+        "[data-open-employee]",
+        "#loadSample",
+        "#clearData",
+        "#generateEmployeeNo",
+        "#orgAddChild",
+        "#orgDeleteNode",
+        "#orgMoveUp",
+        "#orgMoveDown",
+        "#settingsForm button[type='submit']",
+        "#organizationForm button[type='submit']",
+        "#assignmentForm button[type='submit']",
+        "#certificateForm button[type='submit']",
+        "#employeeForm button[type='submit']",
+        "[data-operation-form] button[type='submit']"
+      ].join(",")).forEach((element) => {
+        element.disabled = !writable;
+      });
+      if (!canManage && state.currentView === "administration") {
+        switchView("dashboard");
+      }
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "-";
+      const date = typeof value.toDate === "function" ? value.toDate() : new Date(value);
+      if (Number.isNaN(date.getTime())) return "-";
+      return new Intl.DateTimeFormat("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(date);
+    }
+
+    function makeUserCell(userLike) {
+      const td = document.createElement("td");
+      const wrap = document.createElement("div");
+      wrap.className = "person-cell";
+      const avatar = document.createElement("span");
+      avatar.className = "avatar";
+      avatar.textContent = initials(userLike.displayName || userLike.email || "?");
+      const body = document.createElement("div");
+      const name = document.createElement("div");
+      name.className = "person-name";
+      name.textContent = text(userLike.displayName || userLike.email, "이름 없음");
+      const sub = document.createElement("div");
+      sub.className = "person-sub";
+      sub.textContent = text(userLike.email, userLike.uid || "-");
+      body.append(name, sub);
+      wrap.append(avatar, body);
+      td.append(wrap);
+      return td;
+    }
+
+    function makeSelectCell(options, value, disabled = false) {
+      const td = document.createElement("td");
+      const field = document.createElement("div");
+      field.className = "field";
+      const select = document.createElement("select");
+      options.forEach(([optionValue, label]) => {
+        const option = document.createElement("option");
+        option.value = optionValue;
+        option.textContent = label;
+        select.append(option);
+      });
+      select.value = value;
+      select.disabled = disabled;
+      field.append(select);
+      td.append(field);
+      return [td, select];
+    }
+
+    function statusBadgeCell(status, dictionary) {
+      const [label, variant] = dictionary[status] || [text(status), ""];
+      return makeStatusCell(label, variant);
+    }
+
+    function renderAdministration() {
+      if (!elements.operatorTable) return;
+      const ownerEmail = state.owner?.ownerEmail || state.user?.email || "-";
+      const members = state.members.length
+        ? state.members
+        : state.owner?.ownerUid ? [normalizeMember(state.owner.ownerUid, {
+            uid: state.owner.ownerUid,
+            email: ownerEmail,
+            displayName: state.owner.ownerName || "소유자",
+            role: "owner",
+            status: "active"
+          })] : [];
+      const activeMembers = members.filter((member) => member.status === "active");
+      const pendingRequests = state.accessRequests.filter((request) => request.status === "pending");
+
+      elements.adminOwnerCount.textContent = state.owner?.ownerUid ? "1" : "0";
+      elements.adminOwnerLabel.textContent = ownerEmail;
+      elements.adminActiveUsers.textContent = String(activeMembers.length);
+      elements.adminPendingRequests.textContent = String(pendingRequests.length);
+      elements.adminRecentLogs.textContent = String(Math.min(state.auditLogs.length, 50));
+
+      renderAccessRequests(pendingRequests);
+      renderOperatorTable(members);
+      renderAuditLogTable();
+      renderRolePolicy();
+    }
+
+    function renderRolePolicy() {
+      const rows = Object.entries(roleDefinitions).map(([, item]) => ({
+        title: item.label,
+        body: item.description
+      }));
+      renderInsightItems(elements.rolePolicyList, rows);
+    }
+
+    function renderAccessRequests(requests) {
+      renderTableRows(elements.accessRequestTable, requests.sort((a, b) => timestampMs(b.requestedAt) - timestampMs(a.requestedAt)), 4, (request) => {
+        const tr = document.createElement("tr");
+        const actionTd = document.createElement("td");
+        const wrap = document.createElement("div");
+        wrap.className = "table-actions";
+        [
+          ["admin", "관리자"],
+          ["hr_manager", "인사담당"],
+          ["viewer", "조회전용"]
+        ].forEach(([role, label]) => {
+          const button = document.createElement("button");
+          button.className = "button ghost";
+          button.type = "button";
+          button.textContent = label;
+          button.addEventListener("click", () => approveAccessRequest(request.uid, role));
+          wrap.append(button);
+        });
+        const reject = document.createElement("button");
+        reject.className = "button danger";
+        reject.type = "button";
+        reject.textContent = "반려";
+        reject.addEventListener("click", () => rejectAccessRequest(request.uid));
+        wrap.append(reject);
+        actionTd.append(wrap);
+        tr.append(
+          makeUserCell(request),
+          makeCell(formatDateTime(request.requestedAt)),
+          statusBadgeCell(request.status, accessRequestStatuses),
+          actionTd
+        );
+        return tr;
+      }, "승인 대기 요청이 없습니다.", "미승인 Google 사용자가 로그인하면 이곳에 표시됩니다.");
+    }
+
+    function renderOperatorTable(members) {
+      const sorted = [...members].sort((a, b) => {
+        if (a.role === "owner") return -1;
+        if (b.role === "owner") return 1;
+        return text(a.email).localeCompare(text(b.email), "ko");
+      });
+      renderTableRows(elements.operatorTable, sorted, 5, (member) => {
+        const isOwnerRow = member.uid === state.owner?.ownerUid || member.role === "owner";
+        const tr = document.createElement("tr");
+        const [roleTd, roleSelect] = makeSelectCell([
+          ["admin", "관리자"],
+          ["hr_manager", "인사담당"],
+          ["viewer", "조회전용"]
+        ], isOwnerRow ? "admin" : member.role, isOwnerRow);
+        if (isOwnerRow) {
+          roleTd.replaceChildren();
+          roleTd.append(makeStatusCell("소유자", "success").firstElementChild);
+        }
+        const [statusTd, statusSelect] = makeSelectCell([
+          ["active", "활성"],
+          ["revoked", "중지"]
+        ], member.status, isOwnerRow);
+        const actionTd = document.createElement("td");
+        const save = document.createElement("button");
+        save.className = "button ghost";
+        save.type = "button";
+        save.textContent = isOwnerRow ? "변경 불가" : "저장";
+        save.disabled = isOwnerRow;
+        save.addEventListener("click", () => updateMemberAccess(member.uid, roleSelect.value, statusSelect.value));
+        actionTd.append(save);
+        tr.append(
+          makeUserCell(member),
+          roleTd,
+          statusTd,
+          makeCell(formatDateTime(member.approvedAt)),
+          actionTd
+        );
+        return tr;
+      }, "등록된 운영자 계정이 없습니다.", "접근 요청을 승인하면 이곳에 표시됩니다.");
+    }
+
+    function renderAuditLogTable() {
+      const logs = [...state.auditLogs]
+        .sort((a, b) => timestampMs(b.createdAt) - timestampMs(a.createdAt))
+        .slice(0, 50);
+      renderTableRows(elements.auditLogTable, logs, 5, (log) => {
+        const tr = document.createElement("tr");
+        tr.append(
+          makeCell(formatDateTime(log.createdAt)),
+          makeCell(log.actorEmail || log.actorName || "-"),
+          makeCell(log.actionLabel),
+          makeCell(log.target),
+          makeCell(log.detail)
+        );
+        return tr;
+      }, "운영 로그가 없습니다.", "로그인, 데이터 저장, 권한 변경 이후 로그가 쌓입니다.");
+    }
+
+    function timestampMs(value) {
+      if (!value) return 0;
+      const date = typeof value.toDate === "function" ? value.toDate() : new Date(value);
+      return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+    }
+
+    async function approveAccessRequest(uid, role) {
+      if (!canManageUsers()) return;
+      const request = state.accessRequests.find((item) => item.uid === uid);
+      if (!request) return;
+      try {
+        await setDoc(firestoreUserDoc(uid), {
+          uid,
+          email: request.email || "",
+          displayName: request.displayName || "",
+          photoURL: request.photoURL || "",
+          role,
+          status: "active",
+          approvedAt: serverTimestamp(),
+          approvedBy: state.user.uid,
+          approvedByEmail: state.user.email || "",
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+        await setDoc(firestoreAccessRequestDoc(uid), {
+          status: "approved",
+          role,
+          reviewedAt: serverTimestamp(),
+          reviewedBy: state.user.uid,
+          reviewedByEmail: state.user.email || ""
+        }, { merge: true });
+        await addAuditLog("user:approve", request.email || uid, `${roleLabel(role)} 권한 승인`);
+        showToast("접근 요청을 승인했습니다.");
+      } catch (error) {
+        console.error("approve access failed", error);
+        showToast("접근 요청 승인 중 오류가 발생했습니다.");
+      }
+    }
+
+    async function rejectAccessRequest(uid) {
+      if (!canManageUsers()) return;
+      const request = state.accessRequests.find((item) => item.uid === uid);
+      if (!request) return;
+      try {
+        await setDoc(firestoreAccessRequestDoc(uid), {
+          status: "rejected",
+          reviewedAt: serverTimestamp(),
+          reviewedBy: state.user.uid,
+          reviewedByEmail: state.user.email || ""
+        }, { merge: true });
+        await addAuditLog("user:reject", request.email || uid, "접근 요청 반려");
+        showToast("접근 요청을 반려했습니다.");
+      } catch (error) {
+        console.error("reject access failed", error);
+        showToast("접근 요청 반려 중 오류가 발생했습니다.");
+      }
+    }
+
+    async function updateMemberAccess(uid, role, status) {
+      if (!canManageUsers()) return;
+      if (uid === state.owner?.ownerUid) {
+        showToast("소유자 계정은 변경할 수 없습니다.");
+        return;
+      }
+      const member = state.members.find((item) => item.uid === uid);
+      if (!member) return;
+      try {
+        await setDoc(firestoreUserDoc(uid), {
+          role,
+          status,
+          updatedAt: serverTimestamp(),
+          updatedBy: state.user.uid,
+          updatedByEmail: state.user.email || ""
+        }, { merge: true });
+        await addAuditLog("user:update", member.email || uid, `${roleLabel(role)} / ${memberStatuses[status]?.[0] || status}`);
+        showToast("운영자 권한을 저장했습니다.");
+      } catch (error) {
+        console.error("update member failed", error);
+        showToast("운영자 권한 저장 중 오류가 발생했습니다.");
+      }
     }
 
     function makeEmptyBlock(titleText, bodyText) {
@@ -6593,6 +7251,7 @@
 
     function saveSettingsFromForm(event) {
       event.preventDefault();
+      if (!requireWritePermission()) return;
       elements.settingFields.forEach((field) => {
         state.settings[field.dataset.settingField] = field.value.trim();
       });
@@ -6614,6 +7273,7 @@
     }
 
     function openEmployeeModal(id = null) {
+      if (!requireWritePermission()) return;
       state.editingId = id;
       elements.employeeForm.reset();
       elements.employeeId.value = "";
@@ -6767,6 +7427,7 @@
 
     function upsertEmployee(event) {
       event.preventDefault();
+      if (!requireWritePermission()) return;
       const employee = getFormData();
       if (!validateEmployee(employee)) return;
 
@@ -6788,6 +7449,7 @@
     }
 
     function deleteEmployee(id) {
+      if (!requireWritePermission()) return;
       const employee = state.employees.find((item) => item.id === id);
       if (!employee) return;
       const ok = window.confirm(`${employee.name} 사원 정보를 삭제할까요? 이 작업은 Firebase 데이터에서 제거됩니다.`);
@@ -6863,6 +7525,7 @@
     }
 
     function resetWithSampleData() {
+      if (!requireWritePermission()) return;
       const ok = window.confirm("현재 저장된 사원 데이터, 운영 설정, 발급 이력, 업무 기록을 샘플 기준으로 교체할까요?");
       if (!ok) return;
       state.employees = sampleEmployees.map(normalizeEmployee);
@@ -6878,6 +7541,7 @@
     }
 
     function clearSavedData() {
+      if (!requireWritePermission()) return;
       const ok = window.confirm("저장된 사원 데이터, 증명서 발급 이력, 업무 기록을 모두 삭제할까요?");
       if (!ok) return;
       state.employees = [];
@@ -7008,12 +7672,15 @@
     }
 
     function updateSessionUser(user) {
-      elements.sessionUserName.textContent = user.displayName || "관리자";
+      const role = currentRole();
+      elements.sessionUserName.textContent = role ? `${user.displayName || "관리자"} · ${roleLabel(role)}` : user.displayName || "관리자";
       elements.sessionUserEmail.textContent = user.email || user.uid;
     }
 
-    async function ensureOwner(user) {
+    async function ensureAccess(user) {
       const ownerRef = firestoreMetaDoc("owner");
+      const memberRef = firestoreUserDoc(user.uid);
+      const requestRef = firestoreAccessRequestDoc(user.uid);
       return runTransaction(db, async (transaction) => {
         const snapshot = await transaction.get(ownerRef);
         if (!snapshot.exists()) {
@@ -7024,13 +7691,58 @@
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
           });
-          state.owner = { ownerUid: user.uid, ownerEmail: user.email || "" };
-          return true;
+          const owner = { ownerUid: user.uid, ownerEmail: user.email || "", ownerName: user.displayName || "" };
+          state.owner = owner;
+          state.currentRole = "owner";
+          return { allowed: true, role: "owner", owner };
         }
         const owner = snapshot.data();
         state.owner = owner;
-        return owner.ownerUid === user.uid;
+        if (owner.ownerUid === user.uid) {
+          state.currentRole = "owner";
+          return { allowed: true, role: "owner", owner };
+        }
+
+        const memberSnapshot = await transaction.get(memberRef);
+        if (memberSnapshot.exists()) {
+          const member = memberSnapshot.data();
+          const role = member.role || "viewer";
+          if (member.status === "active" && roleDefinitions[role]) {
+            state.currentRole = role;
+            return { allowed: true, role, owner, member };
+          }
+        }
+
+        transaction.set(requestRef, {
+          uid: user.uid,
+          email: user.email || "",
+          displayName: user.displayName || "",
+          photoURL: user.photoURL || "",
+          status: "pending",
+          requestedAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+        state.currentRole = "";
+        return { allowed: false, requested: true, owner };
       });
+    }
+
+    async function syncOwnerMember(user) {
+      if (currentRole() !== "owner") return;
+      try {
+        await setDoc(firestoreUserDoc(user.uid), {
+          uid: user.uid,
+          email: user.email || "",
+          displayName: user.displayName || "",
+          photoURL: user.photoURL || "",
+          role: "owner",
+          status: "active",
+          approvedAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      } catch (error) {
+        console.error("owner member sync failed", error);
+      }
     }
 
     async function signInWithGoogle() {
@@ -7080,6 +7792,7 @@
     function showSignedOut(message = "Google 계정으로 로그인하세요.") {
       stopDataSubscriptions();
       state.user = null;
+      state.currentRole = "";
       document.body.classList.remove("is-authenticated", "is-auth-loading");
       elements.googleSignIn.hidden = false;
       elements.googleSignIn.disabled = false;
@@ -7087,14 +7800,14 @@
       setAuthStatus(message);
     }
 
-    function showAccessDenied(user) {
+    function showAccessPending(user) {
       stopDataSubscriptions();
       document.body.classList.remove("is-authenticated", "is-auth-loading");
       elements.googleSignIn.hidden = true;
       elements.googleSignIn.disabled = false;
       elements.googleSignOut.hidden = false;
       const ownerEmail = state.owner?.ownerEmail ? ` 등록 운영자: ${state.owner.ownerEmail}` : "";
-      setAuthStatus(`${user.email || "현재 계정"}은 운영자 계정이 아닙니다.${ownerEmail}`);
+      setAuthStatus(`${user.email || "현재 계정"}의 접근 요청을 운영자에게 전달했습니다. 승인 후 다시 로그인하세요.${ownerEmail}`);
     }
 
     function bindAuthEvents() {
@@ -7122,11 +7835,13 @@
         document.body.classList.add("is-auth-loading");
         setAuthStatus("운영자 권한을 확인하는 중입니다.");
         try {
-          const allowed = await ensureOwner(user);
-          if (!allowed) {
-            showAccessDenied(user);
+          const access = await ensureAccess(user);
+          if (!access.allowed) {
+            showAccessPending(user);
             return;
           }
+          await syncOwnerMember(user);
+          await addAuditLog("login", "PeopleOps Hub", `${roleLabel(access.role)} 로그인`);
           subscribeAppData();
         } catch (error) {
           console.error("owner check failed", error);

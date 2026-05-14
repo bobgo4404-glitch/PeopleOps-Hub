@@ -10,10 +10,33 @@ service cloud.firestore {
       return /databases/$(database)/documents/artifacts/peopleops-hub/public/data/appMeta/owner;
     }
 
+    function appUserPath(uid) {
+      return /databases/$(database)/documents/artifacts/peopleops-hub/public/data/appUsers/$(uid);
+    }
+
     function isOwner() {
       return signedIn()
         && exists(ownerPath())
         && get(ownerPath()).data.ownerUid == request.auth.uid;
+    }
+
+    function activeRoleIn(roles) {
+      return signedIn()
+        && exists(appUserPath(request.auth.uid))
+        && get(appUserPath(request.auth.uid)).data.status == "active"
+        && get(appUserPath(request.auth.uid)).data.role in roles;
+    }
+
+    function canReadPeopleData() {
+      return isOwner() || activeRoleIn(["admin", "hr_manager", "viewer"]);
+    }
+
+    function canWritePeopleData() {
+      return isOwner() || activeRoleIn(["admin", "hr_manager"]);
+    }
+
+    function canManageUsers() {
+      return isOwner();
     }
 
     match /artifacts/peopleops-hub/public/data/appMeta/owner {
@@ -23,11 +46,37 @@ service cloud.firestore {
         && !exists(ownerPath())
         && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.ownerEmail is string;
-      allow update, delete: if isOwner();
+      allow update, delete: if canManageUsers();
+    }
+
+    match /artifacts/peopleops-hub/public/data/appUsers/{userId} {
+      allow get: if signedIn() && (userId == request.auth.uid || canManageUsers());
+      allow list: if canManageUsers();
+      allow create, update: if canManageUsers();
+      allow delete: if false;
+    }
+
+    match /artifacts/peopleops-hub/public/data/accessRequests/{userId} {
+      allow get: if signedIn() && (userId == request.auth.uid || canManageUsers());
+      allow list: if canManageUsers();
+      allow create, update: if signedIn()
+        && userId == request.auth.uid
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == "pending";
+      allow update: if canManageUsers();
+      allow delete: if false;
+    }
+
+    match /artifacts/peopleops-hub/public/data/auditLogs/{logId} {
+      allow get, list: if canManageUsers();
+      allow create: if canReadPeopleData()
+        && request.resource.data.actorUid == request.auth.uid;
+      allow update, delete: if false;
     }
 
     match /artifacts/peopleops-hub/public/data/appData/{documentId} {
-      allow read, write: if isOwner();
+      allow read: if canReadPeopleData();
+      allow write: if canWritePeopleData();
     }
 
     match /{document=**} {
