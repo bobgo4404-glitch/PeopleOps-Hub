@@ -1,0 +1,37 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownerPath() {
+      return /databases/$(database)/documents/artifacts/peopleops-hub/public/data/appMeta/owner;
+    }
+
+    function isOwner() {
+      return signedIn()
+        && exists(ownerPath())
+        && get(ownerPath()).data.ownerUid == request.auth.uid;
+    }
+
+    match /artifacts/peopleops-hub/public/data/appMeta/owner {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn()
+        && !exists(ownerPath())
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerEmail is string;
+      allow update, delete: if isOwner();
+    }
+
+    match /artifacts/peopleops-hub/public/data/appData/{documentId} {
+      allow read, write: if isOwner();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
