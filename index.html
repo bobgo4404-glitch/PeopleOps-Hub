@@ -939,6 +939,19 @@
       color: var(--danger);
     }
 
+    select.badge {
+      width: auto;
+      min-height: 28px;
+      border: 1px solid transparent;
+      padding: 0 26px 0 10px;
+      cursor: pointer;
+    }
+
+    select.badge:disabled {
+      cursor: not-allowed;
+      opacity: 0.72;
+    }
+
     .table-actions {
       display: flex;
       gap: 6px;
@@ -2363,6 +2376,28 @@
 
           <div class="grid kpi-grid" id="assignmentSummary" aria-label="계약 발령 요약"></div>
 
+          <div class="grid two-column">
+            <section class="panel" aria-labelledby="assignment-pipeline-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="assignment-pipeline-title">발령 처리 현황</h2>
+                  <p>검토, 승인, 적용, 보류 상태를 기준으로 현재 진행 상황을 확인합니다.</p>
+                </div>
+              </div>
+              <div class="mini-metrics" id="assignmentPipeline"></div>
+            </section>
+
+            <section class="panel" aria-labelledby="contract-risk-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="contract-risk-title">계약 리스크 분류</h2>
+                  <p>계약 종료일 기준으로 즉시 처리, 30일, 90일, 장기 검토 대상을 구분합니다.</p>
+                </div>
+              </div>
+              <div class="chart-grid" id="contractRiskBars"></div>
+            </section>
+          </div>
+
           <div class="settings-stack">
             <section class="panel" aria-labelledby="assignment-form-title">
               <div class="section-head">
@@ -2483,6 +2518,7 @@
                       <th scope="col">남은 기간</th>
                       <th scope="col">검토 항목</th>
                       <th scope="col">상태</th>
+                      <th scope="col">관리</th>
                     </tr>
                   </thead>
                   <tbody id="contractReviewTable"></tbody>
@@ -2547,6 +2583,7 @@
               <p>법정의무교육, 직무교육, 자격/면허 보유 현황을 관리합니다.</p>
             </div>
           </div>
+          <div class="grid kpi-grid" id="trainingSummary" aria-label="교육 자격 요약"></div>
           <div class="grid three-column">
             <article class="stat-card">
               <h3>교육 이수 현황</h3>
@@ -2560,6 +2597,43 @@
               <h3>교육 운영 체크</h3>
               <ul class="insight-list" id="trainingChecklist"></ul>
             </article>
+          </div>
+
+          <div class="grid two-column">
+            <section class="panel" aria-labelledby="mandatory-training-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="mandatory-training-title">법정교육 이수 매트릭스</h2>
+                  <p>올해 기준 개인정보보호, 성희롱 예방, 괴롭힘 예방, 장애인 인식개선 이수 여부를 점검합니다.</p>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <caption class="sr-only">법정교육 이수 매트릭스</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">사원</th>
+                      <th scope="col">개인정보</th>
+                      <th scope="col">성희롱 예방</th>
+                      <th scope="col">괴롭힘 예방</th>
+                      <th scope="col">장애인식개선</th>
+                      <th scope="col">점검</th>
+                    </tr>
+                  </thead>
+                  <tbody id="mandatoryTrainingTable"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel" aria-labelledby="training-risk-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="training-risk-title">교육/자격 조치 대상</h2>
+                  <p>미이수, 기한 임박, 자격 갱신 필요 항목을 우선순위로 표시합니다.</p>
+                </div>
+              </div>
+              <ul class="insight-list" id="trainingRiskList"></ul>
+            </section>
           </div>
         </section>
 
@@ -2718,6 +2792,134 @@
                 </div>
               </div>
               <ul class="insight-list" id="riskList"></ul>
+            </section>
+          </div>
+
+          <section class="panel" aria-labelledby="department-analytics-title">
+            <div class="section-head">
+              <div>
+                <h2 id="department-analytics-title">조직별 인력 현황표</h2>
+                <p>부서별 재직, 휴직, 퇴직, 정규직 비율, 평균 근속, 정보 완성도를 비교합니다.</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">조직별 인력 현황 통계표</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">부서</th>
+                    <th scope="col">총원</th>
+                    <th scope="col">재직</th>
+                    <th scope="col">휴직</th>
+                    <th scope="col">퇴직</th>
+                    <th scope="col">정규직 비율</th>
+                    <th scope="col">평균 근속</th>
+                    <th scope="col">정보 완성도</th>
+                  </tr>
+                </thead>
+                <tbody id="departmentAnalyticsTable"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <div class="grid two-column">
+            <section class="panel" aria-labelledby="employment-cross-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="employment-cross-title">고용형태 × 상태 교차표</h2>
+                  <p>고용형태별 재직, 휴직, 퇴직 구성을 확인합니다.</p>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <caption class="sr-only">고용형태 상태 교차 통계표</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">고용형태</th>
+                      <th scope="col">재직</th>
+                      <th scope="col">휴직</th>
+                      <th scope="col">퇴직</th>
+                      <th scope="col">합계</th>
+                    </tr>
+                  </thead>
+                  <tbody id="employmentCrossTable"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel" aria-labelledby="tenure-age-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="tenure-age-title">연령대 × 근속 구간</h2>
+                  <p>연령대와 근속 구간을 교차해 인력 구조를 확인합니다.</p>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <caption class="sr-only">연령대 근속 구간 교차 통계표</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">연령대</th>
+                      <th scope="col">1년 미만</th>
+                      <th scope="col">1-3년</th>
+                      <th scope="col">3-5년</th>
+                      <th scope="col">5년 이상</th>
+                      <th scope="col">미입력</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tenureAgeMatrixTable"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+
+          <div class="grid two-column">
+            <section class="panel" aria-labelledby="risk-detail-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="risk-detail-title">계약·수습 리스크 상세표</h2>
+                  <p>계약 만료, 수습 종료, 정보 보완 필요 인원을 상세 점검합니다.</p>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <caption class="sr-only">계약 수습 리스크 상세 통계표</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">사원</th>
+                      <th scope="col">구분</th>
+                      <th scope="col">기준일</th>
+                      <th scope="col">남은 기간</th>
+                      <th scope="col">점검 항목</th>
+                    </tr>
+                  </thead>
+                  <tbody id="riskDetailTable"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel" aria-labelledby="quality-detail-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="quality-detail-title">데이터 품질 상세표</h2>
+                  <p>필수 인적사항 누락률을 항목별로 확인합니다.</p>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <caption class="sr-only">데이터 품질 상세 통계표</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">항목</th>
+                      <th scope="col">입력</th>
+                      <th scope="col">누락</th>
+                      <th scope="col">입력률</th>
+                      <th scope="col">주요 누락자</th>
+                    </tr>
+                  </thead>
+                  <tbody id="qualityDetailTable"></tbody>
+                </table>
+              </div>
             </section>
           </div>
         </section>
@@ -4140,13 +4342,18 @@
       assignmentMemo: document.querySelector("#assignmentMemo"),
       assignmentCurrentInfo: document.querySelector("#assignmentCurrentInfo"),
       assignmentReset: document.querySelector("#assignmentReset"),
+      assignmentPipeline: document.querySelector("#assignmentPipeline"),
+      contractRiskBars: document.querySelector("#contractRiskBars"),
       contractReviewTable: document.querySelector("#contractReviewTable"),
       assignmentHistoryTable: document.querySelector("#assignmentHistoryTable"),
       assignmentIssueList: document.querySelector("#assignmentIssueList"),
       appointmentChecklist: document.querySelector("#appointmentChecklist"),
+      trainingSummary: document.querySelector("#trainingSummary"),
       trainingBars: document.querySelector("#trainingBars"),
       licenseList: document.querySelector("#licenseList"),
       trainingChecklist: document.querySelector("#trainingChecklist"),
+      mandatoryTrainingTable: document.querySelector("#mandatoryTrainingTable"),
+      trainingRiskList: document.querySelector("#trainingRiskList"),
       reviewCandidateList: document.querySelector("#reviewCandidateList"),
       compensationChecklist: document.querySelector("#compensationChecklist"),
       employeeTable: document.querySelector("#employeeTable"),
@@ -4192,6 +4399,11 @@
       jobGroupBars: document.querySelector("#jobGroupBars"),
       gradeBars: document.querySelector("#gradeBars"),
       riskList: document.querySelector("#riskList"),
+      departmentAnalyticsTable: document.querySelector("#departmentAnalyticsTable"),
+      employmentCrossTable: document.querySelector("#employmentCrossTable"),
+      tenureAgeMatrixTable: document.querySelector("#tenureAgeMatrixTable"),
+      riskDetailTable: document.querySelector("#riskDetailTable"),
+      qualityDetailTable: document.querySelector("#qualityDetailTable"),
       documentBars: document.querySelector("#documentBars"),
       documentChecklist: document.querySelector("#documentChecklist"),
       documentTable: document.querySelector("#documentTable"),
@@ -6263,6 +6475,8 @@
       const issues = assignmentIssues(contractRows, records);
 
       renderAssignmentSummary(contractRows, records, issues);
+      renderAssignmentPipeline(records);
+      renderContractRiskBars(contractRows);
       renderContractReviewTable(contractRows);
       renderAssignmentHistoryTable(records);
       renderInsightItems(elements.assignmentIssueList, issues.slice(0, 8), "처리 누락 항목이 없습니다.", "계약 만료, 문서 확인, 사원정보 반영 기준으로 보완할 항목이 없습니다.");
@@ -6272,6 +6486,20 @@
         { title: "적용", body: "사원 기본정보에 변경값을 반영하고 발령장 또는 계약서를 문서함에 보관합니다." },
         { title: "사후 확인", body: "조직도, 통계, 증명서 출력값에 변경 정보가 정상 반영되는지 확인합니다." }
       ]);
+    }
+
+    function renderMiniMetrics(container, rows) {
+      container.replaceChildren();
+      rows.forEach(([label, value]) => {
+        const card = document.createElement("div");
+        card.className = "mini-metric";
+        const span = document.createElement("span");
+        span.textContent = label;
+        const strong = document.createElement("strong");
+        strong.textContent = value;
+        card.append(span, strong);
+        container.append(card);
+      });
     }
 
     function assignmentRecords() {
@@ -6431,10 +6659,40 @@
       });
     }
 
+    function renderAssignmentPipeline(records) {
+      const statuses = ["검토", "승인", "적용완료", "보류"];
+      const dueSoon = records.filter((record) => record.dueDate && daysFromToday(record.dueDate) <= 7 && !["적용완료", "보류"].includes(record.status)).length;
+      const missingDocument = records.filter((record) => !record.documentStatus || record.documentStatus === "미확인").length;
+      renderMiniMetrics(elements.assignmentPipeline, [
+        ...statuses.map((status) => [status, `${records.filter((record) => record.status === status).length}건`]),
+        ["기한 임박", `${dueSoon}건`],
+        ["문서 미확인", `${missingDocument}건`]
+      ]);
+    }
+
+    function renderContractRiskBars(rows) {
+      const riskRows = [
+        ["기한 경과", rows.filter((employee) => employee.contractEndDate && daysFromToday(employee.contractEndDate) < 0).length],
+        ["30일 이내", rows.filter((employee) => employee.contractEndDate && daysFromToday(employee.contractEndDate) >= 0 && daysFromToday(employee.contractEndDate) <= 30).length],
+        ["90일 이내", rows.filter((employee) => employee.contractEndDate && daysFromToday(employee.contractEndDate) > 30 && daysFromToday(employee.contractEndDate) <= 90).length],
+        ["90일 초과", rows.filter((employee) => employee.contractEndDate && daysFromToday(employee.contractEndDate) > 90).length],
+        ["종료일 누락", rows.filter((employee) => !employee.contractEndDate).length]
+      ];
+      renderBars(elements.contractRiskBars, riskRows, Math.max(1, rows.length), "계약 리스크 대상이 없습니다.");
+    }
+
     function renderContractReviewTable(rows) {
-      renderTableRows(elements.contractReviewTable, rows, 6, (employee) => {
+      renderTableRows(elements.contractReviewTable, rows, 7, (employee) => {
         const days = employee.contractEndDate ? daysFromToday(employee.contractEndDate) : null;
         const status = !employee.contractEndDate ? ["종료일 누락", "danger"] : days < 0 ? ["기한 경과", "danger"] : days <= 90 ? ["갱신 검토", "warning"] : ["예정", "success"];
+        const actionCell = document.createElement("td");
+        const button = document.createElement("button");
+        button.className = "button ghost";
+        button.type = "button";
+        button.textContent = "갱신 등록";
+        button.disabled = !canWriteData();
+        button.addEventListener("click", () => startContractRenewal(employee.id));
+        actionCell.append(button);
         const tr = document.createElement("tr");
         tr.append(
           makePersonCell(employee),
@@ -6442,10 +6700,50 @@
           makeCell(formatDate(employee.contractEndDate)),
           makeCell(employee.contractEndDate ? describeDaysFromToday(employee.contractEndDate) : "-"),
           makeCell("계약 갱신, 고용형태, 계약서 교부 여부"),
-          makeStatusCell(status[0], status[1])
+          makeStatusCell(status[0], status[1]),
+          actionCell
         );
         return tr;
       }, "계약 검토 대상이 없습니다.", "계약 종료일 또는 계약직 고용형태가 등록되면 표시됩니다.");
+    }
+
+    function startContractRenewal(employeeId) {
+      if (!requireWritePermission()) return;
+      const employee = state.employees.find((item) => item.id === employeeId);
+      elements.assignmentEmployee.value = employeeId;
+      syncAssignmentFormFromEmployee();
+      elements.assignmentType.value = "근로계약 갱신";
+      elements.assignmentStatus.value = "검토";
+      elements.assignmentDocumentStatus.value = "계약서 교부";
+      elements.assignmentDueDate.value = suggestedContractReviewDueDate(employee?.contractEndDate);
+      elements.assignmentNewContractEndDate.value = suggestedRenewedContractEndDate(employee?.contractEndDate);
+      switchView("assignments");
+      elements.assignmentNewContractEndDate.focus();
+    }
+
+    function suggestedContractReviewDueDate(contractEndDate) {
+      const end = parseLocalDate(contractEndDate);
+      if (!end) return new Date().toISOString().slice(0, 10);
+      const due = new Date(end);
+      due.setDate(due.getDate() - 30);
+      const today = startOfToday();
+      return toInputDate(due < today ? today : due);
+    }
+
+    function suggestedRenewedContractEndDate(contractEndDate) {
+      const end = parseLocalDate(contractEndDate);
+      if (!end) return "";
+      const next = new Date(end);
+      next.setFullYear(next.getFullYear() + 1);
+      return toInputDate(next);
+    }
+
+    function toInputDate(date) {
+      return [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, "0"),
+        String(date.getDate()).padStart(2, "0")
+      ].join("-");
     }
 
     function renderAssignmentHistoryTable(records) {
@@ -6457,12 +6755,39 @@
           makeCell(`${text(record.type || record.category)}\n${formatDate(record.effectiveDate || record.dateStart)}`),
           makeAssignmentChangeCell(record.from),
           makeAssignmentChangeCell(record.to, record.subject),
-          makeStatusCell(text(record.documentStatus, "미확인"), record.documentStatus === "문서함 보관" || record.documentStatus === "계약서 교부" ? "success" : "warning"),
-          makeStatusCell(text(record.status), assignmentStatusVariant(record.status)),
+          makeAssignmentRecordSelectCell(record, "documentStatus", ["미확인", "발령장 준비", "계약서 교부", "문서함 보관"], record.documentStatus === "문서함 보관" || record.documentStatus === "계약서 교부" ? "success" : "warning"),
+          makeAssignmentRecordSelectCell(record, "status", ["검토", "승인", "적용완료", "보류"], assignmentStatusVariant(record.status)),
           makeAssignmentActionCell(record)
         );
         return tr;
       }, "발령/계약 변경 이력이 없습니다.", "상단 폼에서 발령 또는 계약 변경을 등록하세요.");
+    }
+
+    function makeAssignmentRecordSelectCell(record, key, values, variant = "") {
+      const td = document.createElement("td");
+      const select = document.createElement("select");
+      select.className = `badge ${variant}`.trim();
+      select.disabled = !canWriteData();
+      values.forEach((value) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        select.append(option);
+      });
+      select.value = record[key] || values[0];
+      select.addEventListener("change", () => {
+        if (!requireWritePermission()) {
+          select.value = record[key] || values[0];
+          return;
+        }
+        record[key] = select.value;
+        if (key === "status" && select.value === "적용완료") record.appliedAt = new Date().toISOString().slice(0, 10);
+        saveOperationRecords();
+        renderAll();
+        showToast(key === "status" ? "발령 처리 상태를 변경했습니다." : "문서 확인 상태를 변경했습니다.");
+      });
+      td.append(select);
+      return td;
     }
 
     function makeAssignmentChangeCell(values, fallback = "") {
@@ -6569,6 +6894,14 @@
       const withCertification = activeEmployees().filter((employee) => text(employee.certifications, "")).length;
       const withLanguage = activeEmployees().filter((employee) => text(employee.languages, "")).length;
       const privacyConsent = activeEmployees().filter((employee) => text(employee.privacyConsentDate, "")).length;
+      const records = trainingRecords();
+      const mandatoryRows = mandatoryTrainingRows();
+      const totalMandatorySlots = mandatoryRows.length * mandatoryTrainingDefinitions().length;
+      const completedMandatorySlots = mandatoryRows.reduce((sum, row) => sum + row.items.filter((item) => item.done).length, 0);
+      const dueSoon = records.filter((record) => record.dateEnd && daysFromToday(record.dateEnd) >= 0 && daysFromToday(record.dateEnd) <= 30 && record.status !== "이수").length;
+      const pending = records.filter((record) => ["대상", "진행중", "미이수"].includes(record.status)).length;
+
+      renderTrainingSummary(total, completedMandatorySlots, totalMandatorySlots, dueSoon, pending, withCertification);
       renderBars(elements.trainingBars, [
         ["개인정보 동의", privacyConsent],
         ["자격/면허 입력", withCertification],
@@ -6583,6 +6916,119 @@
         { title: "직무교육", body: "직군별 필수 교육과 갱신 주기를 운영 설정으로 분리하는 것이 좋습니다." },
         { title: "자격 갱신", body: "유효기간이 있는 면허와 자격은 만료 60일 전 알림 대상으로 관리하세요." }
       ]);
+      renderMandatoryTrainingTable(mandatoryRows);
+      renderTrainingRiskList(records, mandatoryRows);
+    }
+
+    function trainingRecords() {
+      if (!Array.isArray(state.operationRecords.training)) state.operationRecords.training = [];
+      return state.operationRecords.training;
+    }
+
+    function mandatoryTrainingDefinitions() {
+      return [
+        { key: "privacy", label: "개인정보", keywords: ["개인정보", "정보보호"] },
+        { key: "sexual", label: "성희롱 예방", keywords: ["성희롱"] },
+        { key: "harassment", label: "괴롭힘 예방", keywords: ["괴롭힘"] },
+        { key: "disability", label: "장애인식개선", keywords: ["장애"] }
+      ];
+    }
+
+    function trainingRecordMatches(record, employeeId, keywords) {
+      const currentYear = String(new Date().getFullYear());
+      const subject = `${text(record.subject, "")} ${text(record.category, "")}`;
+      return record.employeeId === employeeId
+        && record.status === "이수"
+        && text(record.dateStart || record.dateEnd, "").startsWith(currentYear)
+        && keywords.some((keyword) => subject.includes(keyword));
+    }
+
+    function mandatoryTrainingRows() {
+      const records = trainingRecords();
+      return activeEmployees()
+        .sort((a, b) => text(a.department).localeCompare(text(b.department), "ko") || text(a.name).localeCompare(text(b.name), "ko"))
+        .map((employee) => ({
+          employee,
+          items: mandatoryTrainingDefinitions().map((definition) => ({
+            ...definition,
+            done: records.some((record) => trainingRecordMatches(record, employee.id, definition.keywords))
+          }))
+        }));
+    }
+
+    function renderTrainingSummary(total, completedMandatorySlots, totalMandatorySlots, dueSoon, pending, withCertification) {
+      const completionRate = totalMandatorySlots ? Math.round((completedMandatorySlots / totalMandatorySlots) * 100) : 0;
+      elements.trainingSummary.replaceChildren();
+      [
+        ["법정교육 이수율", `${completionRate}%`, "올해 필수 4개 항목 기준", "graduation-cap"],
+        ["미완료 과제", `${Math.max(0, totalMandatorySlots - completedMandatorySlots)}건`, "사원별 법정교육 공백", "clipboard-x"],
+        ["기한 30일 내", `${dueSoon}건`, "이수/갱신 기한 임박", "clock-alert"],
+        ["진행 중", `${pending}건`, "교육·자격 기록 상태 기준", "list-checks"],
+        ["자격 보유", `${withCertification}명`, "사원 상세 자격 입력 기준", "badge-check"],
+        ["대상 인원", `${total}명`, "재직/휴직 인원 기준", "users"]
+      ].forEach(([label, value, note, icon]) => {
+        const card = document.createElement("article");
+        card.className = "metric-card";
+        const top = document.createElement("div");
+        top.className = "metric-top";
+        const labelEl = document.createElement("span");
+        labelEl.className = "metric-label";
+        labelEl.textContent = label;
+        const iconEl = document.createElement("span");
+        iconEl.className = "metric-icon";
+        iconEl.append(makeIcon(icon));
+        top.append(labelEl, iconEl);
+        const valueEl = document.createElement("p");
+        valueEl.className = "metric-value";
+        valueEl.textContent = value;
+        const noteEl = document.createElement("span");
+        noteEl.className = "metric-note";
+        noteEl.textContent = note;
+        card.append(top, valueEl, noteEl);
+        elements.trainingSummary.append(card);
+      });
+    }
+
+    function renderMandatoryTrainingTable(rows) {
+      renderTableRows(elements.mandatoryTrainingTable, rows, 6, (row) => {
+        const completed = row.items.filter((item) => item.done).length;
+        const tr = document.createElement("tr");
+        tr.append(
+          makePersonCell(row.employee),
+          ...row.items.map((item) => makeStatusCell(item.done ? "이수" : "미이수", item.done ? "success" : "danger")),
+          makeStatusCell(completed === row.items.length ? "완료" : `${row.items.length - completed}건 필요`, completed === row.items.length ? "success" : "warning")
+        );
+        return tr;
+      }, "법정교육 점검 대상이 없습니다.", "재직 인원이 등록되면 교육 이수 매트릭스가 표시됩니다.");
+    }
+
+    function renderTrainingRiskList(records, mandatoryRows) {
+      const missingRows = mandatoryRows
+        .map((row) => ({
+          title: row.employee.name,
+          body: row.items.filter((item) => !item.done).map((item) => item.label).join(", ")
+        }))
+        .filter((item) => item.body)
+        .slice(0, 6);
+      const dueRows = records
+        .filter((record) => record.dateEnd && daysFromToday(record.dateEnd) <= 30 && record.status !== "이수")
+        .sort((a, b) => daysFromToday(a.dateEnd) - daysFromToday(b.dateEnd))
+        .slice(0, 5)
+        .map((record) => {
+          const employee = state.employees.find((item) => item.id === record.employeeId);
+          return {
+            title: `${employee ? employee.name : "삭제된 사원"} · ${text(record.subject)}`,
+            body: `${text(record.category)} · 기한 ${formatDate(record.dateEnd)} (${describeDaysFromToday(record.dateEnd)})`
+          };
+        });
+      const credentialRows = activeEmployees()
+        .filter((employee) => !text(employee.certifications, ""))
+        .slice(0, 4)
+        .map((employee) => ({
+          title: `${employee.name} 자격/면허 미입력`,
+          body: "자격, 면허, 필수 인증이 있는 직무라면 사원 상세정보에 등록하세요."
+        }));
+      renderInsightItems(elements.trainingRiskList, [...dueRows, ...missingRows, ...credentialRows].slice(0, 10), "교육/자격 조치 대상이 없습니다.", "현재 기록 기준으로 기한 임박 또는 미이수 항목이 없습니다.");
     }
 
     function renderReviews() {
@@ -6961,6 +7407,11 @@
       renderGenericStatBars(elements.jobGroupBars, "jobGroup", "직군 데이터가 없습니다.", state.settings.jobGroups);
       renderGenericStatBars(elements.gradeBars, "gradeLevel", "직급/레벨 데이터가 없습니다.", state.settings.gradeLevels);
       renderRiskList();
+      renderDepartmentAnalyticsTable();
+      renderEmploymentCrossTable();
+      renderTenureAgeMatrixTable();
+      renderRiskDetailTable();
+      renderQualityDetailTable();
     }
 
     function renderStatsKpis(total) {
@@ -7041,6 +7492,192 @@
         li.append(dot, wrap);
         elements.riskList.append(li);
       });
+    }
+
+    function percentText(value, total) {
+      return total ? `${Math.round((value / total) * 100)}%` : "0%";
+    }
+
+    function averageText(values, suffix = "") {
+      const valid = values.filter((value) => value !== null && value !== undefined && !Number.isNaN(value));
+      if (!valid.length) return "-";
+      return `${(valid.reduce((sum, value) => sum + value, 0) / valid.length).toFixed(1)}${suffix}`;
+    }
+
+    function renderDepartmentAnalyticsTable() {
+      const departments = [...new Set(state.employees.map((employee) => text(employee.department, "미입력")))]
+        .sort((a, b) => a.localeCompare(b, "ko"));
+      const rows = departments.map((department) => {
+        const employees = state.employees.filter((employee) => text(employee.department, "미입력") === department);
+        return { department, employees };
+      });
+
+      renderTableRows(elements.departmentAnalyticsTable, rows, 8, ({ department, employees }) => {
+        const active = employees.filter((employee) => employee.status === "재직").length;
+        const leave = employees.filter((employee) => employee.status === "휴직").length;
+        const retired = employees.filter((employee) => employee.status === "퇴직").length;
+        const regular = employees.filter((employee) => employee.employmentType === "정규직").length;
+        const tenures = employees.map((employee) => yearsBetween(employee.joinDate)).filter((value) => value !== null);
+        const completeness = employees.map(profileCompleteness);
+        const tr = document.createElement("tr");
+        tr.append(
+          makeCell(department),
+          makeCell(`${employees.length}명`),
+          makeCell(`${active}명`),
+          makeCell(`${leave}명`),
+          makeCell(`${retired}명`),
+          makeCell(percentText(regular, employees.length)),
+          makeCell(averageText(tenures, "년")),
+          makeCell(averageText(completeness, "%"))
+        );
+        return tr;
+      }, "조직별 통계 데이터가 없습니다.", "사원 부서 정보가 등록되면 조직별 현황표가 표시됩니다.");
+    }
+
+    function renderEmploymentCrossTable() {
+      const types = [...new Set([
+        ...state.settings.employmentTypes,
+        ...state.employees.map((employee) => text(employee.employmentType, "미입력"))
+      ])].filter(Boolean);
+      const statuses = ["재직", "휴직", "퇴직"];
+      const rows = types.map((type) => {
+        const employees = state.employees.filter((employee) => text(employee.employmentType, "미입력") === type);
+        return { type, employees };
+      }).filter((row) => row.employees.length);
+
+      renderTableRows(elements.employmentCrossTable, rows, 5, ({ type, employees }) => {
+        const tr = document.createElement("tr");
+        tr.append(
+          makeCell(type),
+          ...statuses.map((status) => makeCell(`${employees.filter((employee) => employee.status === status).length}명`)),
+          makeCell(`${employees.length}명`)
+        );
+        return tr;
+      }, "고용형태 통계 데이터가 없습니다.", "고용형태가 등록되면 교차표가 표시됩니다.");
+    }
+
+    function tenureBucket(employee) {
+      const years = yearsBetween(employee.joinDate);
+      if (years === null) return "미입력";
+      if (years < 1) return "1년 미만";
+      if (years < 3) return "1-3년";
+      if (years < 5) return "3-5년";
+      return "5년 이상";
+    }
+
+    function ageBucket(employee) {
+      const age = getAge(employee.birthDate);
+      if (age === null) return "미입력";
+      if (age < 30) return "20대 이하";
+      if (age < 40) return "30대";
+      if (age < 50) return "40대";
+      return "50대 이상";
+    }
+
+    function renderTenureAgeMatrixTable() {
+      const ageRows = ["20대 이하", "30대", "40대", "50대 이상", "미입력"];
+      const tenureCols = ["1년 미만", "1-3년", "3-5년", "5년 이상", "미입력"];
+      const rows = ageRows.map((ageLabel) => ({
+        ageLabel,
+        counts: tenureCols.map((tenureLabel) => state.employees.filter((employee) => ageBucket(employee) === ageLabel && tenureBucket(employee) === tenureLabel).length)
+      })).filter((row) => row.counts.some(Boolean));
+
+      renderTableRows(elements.tenureAgeMatrixTable, rows, 6, (row) => {
+        const tr = document.createElement("tr");
+        tr.append(makeCell(row.ageLabel), ...row.counts.map((count) => makeCell(`${count}명`)));
+        return tr;
+      }, "연령/근속 교차 데이터가 없습니다.", "생년월일과 입사일이 등록되면 교차표가 표시됩니다.");
+    }
+
+    function riskDetailRows() {
+      const rows = [];
+      activeEmployees().forEach((employee) => {
+        if (employee.contractEndDate && daysFromToday(employee.contractEndDate) <= 90) {
+          rows.push({
+            employee,
+            type: daysFromToday(employee.contractEndDate) < 0 ? "계약 기한 경과" : "계약 만료 예정",
+            date: employee.contractEndDate,
+            remain: describeDaysFromToday(employee.contractEndDate),
+            check: "갱신/종료/전환 여부, 계약서 교부, 문서함 보관"
+          });
+        }
+        if (employee.probationEndDate && daysFromToday(employee.probationEndDate) <= 30 && daysFromToday(employee.probationEndDate) >= 0) {
+          rows.push({
+            employee,
+            type: "수습 종료 예정",
+            date: employee.probationEndDate,
+            remain: describeDaysFromToday(employee.probationEndDate),
+            check: "수습평가, 전환 여부, 발령/계약 변경 필요 여부"
+          });
+        }
+        if (profileCompleteness(employee) < 70) {
+          rows.push({
+            employee,
+            type: "정보 보완",
+            date: "",
+            remain: `${profileCompleteness(employee)}%`,
+            check: "상세 인적사항, 비상연락, 개인정보 동의일 보완"
+          });
+        }
+      });
+      return rows.sort((a, b) => {
+        const dateCompare = text(a.date, "9999-12-31").localeCompare(text(b.date, "9999-12-31"));
+        return dateCompare || text(a.employee.name).localeCompare(text(b.employee.name), "ko");
+      });
+    }
+
+    function renderRiskDetailTable() {
+      renderTableRows(elements.riskDetailTable, riskDetailRows().slice(0, 20), 5, (row) => {
+        const tr = document.createElement("tr");
+        tr.append(
+          makePersonCell(row.employee),
+          makeCell(row.type),
+          makeCell(formatDate(row.date)),
+          makeCell(row.remain),
+          makeCell(row.check)
+        );
+        return tr;
+      }, "계약·수습 리스크 대상이 없습니다.", "현재 등록 데이터 기준으로 즉시 점검 대상이 없습니다.");
+    }
+
+    function statisticsRequiredFields() {
+      return [
+        ["사번", "employeeNo"],
+        ["이름", "name"],
+        ["부서", "department"],
+        ["팀", "team"],
+        ["직책", "position"],
+        ["입사일", "joinDate"],
+        ["생년월일", "birthDate"],
+        ["이메일", "email"],
+        ["연락처", "phone"],
+        ["비상연락처", "emergencyPhone"],
+        ["직군", "jobGroup"],
+        ["직급/레벨", "gradeLevel"],
+        ["근무지", "location"],
+        ["개인정보 동의일", "privacyConsentDate"]
+      ];
+    }
+
+    function renderQualityDetailTable() {
+      const total = state.employees.length;
+      const rows = statisticsRequiredFields().map(([label, key]) => {
+        const filled = state.employees.filter((employee) => text(employee[key], "")).length;
+        const missing = state.employees.filter((employee) => !text(employee[key], ""));
+        return { label, filled, missing };
+      });
+
+      renderTableRows(elements.qualityDetailTable, rows, 5, (row) => {
+        const tr = document.createElement("tr");
+        tr.append(
+          makeCell(row.label),
+          makeCell(`${row.filled}명`),
+          makeCell(`${row.missing.length}명`),
+          makeCell(percentText(row.filled, total)),
+          makeCell(row.missing.slice(0, 5).map((employee) => employee.name).join(", ") || "-")
+        );
+        return tr;
+      }, "데이터 품질 통계가 없습니다.", "사원 정보가 등록되면 품질 상세표가 표시됩니다.");
     }
 
     function renderEmploymentDonut(total) {
