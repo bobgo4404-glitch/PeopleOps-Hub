@@ -8078,6 +8078,11 @@
       state.editingId = null;
     }
 
+    function isEditableField(element) {
+      if (!element) return false;
+      return ["INPUT", "TEXTAREA", "SELECT"].includes(element.tagName) || element.isContentEditable;
+    }
+
     function getFormData() {
       return {
         id: elements.employeeId.value || `emp-${Date.now()}`,
@@ -8317,10 +8322,19 @@
       });
 
       document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && elements.modal.classList.contains("is-open")) {
+        if (!elements.modal.classList.contains("is-open")) return;
+        if (["Backspace", "Delete"].includes(event.key) && isEditableField(event.target)) {
+          event.stopPropagation();
+          return;
+        }
+        if (event.key === "Escape") {
+          if (isEditableField(event.target)) {
+            event.stopPropagation();
+            return;
+          }
           closeEmployeeModal();
         }
-      });
+      }, true);
 
       on(elements.employeeForm, "submit", upsertEmployee);
       on(elements.generateEmployeeNo, "click", () => {
@@ -8613,4 +8627,5 @@
   </script>
 </body>
 </html>
+
 
