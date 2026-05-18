@@ -3323,7 +3323,7 @@
             <div class="filters">
               <button class="button ghost" type="button" id="loadSample">
                 <i data-lucide="database"></i>
-                샘플 데이터 다시 불러오기
+                운영 데이터 초기화
               </button>
               <button class="button ghost" type="button" id="exportSettings">
                 <i data-lucide="download"></i>
@@ -3620,8 +3620,8 @@
     const ROOT_ORG_ID = "org-root";
 
     const defaultSettings = {
-      companyName: "PeopleOps Sample Co.",
-      companyCode: "POH",
+      companyName: "Company",
+      companyCode: "ORG",
       businessNumber: "",
       hrOwner: "인사팀",
       fiscalStartMonth: "1",
@@ -3631,7 +3631,7 @@
       employeeNoSeparator: "-",
       employeeNoYearDigits: "4",
       employeeNoDigits: "3",
-      employeeNoNextSequence: "11",
+      employeeNoNextSequence: "1",
       employeeNoUseDeptCode: "false",
       organizationNodes: [
         { id: ROOT_ORG_ID, name: "PeopleOps Sample Co.", parentId: "", type: "회사", memo: "" },
@@ -3662,6 +3662,14 @@
       gradeLevels: ["임원", "L5", "L4", "L3", "L2", "L1", "인턴"],
       workTypes: ["전일제", "단시간", "시차출퇴근", "원격", "하이브리드"]
     };
+
+    Object.assign(defaultSettings, {
+      companyName: "회사명",
+      hrOwner: "",
+      organizationNodes: [],
+      departments: [],
+      teams: []
+    });
 
     const employeeDefaults = {
       legalName: "",
@@ -4578,8 +4586,19 @@
       return normalizeSettings(defaultSettings);
     }
 
+    function isBundledSampleEmployees(employees) {
+      if (!Array.isArray(employees) || !employees.length || employees.length > sampleEmployees.length) return false;
+      const sampleIds = new Set(sampleEmployees.map((employee) => employee.id));
+      const sampleNumbers = new Set(sampleEmployees.map((employee) => employee.employeeNo));
+      return employees.every((employee) => sampleIds.has(employee.id) && sampleNumbers.has(employee.employeeNo));
+    }
+
+    function isBundledSampleSettings(settings = {}) {
+      return settings.companyName === "PeopleOps Sample Co." || settings.companyCode === "POH";
+    }
+
     function defaultEmployeesValue() {
-      return sampleEmployees.map(normalizeEmployee);
+      return [];
     }
 
     function defaultCertificatesValue() {
@@ -4806,10 +4825,13 @@
       resetDataReady();
       subscribeAdminCollections();
       subscribeDataDoc("settings", defaultSettingsValue, (value) => {
-        state.settings = normalizeSettings(value || defaultSettings);
+        state.settings = normalizeSettings(isBundledSampleSettings(value) ? defaultSettings : (value || defaultSettings));
+        if (isBundledSampleSettings(value) && canWriteData()) saveSettings();
       });
       subscribeDataDoc("employees", defaultEmployeesValue, (value) => {
-        state.employees = Array.isArray(value) ? value.map(normalizeEmployee) : defaultEmployeesValue();
+        const employees = Array.isArray(value) ? value.map(normalizeEmployee) : defaultEmployeesValue();
+        state.employees = isBundledSampleEmployees(employees) ? [] : employees;
+        if (isBundledSampleEmployees(employees) && canWriteData()) saveEmployees();
       });
       subscribeDataDoc("certificates", defaultCertificatesValue, (value) => {
         state.certificates = Array.isArray(value) ? value : [];
@@ -8163,10 +8185,10 @@
 
     function resetWithSampleData() {
       if (!requireWritePermission()) return;
-      const ok = window.confirm("현재 저장된 사원 데이터, 운영 설정, 발급 이력, 업무 기록을 샘플 기준으로 교체할까요?");
+      const ok = window.confirm("현재 저장된 사원 데이터, 운영 설정, 발급 이력, 업무 기록을 빈 운영 데이터로 초기화할까요?");
       if (!ok) return;
-      state.employees = sampleEmployees.map(normalizeEmployee);
-      state.settings = normalizeSettings();
+      state.employees = [];
+      state.settings = normalizeSettings(defaultSettings);
       state.certificates = [];
       state.operationRecords = emptyOperationRecords();
       saveEmployees();
@@ -8174,17 +8196,19 @@
       saveCertificates();
       saveOperationRecords();
       renderAll();
-      showToast("샘플 데이터를 다시 불러왔습니다.");
+      showToast("운영 데이터가 초기화되었습니다.");
     }
 
     function clearSavedData() {
       if (!requireWritePermission()) return;
-      const ok = window.confirm("저장된 사원 데이터, 증명서 발급 이력, 업무 기록을 모두 삭제할까요?");
+      const ok = window.confirm("저장된 사원 데이터, 운영 설정, 증명서 발급 이력, 업무 기록을 모두 초기화할까요?");
       if (!ok) return;
       state.employees = [];
+      state.settings = normalizeSettings(defaultSettings);
       state.certificates = [];
       state.operationRecords = emptyOperationRecords();
       saveEmployees();
+      saveSettings();
       saveCertificates();
       saveOperationRecords();
       renderAll();
