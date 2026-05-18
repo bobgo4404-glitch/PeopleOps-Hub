@@ -4156,6 +4156,7 @@
       appEventsBound: false,
       currentView: "dashboard",
       editingId: null,
+      modalPointerStartedOnBackdrop: false,
       selectedOrgNodeId: ROOT_ORG_ID,
       draggedOrgNodeId: "",
       employeePage: 1,
@@ -8317,8 +8318,12 @@
 
       on(elements.closeModal, "click", closeEmployeeModal);
       on(elements.cancelEmployee, "click", closeEmployeeModal);
+      on(elements.modal, "pointerdown", (event) => {
+        state.modalPointerStartedOnBackdrop = event.target === elements.modal;
+      });
       on(elements.modal, "click", (event) => {
-        if (event.target === elements.modal) closeEmployeeModal();
+        if (event.target === elements.modal && state.modalPointerStartedOnBackdrop) closeEmployeeModal();
+        state.modalPointerStartedOnBackdrop = false;
       });
 
       document.addEventListener("keydown", (event) => {
@@ -8627,5 +8632,6 @@
   </script>
 </body>
 </html>
+
 
 
