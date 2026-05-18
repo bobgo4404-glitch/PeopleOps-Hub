@@ -2018,7 +2018,7 @@
               <div class="org-tree-title">
                 <div>
                   <h2>조직도</h2>
-                  <p>본부, 부서, 팀, 법인 등 하위 조직을 계층형으로 구성합니다.</p>
+                    <p>본부, 부서, 팀, 파트, 법인 등 하위 조직을 계층형으로 구성합니다.</p>
                 </div>
                 <button class="icon-button" type="button" id="orgOpenSettings" aria-label="운영 설정으로 이동">
                   <i data-lucide="settings"></i>
@@ -2073,6 +2073,7 @@
                         <option value="본부">본부</option>
                         <option value="부서">부서</option>
                         <option value="팀">팀</option>
+                        <option value="파트">파트</option>
                         <option value="법인">법인</option>
                         <option value="기타">기타</option>
                       </select>
@@ -2438,6 +2439,10 @@
                   <div class="field">
                     <label for="assignmentNewTeam">변경 후 팀</label>
                     <select id="assignmentNewTeam"></select>
+                  </div>
+                  <div class="field">
+                    <label for="assignmentNewPart">변경 후 파트</label>
+                    <select id="assignmentNewPart"></select>
                   </div>
                   <div class="field">
                     <label for="assignmentNewPosition">변경 후 직책/직급</label>
@@ -3209,7 +3214,7 @@
                 <div class="section-head">
                   <div>
                     <h2 id="code-settings-title">기준 코드 관리</h2>
-                    <p>직책, 고용형태, 근무지 등 조직도 외 기준값을 관리합니다. 부서와 팀은 조직도 메뉴에서 관리합니다.</p>
+                    <p>직책, 고용형태, 근무지 등 조직도 외 기준값을 관리합니다. 부서, 팀, 파트는 조직도 메뉴에서 관리합니다.</p>
                   </div>
                 </div>
                 <div class="form-grid">
@@ -3418,6 +3423,10 @@
               <div class="field">
                 <label for="team">팀</label>
                     <select id="team" name="team"></select>
+              </div>
+              <div class="field">
+                <label for="part">파트</label>
+                    <select id="part" name="part"></select>
               </div>
               <div class="field">
                 <label for="position">직책/직급 *</label>
@@ -3648,6 +3657,7 @@
       ],
       departments: ["인사팀", "개발본부", "사업전략실", "재무관리실", "운영본부", "제품디자인팀", "품질관리팀"],
       teams: ["인사운영팀", "채용팀", "프론트엔드팀", "백엔드팀", "플랫폼팀", "성장전략팀", "재무팀", "고객성공팀", "제품디자인팀", "품질관리팀"],
+      parts: [],
       positions: ["대표", "실장", "본부장", "팀장", "Manager", "Senior Engineer", "Staff Engineer", "Engineer", "Product Designer", "Recruiter"],
       employmentTypes: ["정규직", "계약직", "파견/외주", "인턴"],
       locations: ["서울 본사", "판교 오피스", "부산 지사", "원격"],
@@ -3661,11 +3671,13 @@
       hrOwner: "",
       organizationNodes: [],
       departments: [],
-      teams: []
+      teams: [],
+      parts: []
     });
 
     const employeeDefaults = {
       legalName: "",
+      part: "",
       gender: "",
       nationality: "대한민국",
       maritalStatus: "",
@@ -4272,6 +4284,7 @@
       privacyConsentDate: document.querySelector("#privacyConsentDate"),
       department: document.querySelector("#department"),
       team: document.querySelector("#team"),
+      part: document.querySelector("#part"),
       position: document.querySelector("#position"),
       jobGroup: document.querySelector("#jobGroup"),
       gradeLevel: document.querySelector("#gradeLevel"),
@@ -4332,6 +4345,7 @@
       assignmentDueDate: document.querySelector("#assignmentDueDate"),
       assignmentNewDepartment: document.querySelector("#assignmentNewDepartment"),
       assignmentNewTeam: document.querySelector("#assignmentNewTeam"),
+      assignmentNewPart: document.querySelector("#assignmentNewPart"),
       assignmentNewPosition: document.querySelector("#assignmentNewPosition"),
       assignmentNewGradeLevel: document.querySelector("#assignmentNewGradeLevel"),
       assignmentNewEmploymentType: document.querySelector("#assignmentNewEmploymentType"),
@@ -4424,6 +4438,7 @@
       kpiTenure: document.querySelector("#kpiTenure"),
       departmentList: document.querySelector("#departmentList"),
       teamList: document.querySelector("#teamList"),
+      partList: document.querySelector("#partList"),
       positionList: document.querySelector("#positionList"),
       jobGroupList: document.querySelector("#jobGroupList"),
       gradeLevelList: document.querySelector("#gradeLevelList"),
@@ -4528,15 +4543,17 @@
       };
       visit(ROOT_ORG_ID);
       if (!nonRoot.length) nonRoot.push(...nodes.filter((node) => node.id !== ROOT_ORG_ID));
-      settings.departments = [...new Set(nonRoot.map((node) => node.name).filter(Boolean))];
-      settings.teams = [...new Set(nonRoot.filter((node) => !(childrenByParent[node.id] || []).length).map((node) => node.name).filter(Boolean))];
+      settings.departments = [...new Set(nonRoot.filter((node) => !["팀", "파트"].includes(node.type)).map((node) => node.name).filter(Boolean))];
+      const teamNodes = nonRoot.filter((node) => node.type === "팀");
+      settings.teams = [...new Set((teamNodes.length ? teamNodes : nonRoot.filter((node) => !(childrenByParent[node.id] || []).length && node.type !== "파트")).map((node) => node.name).filter(Boolean))];
+      settings.parts = [...new Set(nonRoot.filter((node) => node.type === "파트").map((node) => node.name).filter(Boolean))];
       return settings;
     }
 
     function normalizeSettings(settings = {}) {
       const merged = { ...defaultSettings, ...settings };
       merged.employeeNoUseDeptCode = "false";
-      ["departments", "teams", "positions", "employmentTypes", "locations", "jobGroups", "gradeLevels", "workTypes"].forEach((key) => {
+      ["departments", "teams", "parts", "positions", "employmentTypes", "locations", "jobGroups", "gradeLevels", "workTypes"].forEach((key) => {
         merged[key] = Array.isArray(merged[key]) && merged[key].length ? merged[key] : defaultSettings[key];
       });
       merged.teams = translateList(merged.teams, legacyTeamLabels);
@@ -4904,6 +4921,10 @@
       }, 2600);
     }
 
+    function orgPathLabel(employee) {
+      return [employee.department, employee.team, employee.part].map((value) => text(value, "")).filter(Boolean).join(" / ") || "-";
+    }
+
     function uniqueValues(key) {
       const seen = new Set();
       return state.employees
@@ -4929,6 +4950,7 @@
     function refreshDataLists() {
       const departments = combinedValues("department", "departments");
       const teams = combinedValues("team", "teams");
+      const parts = combinedValues("part", "parts");
       const positions = combinedValues("position", "positions");
       const jobGroups = combinedValues("jobGroup", "jobGroups");
       const gradeLevels = combinedValues("gradeLevel", "gradeLevels");
@@ -4937,6 +4959,7 @@
 
       fillSelect(elements.department, departments, "", "선택");
       fillSelect(elements.team, teams, "", "선택 안 함");
+      fillSelect(elements.part, parts, "", "선택 안 함");
       fillSelect(elements.position, positions, "", "선택");
       fillSelect(elements.jobGroup, jobGroups, "", "선택 안 함");
       fillSelect(elements.gradeLevel, gradeLevels, "", "선택 안 함");
@@ -4944,6 +4967,7 @@
       fillSelect(elements.location, locations, "", "선택 안 함");
       fillSelect(elements.assignmentNewDepartment, departments, "", "변경 없음");
       fillSelect(elements.assignmentNewTeam, teams, "", "변경 없음");
+      fillSelect(elements.assignmentNewPart, parts, "", "변경 없음");
       fillSelect(elements.assignmentNewPosition, positions, "", "변경 없음");
       fillSelect(elements.assignmentNewGradeLevel, gradeLevels, "", "변경 없음");
       fillSelect(elements.assignmentNewLocation, locations, "", "변경 없음");
@@ -5193,7 +5217,7 @@
         const tr = document.createElement("tr");
         tr.append(
           makePersonCell(employee),
-          makeCell(`${text(employee.department)} / ${text(employee.team)}`),
+          makeCell(orgPathLabel(employee)),
           makeCell(employee.position),
           makeCell(formatDate(employee.joinDate)),
           makeBadgeCell(employee.status)
@@ -5210,6 +5234,7 @@
           employee.employeeNo,
           employee.department,
           employee.team,
+          employee.part,
           employee.position,
           employee.jobGroup,
           employee.gradeLevel,
@@ -5318,7 +5343,7 @@
         const tr = document.createElement("tr");
         tr.append(
           makePersonCell(employee),
-          makeCell(`${text(employee.department)} / ${text(employee.team)}`),
+          makeCell(orgPathLabel(employee)),
           makeCell(employee.position),
           makeCell(employee.employmentType),
           makeCell(`${text(employee.email)}\n${text(employee.phone)}`),
@@ -5456,7 +5481,7 @@
     }
 
     function employeeBelongsToOrgNode(employee, node) {
-      return employee.department === node.name || employee.team === node.name;
+      return employee.department === node.name || employee.team === node.name || employee.part === node.name;
     }
 
     function employeesForOrgNode(nodeId, includeDescendants = true) {
@@ -5469,6 +5494,7 @@
       if (type === "회사") return "building-2";
       if (type === "본부") return "folder-tree";
       if (type === "팀") return "folder";
+      if (type === "파트") return "layers";
       if (type === "법인") return "landmark";
       return "network";
     }
@@ -5672,7 +5698,7 @@
         const name = document.createElement("strong");
         name.textContent = `${type} 하위에 배치된 인원이 없습니다.`;
         const meta = document.createElement("span");
-        meta.textContent = "사원등록에서 부서/팀을 선택하면 표시됩니다.";
+        meta.textContent = "사원등록에서 부서/팀/파트를 선택하면 표시됩니다.";
         body.append(name, meta);
         item.append(body);
         list.append(item);
@@ -5690,7 +5716,7 @@
             const name = document.createElement("strong");
             name.textContent = text(employee.name);
             const meta = document.createElement("span");
-            meta.textContent = `${text(employee.department)} / ${text(employee.team)} · ${text(employee.position)} · ${text(employee.status)}`;
+            meta.textContent = `${orgPathLabel(employee)} · ${text(employee.position)} · ${text(employee.status)}`;
             body.append(name, meta);
             li.append(avatar, body);
             list.append(li);
@@ -5704,13 +5730,14 @@
       if (!requireWritePermission()) return;
       const selected = findOrgNode(state.selectedOrgNodeId);
       const parentId = mode === "sibling" && selected.id !== ROOT_ORG_ID ? selected.parentId : selected.id;
+      const parent = findOrgNode(parentId);
       elements.orgNodeId.value = "";
       elements.orgNodeName.disabled = false;
       elements.orgNodeParent.disabled = false;
       elements.orgNodeType.disabled = false;
       populateOrgParentOptions(parentId || ROOT_ORG_ID);
       elements.orgNodeName.value = "";
-      elements.orgNodeType.value = parentId === ROOT_ORG_ID ? "본부" : "팀";
+      elements.orgNodeType.value = parent?.type === "팀" ? "파트" : parentId === ROOT_ORG_ID ? "본부" : "팀";
       elements.orgNodeMemo.value = "";
       elements.orgNodeName.focus();
     }
@@ -6098,7 +6125,7 @@
     }
 
     function employeeLabel(employee) {
-      return `${employee.name} · ${text(employee.department)} / ${text(employee.team)}`;
+      return `${employee.name} · ${orgPathLabel(employee)}`;
     }
 
     function renderCertificates() {
@@ -6142,7 +6169,7 @@
         ["성명", employee.name],
         ["사번", employee.employeeNo],
         ["생년월일", formatDate(employee.birthDate)],
-        ["소속", `${text(employee.department)} ${text(employee.team)}`],
+        ["소속", orgPathLabel(employee)],
         ["직책/직급", text(employee.position)],
         ["입사일", formatDate(employee.joinDate)],
         ["퇴직일", employee.retirementDate ? formatDate(employee.retirementDate) : "해당 없음"],
@@ -6359,7 +6386,7 @@
       onboardingRows.forEach((employee) => {
         if (!employee.privacyConsentDate) issues.push({ title: `${employee.name} 개인정보 동의 누락`, body: "입사 처리 전 개인정보 동의일을 확인하세요." });
         if (!employee.emergencyPhone) issues.push({ title: `${employee.name} 비상연락처 누락`, body: "입사 후 비상연락처와 관계를 확인하세요." });
-        if (!employee.department || !employee.position) issues.push({ title: `${employee.name} 조직/직책 배치 미완료`, body: "조직도 기준 부서, 팀, 직책을 확정하세요." });
+      if (!employee.department || !employee.position) issues.push({ title: `${employee.name} 조직/직책 배치 미완료`, body: "조직도 기준 부서, 팀, 파트, 직책을 확정하세요." });
       });
       probationRows.forEach((employee) => {
         const days = daysFromToday(employee.probationEndDate);
@@ -6586,6 +6613,7 @@
       const hasDraft = [
         elements.assignmentNewDepartment,
         elements.assignmentNewTeam,
+        elements.assignmentNewPart,
         elements.assignmentNewPosition,
         elements.assignmentNewGradeLevel,
         elements.assignmentNewLocation,
@@ -6600,7 +6628,7 @@
         elements.assignmentCurrentInfo.textContent = "대상 사원을 선택하세요.";
         return;
       }
-      elements.assignmentCurrentInfo.textContent = `현재 정보: ${text(employee.department)} / ${text(employee.team)} · ${text(employee.position)} · ${text(employee.gradeLevel)} · ${text(employee.employmentType)} · ${text(employee.location)}`;
+      elements.assignmentCurrentInfo.textContent = `현재 정보: ${orgPathLabel(employee)} · ${text(employee.position)} · ${text(employee.gradeLevel)} · ${text(employee.employmentType)} · ${text(employee.location)}`;
     }
 
     function syncAssignmentFormFromEmployee() {
@@ -6608,6 +6636,7 @@
       if (!employee) return;
       elements.assignmentNewDepartment.value = employee.department || "";
       elements.assignmentNewTeam.value = employee.team || "";
+      elements.assignmentNewPart.value = employee.part || "";
       elements.assignmentNewPosition.value = employee.position || "";
       elements.assignmentNewGradeLevel.value = employee.gradeLevel || "";
       elements.assignmentNewEmploymentType.value = employee.employmentType || state.settings.employmentTypes[0] || "";
@@ -6620,6 +6649,7 @@
       return {
         department: employee.department || "",
         team: employee.team || "",
+        part: employee.part || "",
         position: employee.position || "",
         gradeLevel: employee.gradeLevel || "",
         employmentType: employee.employmentType || "",
@@ -6632,6 +6662,7 @@
       return {
         department: elements.assignmentNewDepartment.value.trim(),
         team: elements.assignmentNewTeam.value.trim(),
+        part: elements.assignmentNewPart.value.trim(),
         position: elements.assignmentNewPosition.value.trim(),
         gradeLevel: elements.assignmentNewGradeLevel.value.trim(),
         employmentType: elements.assignmentNewEmploymentType.value.trim(),
@@ -6856,7 +6887,7 @@
     function makeAssignmentChangeCell(values, fallback = "") {
       const td = document.createElement("td");
       const lines = values ? [
-        ["조직", `${text(values.department)} / ${text(values.team)}`],
+        ["조직", [values.department, values.team, values.part].map((value) => text(value, "")).filter(Boolean).join(" / ") || "-"],
         ["직책", text(values.position)],
         ["레벨", text(values.gradeLevel)],
         ["고용", text(values.employmentType)],
@@ -6904,7 +6935,7 @@
         if (!options.silent) showToast("반영할 발령 이력을 찾을 수 없습니다.");
         return;
       }
-      ["department", "team", "position", "gradeLevel", "employmentType", "location", "contractEndDate"].forEach((key) => {
+      ["department", "team", "part", "position", "gradeLevel", "employmentType", "location", "contractEndDate"].forEach((key) => {
         if (record.to && record.to[key] !== undefined && record.to[key] !== "") {
           employee[key] = record.to[key];
         }
@@ -7997,6 +8028,7 @@
         elements.privacyConsentDate.value = employee.privacyConsentDate || "";
         elements.department.value = employee.department || "";
         elements.team.value = employee.team || "";
+        elements.part.value = employee.part || "";
         elements.position.value = employee.position || "";
         elements.jobGroup.value = employee.jobGroup || "";
         elements.gradeLevel.value = employee.gradeLevel || "";
@@ -8059,6 +8091,7 @@
         privacyConsentDate: elements.privacyConsentDate.value,
         department: elements.department.value.trim(),
         team: elements.team.value.trim(),
+        part: elements.part.value.trim(),
         position: elements.position.value.trim(),
         jobGroup: elements.jobGroup.value.trim(),
         gradeLevel: elements.gradeLevel.value.trim(),
@@ -8166,7 +8199,7 @@
     }
 
     function exportCsvFile() {
-      const headers = ["사번", "이름", "법적 성명", "성별", "국적", "혼인상태", "부서", "팀", "직책", "직군", "직급/레벨", "고용형태", "근무형태", "상태", "입사일", "수습 종료일", "계약 종료일", "퇴직일", "생년월일", "이메일", "연락처", "주소", "비상연락 이름", "비상연락 관계", "비상연락 번호", "근무지", "코스트센터", "상위 관리자", "최종학력", "전공", "입사 전 경력연수", "병역", "보훈 여부", "장애 여부", "개인정보 동의일", "자격/면허", "언어 역량", "정보완성도", "메모"];
+      const headers = ["사번", "이름", "법적 성명", "성별", "국적", "혼인상태", "부서", "팀", "파트", "직책", "직군", "직급/레벨", "고용형태", "근무형태", "상태", "입사일", "수습 종료일", "계약 종료일", "퇴직일", "생년월일", "이메일", "연락처", "주소", "비상연락 이름", "비상연락 관계", "비상연락 번호", "근무지", "코스트센터", "상위 관리자", "최종학력", "전공", "입사 전 경력연수", "병역", "보훈 여부", "장애 여부", "개인정보 동의일", "자격/면허", "언어 역량", "정보완성도", "메모"];
       const rows = state.employees.map((employee) => [
         employee.employeeNo,
         employee.name,
@@ -8176,6 +8209,7 @@
         employee.maritalStatus,
         employee.department,
         employee.team,
+        employee.part,
         employee.position,
         employee.jobGroup,
         employee.gradeLevel,
