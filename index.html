@@ -3371,10 +3371,6 @@
                 <input id="name" name="name" type="text" autocomplete="name" required />
               </div>
               <div class="field">
-                <label for="legalName">법적 성명</label>
-                <input id="legalName" name="legalName" type="text" autocomplete="off" />
-              </div>
-              <div class="field">
                 <label for="birthDate">생년월일</label>
                 <input id="birthDate" name="birthDate" type="date" />
               </div>
@@ -4278,7 +4274,6 @@
       employeeNo: document.querySelector("#employeeNo"),
       generateEmployeeNo: document.querySelector("#generateEmployeeNo"),
       name: document.querySelector("#name"),
-      legalName: document.querySelector("#legalName"),
       gender: document.querySelector("#gender"),
       nationality: document.querySelector("#nationality"),
       maritalStatus: document.querySelector("#maritalStatus"),
@@ -8021,7 +8016,6 @@
         elements.employeeId.value = employee.id;
         elements.employeeNo.value = employee.employeeNo || "";
         elements.name.value = employee.name || "";
-        elements.legalName.value = employee.legalName || "";
         elements.gender.value = employee.gender || "";
         elements.nationality.value = employee.nationality || "";
         elements.maritalStatus.value = employee.maritalStatus || "";
@@ -8089,7 +8083,6 @@
         id: elements.employeeId.value || `emp-${Date.now()}`,
         employeeNo: elements.employeeNo.value.trim(),
         name: elements.name.value.trim(),
-        legalName: elements.legalName.value.trim(),
         gender: elements.gender.value,
         nationality: elements.nationality.value.trim(),
         maritalStatus: elements.maritalStatus.value,
@@ -8203,11 +8196,10 @@
     }
 
     function exportCsvFile() {
-      const headers = ["사번", "이름", "법적 성명", "성별", "국적", "혼인상태", "부서", "팀", "파트", "직책", "직군", "직급/레벨", "고용형태", "근무형태", "상태", "입사일", "수습 종료일", "계약 종료일", "퇴직일", "생년월일", "이메일", "연락처", "주소", "비상연락 이름", "비상연락 관계", "비상연락 번호", "근무지", "코스트센터", "상위 관리자", "최종학력", "전공", "입사 전 경력연수", "병역", "보훈 여부", "장애 여부", "개인정보 동의일", "자격/면허", "언어 역량", "정보완성도", "메모"];
+      const headers = ["사번", "이름", "성별", "국적", "혼인상태", "부서", "팀", "파트", "직책", "직군", "직급/레벨", "고용형태", "근무형태", "상태", "입사일", "수습 종료일", "계약 종료일", "퇴직일", "생년월일", "이메일", "연락처", "주소", "비상연락 이름", "비상연락 관계", "비상연락 번호", "근무지", "코스트센터", "상위 관리자", "최종학력", "전공", "입사 전 경력연수", "병역", "보훈 여부", "장애 여부", "개인정보 동의일", "자격/면허", "언어 역량", "정보완성도", "메모"];
       const rows = state.employees.map((employee) => [
         employee.employeeNo,
         employee.name,
-        employee.legalName,
         employee.gender,
         employee.nationality,
         employee.maritalStatus,
@@ -8632,6 +8624,7 @@
   </script>
 </body>
 </html>
+
 
 
 
