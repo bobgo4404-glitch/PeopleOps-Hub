@@ -2433,19 +2433,19 @@
                   </div>
                   <div class="field">
                     <label for="assignmentNewDepartment">변경 후 부서</label>
-                    <input id="assignmentNewDepartment" type="text" list="departmentList" />
+                    <select id="assignmentNewDepartment"></select>
                   </div>
                   <div class="field">
                     <label for="assignmentNewTeam">변경 후 팀</label>
-                    <input id="assignmentNewTeam" type="text" list="teamList" />
+                    <select id="assignmentNewTeam"></select>
                   </div>
                   <div class="field">
                     <label for="assignmentNewPosition">변경 후 직책/직급</label>
-                    <input id="assignmentNewPosition" type="text" list="positionList" />
+                    <select id="assignmentNewPosition"></select>
                   </div>
                   <div class="field">
                     <label for="assignmentNewGradeLevel">변경 후 직급/레벨</label>
-                    <input id="assignmentNewGradeLevel" type="text" list="gradeLevelList" />
+                    <select id="assignmentNewGradeLevel"></select>
                   </div>
                   <div class="field">
                     <label for="assignmentNewEmploymentType">변경 후 고용형태</label>
@@ -2453,7 +2453,7 @@
                   </div>
                   <div class="field">
                     <label for="assignmentNewLocation">변경 후 근무지</label>
-                    <input id="assignmentNewLocation" type="text" list="locationList" />
+                    <select id="assignmentNewLocation"></select>
                   </div>
                   <div class="field">
                     <label for="assignmentNewContractEndDate">변경 후 계약 종료일</label>
@@ -3413,28 +3413,23 @@
             <div class="form-grid">
               <div class="field">
                 <label for="department">부서 *</label>
-                <input id="department" name="department" type="text" list="departmentList" required />
-                <datalist id="departmentList"></datalist>
+                    <select id="department" name="department" required></select>
               </div>
               <div class="field">
                 <label for="team">팀</label>
-                <input id="team" name="team" type="text" list="teamList" />
-                <datalist id="teamList"></datalist>
+                    <select id="team" name="team"></select>
               </div>
               <div class="field">
                 <label for="position">직책/직급 *</label>
-                <input id="position" name="position" type="text" list="positionList" required />
-                <datalist id="positionList"></datalist>
+                    <select id="position" name="position" required></select>
               </div>
               <div class="field">
                 <label for="jobGroup">직군</label>
-                <input id="jobGroup" name="jobGroup" type="text" list="jobGroupList" />
-                <datalist id="jobGroupList"></datalist>
+                    <select id="jobGroup" name="jobGroup"></select>
               </div>
               <div class="field">
                 <label for="gradeLevel">직급/레벨</label>
-                <input id="gradeLevel" name="gradeLevel" type="text" list="gradeLevelList" />
-                <datalist id="gradeLevelList"></datalist>
+                    <select id="gradeLevel" name="gradeLevel"></select>
               </div>
               <div class="field">
                 <label for="employmentType">고용형태</label>
@@ -3442,8 +3437,7 @@
               </div>
               <div class="field">
                 <label for="workType">근무형태</label>
-                <input id="workType" name="workType" type="text" list="workTypeList" />
-                <datalist id="workTypeList"></datalist>
+                    <select id="workType" name="workType"></select>
               </div>
               <div class="field">
                 <label for="status">상태</label>
@@ -3471,8 +3465,7 @@
               </div>
               <div class="field">
                 <label for="location">근무지</label>
-                <input id="location" name="location" type="text" list="locationList" />
-                <datalist id="locationList"></datalist>
+                    <select id="location" name="location"></select>
               </div>
               <div class="field">
                 <label for="costCenter">코스트센터</label>
@@ -4520,7 +4513,21 @@
         acc[node.parentId].push(node);
         return acc;
       }, {});
-      const nonRoot = nodes.filter((node) => node.id !== ROOT_ORG_ID);
+      Object.values(childrenByParent).forEach((children) => {
+        children.sort((a, b) => {
+          const orderCompare = (Number(a.order) || 0) - (Number(b.order) || 0);
+          return orderCompare || text(a.name, "").localeCompare(text(b.name, ""), "ko");
+        });
+      });
+      const nonRoot = [];
+      const visit = (parentId) => {
+        (childrenByParent[parentId] || []).forEach((node) => {
+          if (node.id !== ROOT_ORG_ID) nonRoot.push(node);
+          visit(node.id);
+        });
+      };
+      visit(ROOT_ORG_ID);
+      if (!nonRoot.length) nonRoot.push(...nodes.filter((node) => node.id !== ROOT_ORG_ID));
       settings.departments = [...new Set(nonRoot.map((node) => node.name).filter(Boolean))];
       settings.teams = [...new Set(nonRoot.filter((node) => !(childrenByParent[node.id] || []).length).map((node) => node.name).filter(Boolean))];
       return settings;
@@ -4898,28 +4905,55 @@
     }
 
     function uniqueValues(key) {
-      return [...new Set(state.employees.map((employee) => text(employee[key], "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ko"));
+      const seen = new Set();
+      return state.employees
+        .map((employee) => text(employee[key], "").trim())
+        .filter((value) => {
+          if (!value || seen.has(value)) return false;
+          seen.add(value);
+          return true;
+        });
     }
 
     function combinedValues(key, settingKey = key) {
-      return [...new Set([...(state.settings[settingKey] || []), ...uniqueValues(key)])]
-        .filter(Boolean)
-        .sort((a, b) => a.localeCompare(b, "ko"));
+      const seen = new Set();
+      return [...(state.settings[settingKey] || []), ...uniqueValues(key)]
+        .map((value) => text(value, "").trim())
+        .filter((value) => {
+          if (!value || seen.has(value)) return false;
+          seen.add(value);
+          return true;
+        });
     }
 
     function refreshDataLists() {
-      fillDatalist(elements.departmentList, state.settings.departments || []);
-      fillDatalist(elements.teamList, state.settings.teams || []);
-      fillDatalist(elements.positionList, combinedValues("position", "positions"));
-      fillDatalist(elements.jobGroupList, combinedValues("jobGroup", "jobGroups"));
-      fillDatalist(elements.gradeLevelList, combinedValues("gradeLevel", "gradeLevels"));
-      fillDatalist(elements.workTypeList, combinedValues("workType", "workTypes"));
-      fillDatalist(elements.locationList, combinedValues("location", "locations"));
+      const departments = combinedValues("department", "departments");
+      const teams = combinedValues("team", "teams");
+      const positions = combinedValues("position", "positions");
+      const jobGroups = combinedValues("jobGroup", "jobGroups");
+      const gradeLevels = combinedValues("gradeLevel", "gradeLevels");
+      const workTypes = combinedValues("workType", "workTypes");
+      const locations = combinedValues("location", "locations");
+
+      fillSelect(elements.department, departments, "", "선택");
+      fillSelect(elements.team, teams, "", "선택 안 함");
+      fillSelect(elements.position, positions, "", "선택");
+      fillSelect(elements.jobGroup, jobGroups, "", "선택 안 함");
+      fillSelect(elements.gradeLevel, gradeLevels, "", "선택 안 함");
+      fillSelect(elements.workType, workTypes, "", "선택 안 함");
+      fillSelect(elements.location, locations, "", "선택 안 함");
+      fillSelect(elements.assignmentNewDepartment, departments, "", "변경 없음");
+      fillSelect(elements.assignmentNewTeam, teams, "", "변경 없음");
+      fillSelect(elements.assignmentNewPosition, positions, "", "변경 없음");
+      fillSelect(elements.assignmentNewGradeLevel, gradeLevels, "", "변경 없음");
+      fillSelect(elements.assignmentNewLocation, locations, "", "변경 없음");
       fillDatalist(elements.managerList, state.employees.map((employee) => employee.name).filter(Boolean).sort((a, b) => a.localeCompare(b, "ko")));
       fillSelect(elements.employmentType, state.settings.employmentTypes, "정규직");
+      fillSelect(elements.assignmentNewEmploymentType, state.settings.employmentTypes, "", "변경 없음");
     }
 
     function fillDatalist(list, values) {
+      if (!list) return;
       list.replaceChildren();
       values.forEach((value) => {
         const option = document.createElement("option");
@@ -4928,16 +4962,23 @@
       });
     }
 
-    function fillSelect(select, values, fallbackValue = "") {
+    function fillSelect(select, values, fallbackValue = "", blankLabel = "") {
+      if (!select) return;
       const current = select.value || fallbackValue;
       select.replaceChildren();
+      if (blankLabel) {
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = blankLabel;
+        select.append(option);
+      }
       values.forEach((value) => {
         const option = document.createElement("option");
         option.value = value;
         option.textContent = value;
         select.append(option);
       });
-      select.value = values.includes(current) ? current : (values[0] || "");
+      select.value = values.includes(current) || (blankLabel && current === "") ? current : (values[0] || "");
     }
 
     function refreshDepartmentFilter() {
@@ -6540,7 +6581,7 @@
       });
       if (currentEmployee) elements.assignmentEmployee.value = currentEmployee;
       if (!elements.assignmentEmployee.value && activeEmployees()[0]) elements.assignmentEmployee.value = activeEmployees()[0].id;
-      fillSelect(elements.assignmentNewEmploymentType, state.settings.employmentTypes, "정규직");
+      fillSelect(elements.assignmentNewEmploymentType, state.settings.employmentTypes, "", "변경 없음");
       if (!elements.assignmentEffectiveDate.value) elements.assignmentEffectiveDate.value = new Date().toISOString().slice(0, 10);
       const hasDraft = [
         elements.assignmentNewDepartment,
@@ -7858,10 +7899,15 @@
     }
 
     function parseLines(value) {
+      const seen = new Set();
       return value
         .split(/\r?\n/)
         .map((line) => line.trim())
-        .filter(Boolean);
+        .filter((line) => {
+          if (!line || seen.has(line)) return false;
+          seen.add(line);
+          return true;
+        });
     }
 
     function generateEmployeeNo() {
