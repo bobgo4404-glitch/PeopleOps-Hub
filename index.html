@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PeopleOps Hub - 인적관리 시스템</title>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
       color-scheme: light;
@@ -1949,6 +1950,15 @@
                   </select>
                 </div>
               </div>
+              <button class="button ghost" type="button" id="downloadEmployeeTemplate">
+                <i data-lucide="file-spreadsheet"></i>
+                엑셀양식 다운로드
+              </button>
+              <button class="button ghost" type="button" id="uploadEmployeeExcel">
+                <i data-lucide="upload"></i>
+                엑셀 업로드
+              </button>
+              <input id="employeeExcelInput" type="file" accept=".xlsx,.xls" hidden />
               <button class="button ghost" type="button" id="exportCsv">
                 <i data-lucide="download"></i>
                 CSV 내보내기
@@ -4450,6 +4460,9 @@
       settingJobGroupCount: document.querySelector("#settingJobGroupCount"),
       settingLocationCount: document.querySelector("#settingLocationCount"),
       settingRetentionPreview: document.querySelector("#settingRetentionPreview"),
+      downloadEmployeeTemplate: document.querySelector("#downloadEmployeeTemplate"),
+      uploadEmployeeExcel: document.querySelector("#uploadEmployeeExcel"),
+      employeeExcelInput: document.querySelector("#employeeExcelInput"),
       exportCsv: document.querySelector("#exportCsv"),
       exportSettings: document.querySelector("#exportSettings"),
       loadSample: document.querySelector("#loadSample"),
@@ -8195,6 +8208,227 @@
       showToast("사원 정보가 삭제되었습니다.");
     }
 
+
+    const employeeExcelColumns = [
+      { header: "사번", key: "employeeNo" },
+      { header: "이름", key: "name", required: true },
+      { header: "주민번호 앞6자리+뒤1자리", key: "residentIdPart", importOnly: true },
+      { header: "성별", key: "gender" },
+      { header: "국적", key: "nationality" },
+      { header: "혼인상태", key: "maritalStatus" },
+      { header: "부서", key: "department", required: true },
+      { header: "팀", key: "team" },
+      { header: "파트", key: "part" },
+      { header: "직책", key: "position", required: true },
+      { header: "직군", key: "jobGroup" },
+      { header: "직급/레벨", key: "gradeLevel" },
+      { header: "고용형태", key: "employmentType" },
+      { header: "근무형태", key: "workType" },
+      { header: "상태", key: "status" },
+      { header: "입사일", key: "joinDate", required: true, type: "date" },
+      { header: "수습 종료일", key: "probationEndDate", type: "date" },
+      { header: "계약 종료일", key: "contractEndDate", type: "date" },
+      { header: "퇴직일", key: "retirementDate", type: "date" },
+      { header: "생년월일", key: "birthDate", type: "date" },
+      { header: "이메일", key: "email" },
+      { header: "연락처", key: "phone" },
+      { header: "주소", key: "address" },
+      { header: "비상연락 이름", key: "emergencyName" },
+      { header: "비상연락 관계", key: "emergencyRelation" },
+      { header: "비상연락 번호", key: "emergencyPhone" },
+      { header: "근무지", key: "location" },
+      { header: "코스트센터", key: "costCenter" },
+      { header: "상위 관리자", key: "manager" },
+      { header: "최종학력", key: "educationLevel" },
+      { header: "전공", key: "major" },
+      { header: "입사 전 경력연수", key: "careerYears" },
+      { header: "병역", key: "militaryStatus" },
+      { header: "보훈 여부", key: "veteranStatus" },
+      { header: "장애 여부", key: "disabilityStatus" },
+      { header: "개인정보 동의일", key: "privacyConsentDate", type: "date" },
+      { header: "자격/면허", key: "certifications" },
+      { header: "언어 역량", key: "languages" },
+      { header: "메모", key: "memo" }
+    ];
+
+    function xlsxReady() {
+      if (window.XLSX) return true;
+      showToast("엑셀 기능을 불러오지 못했습니다. 인터넷 연결 후 다시 시도하세요.");
+      return false;
+    }
+
+    function downloadEmployeeExcelTemplate() {
+      if (!xlsxReady()) return;
+      const workbook = window.XLSX.utils.book_new();
+      const headers = employeeExcelColumns.map((column) => column.header);
+      const sheet = window.XLSX.utils.aoa_to_sheet([headers]);
+      sheet["!cols"] = employeeExcelColumns.map((column) => ({ wch: Math.max(12, column.header.length + 6) }));
+      window.XLSX.utils.book_append_sheet(workbook, sheet, "사원등록");
+
+      const guideRows = [
+        ["작성 안내"],
+        ["필수 항목", employeeExcelColumns.filter((column) => column.required).map((column) => column.header).join(", ")],
+        ["날짜 형식", "YYYY-MM-DD 형식으로 입력하세요."],
+        ["주민번호 앞6자리+뒤1자리", "예: 901231-1 또는 9012311. 업로드 시 생년월일과 성별을 자동 입력하며 이 값은 저장하지 않습니다."],
+        ["사번", "비워도 업로드할 수 있습니다. 입력한 사번은 기존 사번과 중복되면 업로드가 중단됩니다."],
+        ["업로드 방식", "사원등록 시트의 1행은 제목으로 유지하고 2행부터 입력하세요."]
+      ];
+      window.XLSX.utils.book_append_sheet(workbook, window.XLSX.utils.aoa_to_sheet(guideRows), "작성안내");
+
+      const optionRows = [
+        ["부서", ...(state.settings.departments || [])],
+        ["팀", ...(state.settings.teams || [])],
+        ["파트", ...(state.settings.parts || [])],
+        ["직책", ...(state.settings.positions || [])],
+        ["고용형태", ...(state.settings.employmentTypes || [])],
+        ["근무형태", ...(state.settings.workTypes || [])],
+        ["근무지", ...(state.settings.locations || [])],
+        ["직군", ...(state.settings.jobGroups || [])],
+        ["직급/레벨", ...(state.settings.gradeLevels || [])],
+        ["상태", "재직", "휴직", "퇴직"]
+      ];
+      window.XLSX.utils.book_append_sheet(workbook, window.XLSX.utils.aoa_to_sheet(optionRows), "선택값");
+      window.XLSX.writeFile(workbook, `peopleops-employee-template-${new Date().toISOString().slice(0, 10)}.xlsx`);
+      showToast("엑셀 업로드 양식을 생성했습니다.");
+    }
+
+    function normalizeExcelHeader(value) {
+      return text(value, "").replace(/[\s*()（）]/g, "").toLowerCase();
+    }
+
+    function formatDateObject(date) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    }
+
+    function excelDateValue(value) {
+      if (!value) return "";
+      if (value instanceof Date && !Number.isNaN(value.getTime())) return formatDateObject(value);
+      if (typeof value === "number" && window.XLSX?.SSF?.parse_date_code) {
+        const parsed = window.XLSX.SSF.parse_date_code(value);
+        if (parsed) return `${parsed.y}-${String(parsed.m).padStart(2, "0")}-${String(parsed.d).padStart(2, "0")}`;
+      }
+      const normalized = String(value).trim().replace(/[./]/g, "-");
+      if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(normalized)) {
+        const [year, month, day] = normalized.split("-");
+        return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+      }
+      const date = new Date(normalized);
+      return Number.isNaN(date.getTime()) ? "" : formatDateObject(date);
+    }
+
+
+    function residentInfoFromPartial(value) {
+      const digits = text(value, "").replace(/\D/g, "");
+      if (!digits) return null;
+      if (digits.length !== 7) return { error: "주민번호는 앞6자리와 뒤 1자리만 입력하세요." };
+      const birth = digits.slice(0, 6);
+      const genderCode = digits.slice(6, 7);
+      const year = Number(birth.slice(0, 2));
+      const month = birth.slice(2, 4);
+      const day = birth.slice(4, 6);
+      const centuryMap = {
+        "1": 1900,
+        "2": 1900,
+        "5": 1900,
+        "6": 1900,
+        "3": 2000,
+        "4": 2000,
+        "7": 2000,
+        "8": 2000,
+        "9": 1800,
+        "0": 1800
+      };
+      const century = centuryMap[genderCode];
+      if (!century) return { error: "주민번호 뒤 첫 자리를 확인하세요." };
+      const birthDate = `${century + year}-${month}-${day}`;
+      const date = new Date(`${birthDate}T00:00:00`);
+      if (Number.isNaN(date.getTime()) || formatDateObject(date) !== birthDate) return { error: "주민번호 생년월일을 확인하세요." };
+      return {
+        birthDate,
+        gender: Number(genderCode) % 2 === 1 ? "남성" : "여성"
+      };
+    }
+    function valueFromExcelRow(row, column) {
+      const target = normalizeExcelHeader(column.header);
+      const key = Object.keys(row).find((header) => normalizeExcelHeader(header) === target);
+      const value = key ? row[key] : "";
+      return column.type === "date" ? excelDateValue(value) : text(value, "").trim();
+    }
+
+    function validateImportedEmployees(employees) {
+      const errors = [];
+      const existingNos = new Set(state.employees.map((employee) => employee.employeeNo).filter(Boolean));
+      const uploadNos = new Set();
+      employees.forEach((employee, index) => {
+        const row = index + 2;
+        employeeExcelColumns.filter((column) => column.required).forEach((column) => {
+          if (!employee[column.key]) errors.push(`${row}행: ${column.header} 항목을 입력하세요.`);
+        });
+        if (employee.employeeNo) {
+          if (existingNos.has(employee.employeeNo) || uploadNos.has(employee.employeeNo)) errors.push(`${row}행: 사번 ${employee.employeeNo}이(가) 중복됩니다.`);
+          uploadNos.add(employee.employeeNo);
+        }
+        if (employee.residentIdPartError) errors.push(`${row}행: ${employee.residentIdPartError}`);
+        if (employee.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(employee.email)) errors.push(`${row}행: 이메일 형식을 확인하세요.`);
+        if (employee.contractEndDate && employee.joinDate && employee.contractEndDate < employee.joinDate) errors.push(`${row}행: 계약 종료일은 입사일 이후여야 합니다.`);
+        if (employee.retirementDate && employee.joinDate && employee.retirementDate < employee.joinDate) errors.push(`${row}행: 퇴직일은 입사일 이후여야 합니다.`);
+      });
+      return errors;
+    }
+
+    async function importEmployeesFromExcel(event) {
+      if (!requireWritePermission()) return;
+      if (!xlsxReady()) return;
+      const file = event.target.files?.[0];
+      event.target.value = "";
+      if (!file) return;
+
+      try {
+        const workbook = window.XLSX.read(await file.arrayBuffer(), { type: "array", cellDates: true });
+        const sheet = workbook.Sheets["사원등록"] || workbook.Sheets[workbook.SheetNames[0]];
+        const rows = window.XLSX.utils.sheet_to_json(sheet, { defval: "", raw: true });
+        const employees = rows
+          .filter((row) => Object.values(row).some((value) => text(value, "").trim()))
+          .map((row, index) => {
+            const employee = { id: `emp-${Date.now()}-${index}` };
+            employeeExcelColumns.forEach((column) => {
+              employee[column.key] = valueFromExcelRow(row, column);
+            });
+            const residentInfo = residentInfoFromPartial(employee.residentIdPart);
+            if (residentInfo && !residentInfo.error) {
+              employee.birthDate = residentInfo.birthDate;
+              employee.gender = residentInfo.gender;
+            }
+            employee.residentIdPartError = residentInfo?.error || "";
+            delete employee.residentIdPart;
+            employee.status = employee.status || "재직";
+            employee.nationality = employee.nationality || "대한민국";
+            employee.employmentType = employee.employmentType || state.settings.employmentTypes[0] || "정규직";
+            employee.workType = employee.workType || state.settings.workTypes[0] || "전일제";
+            return normalizeEmployee(employee);
+          });
+
+        if (!employees.length) {
+          showToast("업로드할 사원 데이터가 없습니다.");
+          return;
+        }
+
+        const errors = validateImportedEmployees(employees);
+        if (errors.length) {
+          window.alert(["엑셀 업로드를 중단했습니다.", ...errors.slice(0, 12), errors.length > 12 ? `외 ${errors.length - 12}건` : ""].filter(Boolean).join("\n"));
+          return;
+        }
+
+        employees.forEach((employee) => delete employee.residentIdPartError);
+        state.employees.push(...employees);
+        saveEmployees();
+        renderAll();
+        showToast(`${employees.length}명의 사원을 업로드했습니다.`);
+      } catch (error) {
+        console.error("employee excel import failed", error);
+        showToast("엑셀 파일을 읽지 못했습니다. 양식을 확인하세요.");
+      }
+    }
     function exportCsvFile() {
       const headers = ["사번", "이름", "성별", "국적", "혼인상태", "부서", "팀", "파트", "직책", "직군", "직급/레벨", "고용형태", "근무형태", "상태", "입사일", "수습 종료일", "계약 종료일", "퇴직일", "생년월일", "이메일", "연락처", "주소", "비상연락 이름", "비상연락 관계", "비상연락 번호", "근무지", "코스트센터", "상위 관리자", "최종학력", "전공", "입사 전 경력연수", "병역", "보훈 여부", "장애 여부", "개인정보 동의일", "자격/면허", "언어 역량", "정보완성도", "메모"];
       const rows = state.employees.map((employee) => [
@@ -8409,6 +8643,11 @@
         if (window.lucide) window.lucide.createIcons();
       });
 
+      on(elements.downloadEmployeeTemplate, "click", downloadEmployeeExcelTemplate);
+      on(elements.uploadEmployeeExcel, "click", () => {
+        if (requireWritePermission()) elements.employeeExcelInput?.click();
+      });
+      on(elements.employeeExcelInput, "change", importEmployeesFromExcel);
       [elements.exportCsv, elements.exportSettings].forEach((button) => {
         on(button, "click", exportCsvFile);
       });
@@ -8624,6 +8863,20 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
