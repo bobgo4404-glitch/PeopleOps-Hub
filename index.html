@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -3360,9 +3360,9 @@
             <legend>기본 식별 정보</legend>
             <div class="form-grid">
               <div class="field">
-                <label for="employeeNo">사번 *</label>
+                <label for="employeeNo">사번</label>
                 <div class="compound-field">
-                  <input id="employeeNo" name="employeeNo" type="text" autocomplete="off" required />
+                  <input id="employeeNo" name="employeeNo" type="text" autocomplete="off" />
                   <button class="button ghost" type="button" id="generateEmployeeNo">자동생성</button>
                 </div>
               </div>
@@ -6167,7 +6167,6 @@
       grid.className = "certificate-grid";
       [
         ["성명", employee.name],
-        ["사번", employee.employeeNo],
         ["생년월일", formatDate(employee.birthDate)],
         ["소속", orgPathLabel(employee)],
         ["직책/직급", text(employee.position)],
@@ -8126,7 +8125,6 @@
 
     function validateEmployee(employee) {
       const required = [
-        ["사번", employee.employeeNo],
         ["이름", employee.name],
         ["부서", employee.department],
         ["직책/직급", employee.position],
@@ -8139,7 +8137,7 @@
         return false;
       }
 
-      const duplicate = state.employees.some((item) => item.employeeNo === employee.employeeNo && item.id !== employee.id);
+      const duplicate = employee.employeeNo && state.employees.some((item) => item.employeeNo === employee.employeeNo && item.id !== employee.id);
       if (duplicate) {
         showToast("이미 등록된 사번입니다.");
         return false;
@@ -8615,3 +8613,4 @@
   </script>
 </body>
 </html>
+
