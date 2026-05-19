@@ -8210,28 +8210,28 @@
 
 
     const employeeExcelColumns = [
-      { header: "사번", key: "employeeNo" },
-      { header: "이름", key: "name", required: true },
-      { header: "주민번호 앞6자리+뒤1자리", key: "residentIdPart", importOnly: true },
+      { header: "사번", key: "employeeNo", aliases: ["사원번호", "직원번호", "근로자번호"] },
+      { header: "이름", key: "name", required: true, aliases: ["성명", "직원명", "사원명", "근로자명", "근로자"] },
+      { header: "주민번호 앞6자리+뒤1자리", key: "residentIdPart", importOnly: true, aliases: ["주민번호", "주민등록번호", "주민번호앞7자리", "주민등록번호앞7자리"] },
       { header: "성별", key: "gender" },
       { header: "국적", key: "nationality" },
       { header: "혼인상태", key: "maritalStatus" },
-      { header: "부서", key: "department", required: true },
-      { header: "팀", key: "team" },
-      { header: "파트", key: "part" },
-      { header: "직책", key: "position", required: true },
+      { header: "부서", key: "department", required: true, aliases: ["부서명", "소속", "소속부서", "소속명", "조직", "조직명"] },
+      { header: "팀", key: "team", aliases: ["팀명", "소속팀"] },
+      { header: "파트", key: "part", aliases: ["파트명", "소속파트"] },
+      { header: "직책", key: "position", required: true, aliases: ["직책/직급", "직급", "직위", "직책명"] },
       { header: "직군", key: "jobGroup" },
       { header: "직급/레벨", key: "gradeLevel" },
-      { header: "고용형태", key: "employmentType" },
+      { header: "고용형태", key: "employmentType", aliases: ["근로자구분", "근로형태", "계약형태"] },
       { header: "근무형태", key: "workType" },
       { header: "상태", key: "status" },
-      { header: "입사일", key: "joinDate", required: true, type: "date" },
+      { header: "입사일", key: "joinDate", required: true, type: "date", aliases: ["입사년월일", "입사일자", "채용일"] },
       { header: "수습 종료일", key: "probationEndDate", type: "date" },
       { header: "계약 종료일", key: "contractEndDate", type: "date" },
       { header: "퇴직일", key: "retirementDate", type: "date" },
-      { header: "생년월일", key: "birthDate", type: "date" },
-      { header: "이메일", key: "email" },
-      { header: "연락처", key: "phone" },
+      { header: "생년월일", key: "birthDate", type: "date", aliases: ["생일", "생년월일"] },
+      { header: "이메일", key: "email", aliases: ["이메일주소", "메일"] },
+      { header: "연락처", key: "phone", aliases: ["휴대폰", "휴대전화", "전화번호", "핸드폰"] },
       { header: "주소", key: "address" },
       { header: "비상연락 이름", key: "emergencyName" },
       { header: "비상연락 관계", key: "emergencyRelation" },
@@ -8269,7 +8269,7 @@
         ["작성 안내"],
         ["필수 항목", employeeExcelColumns.filter((column) => column.required).map((column) => column.header).join(", ")],
         ["날짜 형식", "YYYY-MM-DD 형식으로 입력하세요."],
-        ["주민번호 앞6자리+뒤1자리", "예: 901231-1 또는 9012311. 업로드 시 생년월일과 성별을 자동 입력하며 이 값은 저장하지 않습니다."],
+        ["주민번호 앞6자리+뒤1자리", "예: 901231-1 또는 9012311. 전체 주민등록번호가 들어와도 앞 7자리만 계산에 사용하고 저장하지 않습니다."],
         ["사번", "비워도 업로드할 수 있습니다. 입력한 사번은 기존 사번과 중복되면 업로드가 중단됩니다."],
         ["업로드 방식", "사원등록 시트의 1행은 제목으로 유지하고 2행부터 입력하세요."]
       ];
@@ -8317,10 +8317,34 @@
     }
 
 
+
+    function orgNodeByNameAndType(name, type) {
+      const target = text(name, "");
+      if (!target) return null;
+      return orgNodes().find((node) => node.name === target && (!type || node.type === type)) || null;
+    }
+
+    function nearestOrgPathName(node, allowedTypes) {
+      if (!node) return "";
+      return orgNodePath(node.id).reverse().find((pathNode) => allowedTypes.includes(pathNode.type))?.name || "";
+    }
+
+    function completeImportedOrganization(employee) {
+      if (employee.part) {
+        const partNode = orgNodeByNameAndType(employee.part, "파트");
+        employee.team = employee.team || nearestOrgPathName(partNode, ["팀"]);
+        employee.department = employee.department || nearestOrgPathName(partNode, ["부서", "본부", "법인", "기타"]);
+      }
+      if (employee.team) {
+        const teamNode = orgNodeByNameAndType(employee.team, "팀");
+        employee.department = employee.department || nearestOrgPathName(teamNode, ["부서", "본부", "법인", "기타"]);
+      }
+      if (!employee.department && !employee.team && employee.part) employee.team = employee.part;
+    }
     function residentInfoFromPartial(value) {
       const digits = text(value, "").replace(/\D/g, "");
       if (!digits) return null;
-      if (digits.length !== 7) return { error: "주민번호는 앞6자리와 뒤 1자리만 입력하세요." };
+      if (digits.length < 7) return { error: "주민번호 앞6자리와 뒤 1자리를 입력하세요." };
       const birth = digits.slice(0, 6);
       const genderCode = digits.slice(6, 7);
       const year = Number(birth.slice(0, 2));
@@ -8349,8 +8373,8 @@
       };
     }
     function valueFromExcelRow(row, column) {
-      const target = normalizeExcelHeader(column.header);
-      const key = Object.keys(row).find((header) => normalizeExcelHeader(header) === target);
+      const targets = [column.header, ...(column.aliases || [])].map(normalizeExcelHeader);
+      const key = Object.keys(row).find((header) => targets.includes(normalizeExcelHeader(header)));
       const value = key ? row[key] : "";
       return column.type === "date" ? excelDateValue(value) : text(value, "").trim();
     }
@@ -8361,9 +8385,10 @@
       const uploadNos = new Set();
       employees.forEach((employee, index) => {
         const row = index + 2;
-        employeeExcelColumns.filter((column) => column.required).forEach((column) => {
+        employeeExcelColumns.filter((column) => column.required && column.key !== "department").forEach((column) => {
           if (!employee[column.key]) errors.push(`${row}행: ${column.header} 항목을 입력하세요.`);
         });
+        if (!employee.department && !employee.team && !employee.part) errors.push(`${row}행: 부서, 팀, 파트 중 하나를 입력하세요.`);
         if (employee.employeeNo) {
           if (existingNos.has(employee.employeeNo) || uploadNos.has(employee.employeeNo)) errors.push(`${row}행: 사번 ${employee.employeeNo}이(가) 중복됩니다.`);
           uploadNos.add(employee.employeeNo);
@@ -8394,6 +8419,7 @@
             employeeExcelColumns.forEach((column) => {
               employee[column.key] = valueFromExcelRow(row, column);
             });
+            completeImportedOrganization(employee);
             const residentInfo = residentInfoFromPartial(employee.residentIdPart);
             if (residentInfo && !residentInfo.error) {
               employee.birthDate = residentInfo.birthDate;
@@ -8863,6 +8889,9 @@
   </script>
 </body>
 </html>
+
+
+
 
 
 
