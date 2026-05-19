@@ -3344,6 +3344,10 @@
                 <i data-lucide="download"></i>
                 CSV 내보내기
               </button>
+              <button class="button danger" type="button" id="clearEmployees">
+                <i data-lucide="user-x"></i>
+                사원 데이터 초기화
+              </button>
               <button class="button danger" type="button" id="clearData">
                 <i data-lucide="trash-2"></i>
                 저장 데이터 초기화
@@ -4463,6 +4467,7 @@
       downloadEmployeeTemplate: document.querySelector("#downloadEmployeeTemplate"),
       uploadEmployeeExcel: document.querySelector("#uploadEmployeeExcel"),
       employeeExcelInput: document.querySelector("#employeeExcelInput"),
+      clearEmployees: document.querySelector("#clearEmployees"),
       exportCsv: document.querySelector("#exportCsv"),
       exportSettings: document.querySelector("#exportSettings"),
       loadSample: document.querySelector("#loadSample"),
@@ -8535,6 +8540,17 @@
       showToast("운영 데이터가 초기화되었습니다.");
     }
 
+
+    function clearEmployeeDataOnly() {
+      if (!requireWritePermission()) return;
+      const ok = window.confirm("등록된 사원 데이터만 모두 초기화할까요? 운영 설정, 조직도, 기준코드, 증명서/업무 기록은 유지됩니다.");
+      if (!ok) return;
+      state.employees = [];
+      saveEmployees();
+      resetEmployeePage();
+      renderAll();
+      showToast("사원 데이터가 초기화되었습니다.");
+    }
     function clearSavedData() {
       if (!requireWritePermission()) return;
       const ok = window.confirm("저장된 사원 데이터, 운영 설정, 증명서 발급 이력, 업무 기록을 모두 초기화할까요?");
@@ -8674,6 +8690,7 @@
         if (requireWritePermission()) elements.employeeExcelInput?.click();
       });
       on(elements.employeeExcelInput, "change", importEmployeesFromExcel);
+      on(elements.clearEmployees, "click", clearEmployeeDataOnly);
       [elements.exportCsv, elements.exportSettings].forEach((button) => {
         on(button, "click", exportCsvFile);
       });
@@ -8889,6 +8906,12 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
 
 
 
