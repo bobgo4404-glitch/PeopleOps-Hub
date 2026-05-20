@@ -2203,7 +2203,11 @@
               <form id="certificateForm">
                 <div class="form-grid">
                   <div class="field">
-                    <label for="certificateEmployee">대상 사원</label>
+                    <label for="certificateEmployeeSearch">대상 사원 검색</label>
+                    <input id="certificateEmployeeSearch" type="search" placeholder="이름, 사번, 부서 검색" autocomplete="off" />
+                  </div>
+                  <div class="field">
+                    <label for="certificateEmployee">대상 사원 선택</label>
                     <select id="certificateEmployee" required></select>
                   </div>
                   <div class="field">
@@ -2979,51 +2983,6 @@
             </section>
           </div>
 
-          <section class="panel" aria-labelledby="retirement-detail-title">
-              <div class="section-head">
-                <div>
-                  <h2 id="retirement-detail-title">퇴직자 현황</h2>
-                  <p>퇴직일 기준 최근 퇴직자를 확인합니다.</p>
-                </div>
-              </div>
-              <div class="table-wrap">
-                <table>
-                  <caption class="sr-only">퇴직자 현황 통계표</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">사원</th>
-                      <th scope="col">부서</th>
-                      <th scope="col">직책</th>
-                      <th scope="col">입사일</th>
-                      <th scope="col">퇴직일</th>
-                      <th scope="col">근속</th>
-                    </tr>
-                  </thead>
-                  <tbody id="retirementDetailTable"></tbody>
-                </table>
-              </div>
-              <div class="pagination" id="retirementPagination" aria-label="퇴직자 현황 페이지 이동">
-                <span id="retirementPageInfo">0명</span>
-                <div class="pagination-controls">
-                  <label class="page-size-field" for="retirementPageSize">
-                    표시 개수
-                    <select id="retirementPageSize">
-                      <option value="10">10</option>
-                      <option value="20">20</option>
-                      <option value="50">50</option>
-                    </select>
-                  </label>
-                  <button class="page-button" type="button" id="retirementPrevPage" aria-label="이전 페이지">
-                    <i data-lucide="chevron-left"></i>
-                  </button>
-                  <div class="page-buttons" id="retirementPageButtons" aria-label="페이지 번호"></div>
-                  <button class="page-button" type="button" id="retirementNextPage" aria-label="다음 페이지">
-                    <i data-lucide="chevron-right"></i>
-                  </button>
-                </div>
-              </div>
-          </section>
-
           <section class="panel" aria-labelledby="hire-detail-title">
               <div class="section-head">
                 <div>
@@ -3063,6 +3022,51 @@
                   </button>
                   <div class="page-buttons" id="hirePageButtons" aria-label="페이지 번호"></div>
                   <button class="page-button" type="button" id="hireNextPage" aria-label="다음 페이지">
+                    <i data-lucide="chevron-right"></i>
+                  </button>
+                </div>
+              </div>
+          </section>
+
+          <section class="panel" aria-labelledby="retirement-detail-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="retirement-detail-title">퇴직자 현황</h2>
+                  <p>퇴직일 기준 최근 퇴직자를 확인합니다.</p>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <caption class="sr-only">퇴직자 현황 통계표</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">사원</th>
+                      <th scope="col">부서</th>
+                      <th scope="col">직책</th>
+                      <th scope="col">입사일</th>
+                      <th scope="col">퇴직일</th>
+                      <th scope="col">근속</th>
+                    </tr>
+                  </thead>
+                  <tbody id="retirementDetailTable"></tbody>
+                </table>
+              </div>
+              <div class="pagination" id="retirementPagination" aria-label="퇴직자 현황 페이지 이동">
+                <span id="retirementPageInfo">0명</span>
+                <div class="pagination-controls">
+                  <label class="page-size-field" for="retirementPageSize">
+                    표시 개수
+                    <select id="retirementPageSize">
+                      <option value="10">10</option>
+                      <option value="20">20</option>
+                      <option value="50">50</option>
+                    </select>
+                  </label>
+                  <button class="page-button" type="button" id="retirementPrevPage" aria-label="이전 페이지">
+                    <i data-lucide="chevron-left"></i>
+                  </button>
+                  <div class="page-buttons" id="retirementPageButtons" aria-label="페이지 번호"></div>
+                  <button class="page-button" type="button" id="retirementNextPage" aria-label="다음 페이지">
                     <i data-lucide="chevron-right"></i>
                   </button>
                 </div>
@@ -4486,6 +4490,7 @@
       orgSearch: document.querySelector("#orgSearch"),
       orgStatusFilter: document.querySelector("#orgStatusFilter"),
       certificateForm: document.querySelector("#certificateForm"),
+      certificateEmployeeSearch: document.querySelector("#certificateEmployeeSearch"),
       certificateEmployee: document.querySelector("#certificateEmployee"),
       certificateType: document.querySelector("#certificateType"),
       certificatePurpose: document.querySelector("#certificatePurpose"),
@@ -6339,22 +6344,41 @@
       return `${employee.name} · ${orgPathLabel(employee)}`;
     }
 
+    function certificateEmployeeMatches(employee, query) {
+      if (!query) return true;
+      const haystack = [
+        employee.name,
+        employee.employeeNo,
+        employee.department,
+        employee.team,
+        employee.part,
+        employee.position
+      ].map((value) => text(value, "").toLowerCase()).join(" ");
+      return haystack.includes(query.toLowerCase());
+    }
+
     function renderCertificates() {
       const currentValue = elements.certificateEmployee.value;
+      const query = elements.certificateEmployeeSearch?.value.trim() || "";
+      const employees = activeEmployees().filter((employee) => certificateEmployeeMatches(employee, query));
       elements.certificateEmployee.replaceChildren();
-      activeEmployees().forEach((employee) => {
+      employees.forEach((employee) => {
         const option = document.createElement("option");
         option.value = employee.id;
-        option.textContent = `${employee.name} (${employee.employeeNo})`;
+        option.textContent = `${employee.name} (${text(employee.employeeNo, "사번 없음")}) · ${orgPathLabel(employee)}`;
         elements.certificateEmployee.append(option);
       });
-      if (currentValue) elements.certificateEmployee.value = currentValue;
+      if (employees.some((employee) => employee.id === currentValue)) {
+        elements.certificateEmployee.value = currentValue;
+      } else if (employees[0]) {
+        elements.certificateEmployee.value = employees[0].id;
+      }
       if (!elements.certificateIssueDate.value) elements.certificateIssueDate.value = new Date().toISOString().slice(0, 10);
       renderCertificatePreview();
     }
 
     function renderCertificatePreview() {
-      const employee = state.employees.find((item) => item.id === elements.certificateEmployee.value) || activeEmployees()[0];
+      const employee = state.employees.find((item) => item.id === elements.certificateEmployee.value);
       const certificateType = elements.certificateType.value || "재직증명서";
       const purpose = text(elements.certificatePurpose.value, "제출용");
       const destination = text(elements.certificateDestination.value, "요청 기관");
@@ -9086,6 +9110,7 @@
       on(elements.assignmentReset, "click", () => clearAssignmentForm(true));
       on(elements.certificateForm, "submit", createCertificateRecord);
       on(elements.certificatePrintButton, "click", printCertificate);
+      on(elements.certificateEmployeeSearch, "input", renderCertificates);
       [elements.certificateEmployee, elements.certificateType, elements.certificatePurpose, elements.certificateDestination, elements.certificateIssueDate].forEach((field) => {
         on(field, "input", renderCertificatePreview);
         on(field, "change", renderCertificatePreview);
@@ -9379,6 +9404,7 @@
   </script>
 </body>
 </html>
+
 
 
 
