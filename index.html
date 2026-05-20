@@ -653,84 +653,119 @@
     }
 
     .certificate-document {
-      min-height: 560px;
+      min-height: 820px;
       border: 1px solid var(--line-strong);
       border-radius: var(--radius);
       background: #ffffff;
-      padding: 42px 34px;
-      color: #17211f;
+      padding: 70px 54px;
+      color: #111111;
       display: flex;
       flex-direction: column;
       align-items: center;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
     }
 
     .certificate-document h3 {
-      width: min(100%, 680px);
-      margin: 8px auto 28px;
+      width: min(100%, 780px);
+      margin: 18px auto 78px;
       text-align: center;
-      font-size: 2rem;
-      letter-spacing: 0.16em;
-      padding-left: 0.16em;
+      font-size: 1.75rem;
+      letter-spacing: 0.44em;
+      padding-left: 0.44em;
       line-height: 1.2;
+      font-weight: 850;
     }
 
     .certificate-number {
-      width: min(100%, 680px);
+      width: min(100%, 780px);
       text-align: right;
       color: #5e6b67;
       font-size: 0.78rem;
       margin: 0 auto 6px;
+      display: none;
     }
 
     .certificate-grid {
-      width: min(100%, 680px);
+      width: min(100%, 780px);
       display: grid;
-      grid-template-columns: 116px minmax(0, 1fr);
-      border-top: 2px solid #20302d;
-      border-left: 1px solid #b8c2bf;
-      margin: 0 auto 26px;
+      grid-template-columns: 210px minmax(0, 1fr);
+      border-top: 1px solid #222222;
+      border-left: 1px solid #222222;
+      margin: 0 auto 128px;
     }
 
     .certificate-grid dt,
     .certificate-grid dd {
       margin: 0;
-      min-height: 38px;
-      padding: 9px 13px;
-      border-right: 1px solid #b8c2bf;
-      border-bottom: 1px solid #b8c2bf;
+      min-height: 47px;
+      padding: 12px 16px;
+      border-right: 1px solid #222222;
+      border-bottom: 1px solid #222222;
       display: flex;
       align-items: center;
+      font-size: 1rem;
     }
 
     .certificate-grid dt {
-      background: #f4f7f6;
-      font-weight: 800;
-      color: #4f5f5b;
+      background: #e3e3e3;
+      font-weight: 700;
+      color: #111111;
+      justify-content: center;
+      letter-spacing: 0.22em;
+      padding-left: calc(16px + 0.22em);
+      text-align: center;
     }
 
     .certificate-body {
-      width: min(100%, 680px);
-      margin: 34px auto 0;
+      width: min(100%, 780px);
+      margin: 0 auto 0;
       line-height: 2;
       white-space: pre-line;
-      font-size: 0.98rem;
+      font-size: 1rem;
+      text-align: center;
     }
 
     .certificate-footer {
-      width: min(100%, 680px);
-      margin-top: 82px;
-      text-align: center;
+      width: min(100%, 780px);
+      margin-top: 80px;
+      text-align: left;
       display: grid;
-      gap: 10px;
+      gap: 22px;
+      justify-items: end;
     }
 
     .certificate-company {
-      font-size: 1.16rem;
-      font-weight: 850;
+      font-size: 1rem;
+      font-weight: 400;
     }
 
     .certificate-seal {
-      font-size: 0.95rem;
+      position: relative;
+      font-size: 1rem;
+    }
+
+    .certificate-company-info {
+      display: grid;
+      grid-template-columns: 110px minmax(0, 1fr);
+      gap: 16px 24px;
+      min-width: min(100%, 460px);
+      align-items: center;
+      font-size: 1rem;
+    }
+
+    .certificate-stamp {
+      display: inline-flex;
+      width: 48px;
+      height: 48px;
+      border: 2px solid #d94364;
+      color: #d94364;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.74rem;
+      font-weight: 800;
+      margin-left: 18px;
+      transform: rotate(-12deg);
     }
 
     .print-only {
@@ -1693,15 +1728,15 @@
         width: 210mm;
         min-height: 297mm;
         margin: 0 auto;
-        padding: 28mm 22mm 24mm;
+        padding: 30mm 18mm 20mm;
       }
 
       .certificate-body {
-        margin-top: 16mm;
+        margin-top: 0;
       }
 
       .certificate-footer {
-        margin-top: 26mm;
+        margin-top: 28mm;
       }
 
       .print-only {
@@ -3159,6 +3194,14 @@
                     <input id="settingBusinessNumber" type="text" data-setting-field="businessNumber" placeholder="000-00-00000" />
                   </div>
                   <div class="field">
+                    <label for="settingCompanyAddress">회사주소</label>
+                    <input id="settingCompanyAddress" type="text" data-setting-field="companyAddress" />
+                  </div>
+                  <div class="field">
+                    <label for="settingRepresentativeName">대표이사</label>
+                    <input id="settingRepresentativeName" type="text" data-setting-field="representativeName" />
+                  </div>
+                  <div class="field">
                     <label for="settingHrOwner">인사 운영 담당</label>
                     <input id="settingHrOwner" type="text" data-setting-field="hrOwner" />
                   </div>
@@ -3635,6 +3678,8 @@
       companyName: "Company",
       companyCode: "ORG",
       businessNumber: "",
+      companyAddress: "",
+      representativeName: "",
       hrOwner: "인사팀",
       fiscalStartMonth: "1",
       annualLeaveBasis: "anniversary",
@@ -3678,6 +3723,8 @@
 
     Object.assign(defaultSettings, {
       companyName: "회사명",
+      companyAddress: "",
+      representativeName: "",
       hrOwner: "",
       organizationNodes: [],
       departments: [],
@@ -4170,7 +4217,7 @@
       selectedOrgNodeId: ROOT_ORG_ID,
       draggedOrgNodeId: "",
       employeePage: 1,
-      employeePageSize: 5,
+      employeePageSize: 10,
       filters: {
         search: "",
         department: "all",
@@ -6179,20 +6226,12 @@
 
       const grid = document.createElement("dl");
       grid.className = "certificate-grid";
-      [
-        ["성명", employee.name],
-        ["생년월일", formatDate(employee.birthDate)],
-        ["소속", orgPathLabel(employee)],
-        ["직책/직급", text(employee.position)],
-        ["입사일", formatDate(employee.joinDate)],
-        ["퇴직일", employee.retirementDate ? formatDate(employee.retirementDate) : "해당 없음"],
-        ["용도", purpose],
-        ["제출처", destination]
-      ].forEach(([label, value]) => {
+      certificateRows(certificateType, employee, purpose, destination, issueDate).forEach(({ label, value, className = "" }) => {
         const dt = document.createElement("dt");
         dt.textContent = label;
         const dd = document.createElement("dd");
         dd.textContent = value;
+        if (className) dd.className = className;
         grid.append(dt, dd);
       });
 
@@ -6203,16 +6242,70 @@
       const footer = document.createElement("footer");
       footer.className = "certificate-footer";
       const date = document.createElement("div");
-      date.textContent = formatDate(issueDate);
-      const company = document.createElement("div");
-      company.className = "certificate-company";
-      company.textContent = state.settings.companyName || "회사명";
-      const seal = document.createElement("div");
-      seal.className = "certificate-seal";
-      seal.textContent = "대표자: ____________________  (직인)";
-      footer.append(date, company, seal);
+      date.textContent = formatKoreanDateSpaced(issueDate);
+
+      const companyInfo = document.createElement("div");
+      companyInfo.className = "certificate-company-info";
+      [
+        ["회 사 명 :", state.settings.companyName || "회사명"],
+        ["회사주소 :", state.settings.companyAddress || ""],
+        ["대표이사 :", state.settings.representativeName || ""]
+      ].forEach(([label, value], index) => {
+        const labelEl = document.createElement("span");
+        labelEl.textContent = label;
+        const valueEl = document.createElement("span");
+        valueEl.textContent = value;
+        if (index === 2) {
+          const stamp = document.createElement("span");
+          stamp.className = "certificate-stamp";
+          stamp.textContent = "직인";
+          valueEl.append(stamp);
+        }
+        companyInfo.append(labelEl, valueEl);
+      });
+      footer.append(date, companyInfo);
 
       elements.certificatePreview.append(number, title, grid, body, footer);
+    }
+
+    function certificateRows(certificateType, employee, purpose, destination, issueDate) {
+      const periodEnd = certificateType === "퇴직증명서" && employee.retirementDate ? employee.retirementDate : issueDate;
+      return [
+        { label: "성명", value: text(employee.name, "") },
+        { label: "주민등록번호", value: residentRegistrationDisplay(employee) },
+        { label: "직급", value: text(employee.position, "") },
+        { label: "부서", value: orgPathLabel(employee) },
+        { label: "현주소", value: text(employee.address, "") },
+        { label: "재직기간", value: `${formatKoreanDate(employee.joinDate)}부터  ${formatKoreanDate(periodEnd)}까지` },
+        { label: "용도", value: purpose },
+        { label: "제출처", value: destination }
+      ];
+    }
+
+    function formatKoreanDate(dateString) {
+      if (!dateString) return "";
+      const date = new Date(`${dateString}T00:00:00`);
+      if (Number.isNaN(date.getTime())) return "";
+      return `${date.getFullYear()}년  ${String(date.getMonth() + 1).padStart(2, "0")}월  ${String(date.getDate()).padStart(2, "0")}일`;
+    }
+
+    function formatKoreanDateSpaced(dateString) {
+      if (!dateString) return "";
+      const date = new Date(`${dateString}T00:00:00`);
+      if (Number.isNaN(date.getTime())) return "";
+      return `${date.getFullYear()}  년  ${String(date.getMonth() + 1).padStart(2, "0")}  월  ${String(date.getDate()).padStart(2, "0")}  일`;
+    }
+
+    function residentRegistrationDisplay(employee) {
+      const birthDate = text(employee.birthDate, "");
+      const birth = birthDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!birth) return "";
+      const year = Number(birth[1]);
+      const gender = text(employee.gender, "");
+      const code = year < 2000
+        ? (gender === "여성" ? "2" : "1")
+        : (gender === "여성" ? "4" : "3");
+      return `${birth[1].slice(2)}${birth[2]}${birth[3]}-${code}******`;
     }
 
     function makeCertificateNumber(employee, certificateType, issueDate) {
@@ -6223,15 +6316,15 @@
 
     function makeCertificateBody(certificateType, employee) {
       if (certificateType === "퇴직증명서") {
-        return "위 사람은 당사에 재직 후 퇴직하였음을 증명합니다.";
+        return "상기인은 당사에 재직 후 퇴직하였음을 증명합니다.";
       }
       if (certificateType === "경력증명서") {
-        return "위 사람은 당사에서 기재된 기간 동안 해당 직무를 수행하였음을 증명합니다.";
+        return "상기인은 당사에서 기재된 기간 동안 해당 직무를 수행하였음을 증명합니다.";
       }
       if (certificateType === "원천징수영수증 요청") {
-        return "위 사람의 원천징수영수증 발급 요청을 접수하기 위한 확인 문서입니다.";
+        return "상기인의 원천징수영수증 발급 요청을 접수하기 위한 확인 문서입니다.";
       }
-      return "위 사람은 현재 당사에 재직 중임을 증명합니다.";
+      return "상기인은 현재 재직 중에 있음을 증명합니다.";
     }
 
     function createCertificateRecord(event) {
@@ -8906,6 +8999,7 @@
   </script>
 </body>
 </html>
+
 
 
 
