@@ -2760,6 +2760,22 @@
             </article>
             <article class="metric-card">
               <div class="metric-top">
+                <span class="metric-label">올해 입사</span>
+                <span class="metric-icon"><i data-lucide="user-plus"></i></span>
+              </div>
+              <p class="metric-value" id="statHiredThisYear">0</p>
+              <span class="metric-note">입사일 기준</span>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top">
+                <span class="metric-label">최근 30일 입사</span>
+                <span class="metric-icon"><i data-lucide="calendar-plus"></i></span>
+              </div>
+              <p class="metric-value" id="statRecentHires">0</p>
+              <span class="metric-note">입사일 기준</span>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top">
                 <span class="metric-label">퇴직 인원</span>
                 <span class="metric-icon"><i data-lucide="log-out"></i></span>
               </div>
@@ -2781,6 +2797,14 @@
               </div>
               <p class="metric-value" id="statCompleteness">0%</p>
               <span class="metric-note">전체 등록 인원 대비</span>
+            </article>
+            <article class="metric-card">
+              <div class="metric-top">
+                <span class="metric-label">평균 근속</span>
+                <span class="metric-icon"><i data-lucide="timer"></i></span>
+              </div>
+              <p class="metric-value" id="statAverageTenure">0년</p>
+              <span class="metric-note">재직자 입사일 기준</span>
             </article>
           </div>
 
@@ -2837,6 +2861,18 @@
               <div class="chart-grid" id="statusBars"></div>
             </section>
 
+            <section class="panel" aria-labelledby="hire-department-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="hire-department-title">올해 입사자 부서 분포</h2>
+                  <p>올해 입사자가 어느 부서에 배치되었는지 확인합니다.</p>
+                </div>
+              </div>
+              <div class="chart-grid" id="hireDepartmentBars"></div>
+            </section>
+          </div>
+
+          <div class="grid two-column">
             <section class="panel" aria-labelledby="retirement-department-title">
               <div class="section-head">
                 <div>
@@ -2845,6 +2881,16 @@
                 </div>
               </div>
               <div class="chart-grid" id="retirementDepartmentBars"></div>
+            </section>
+
+            <section class="panel" aria-labelledby="hire-month-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="hire-month-title">월별 입사 추이</h2>
+                  <p>올해 월별 입사 인원 흐름을 확인합니다.</p>
+                </div>
+              </div>
+              <div class="chart-grid" id="hireMonthBars"></div>
             </section>
           </div>
 
@@ -2955,6 +3001,71 @@
                   </thead>
                   <tbody id="retirementDetailTable"></tbody>
                 </table>
+              </div>
+              <div class="pagination" id="retirementPagination" aria-label="퇴직자 현황 페이지 이동">
+                <span id="retirementPageInfo">0명</span>
+                <div class="pagination-controls">
+                  <label class="page-size-field" for="retirementPageSize">
+                    표시 개수
+                    <select id="retirementPageSize">
+                      <option value="10">10</option>
+                      <option value="20">20</option>
+                      <option value="50">50</option>
+                    </select>
+                  </label>
+                  <button class="page-button" type="button" id="retirementPrevPage" aria-label="이전 페이지">
+                    <i data-lucide="chevron-left"></i>
+                  </button>
+                  <div class="page-buttons" id="retirementPageButtons" aria-label="페이지 번호"></div>
+                  <button class="page-button" type="button" id="retirementNextPage" aria-label="다음 페이지">
+                    <i data-lucide="chevron-right"></i>
+                  </button>
+                </div>
+              </div>
+          </section>
+
+          <section class="panel" aria-labelledby="hire-detail-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="hire-detail-title">입사자 현황</h2>
+                  <p>입사일 기준 최근 입사자를 확인합니다.</p>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <caption class="sr-only">입사자 현황 통계표</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">사원</th>
+                      <th scope="col">부서</th>
+                      <th scope="col">직책</th>
+                      <th scope="col">고용형태</th>
+                      <th scope="col">입사일</th>
+                      <th scope="col">상태</th>
+                    </tr>
+                  </thead>
+                  <tbody id="hireDetailTable"></tbody>
+                </table>
+              </div>
+              <div class="pagination" id="hirePagination" aria-label="입사자 현황 페이지 이동">
+                <span id="hirePageInfo">0명</span>
+                <div class="pagination-controls">
+                  <label class="page-size-field" for="hirePageSize">
+                    표시 개수
+                    <select id="hirePageSize">
+                      <option value="10">10</option>
+                      <option value="20">20</option>
+                      <option value="50">50</option>
+                    </select>
+                  </label>
+                  <button class="page-button" type="button" id="hirePrevPage" aria-label="이전 페이지">
+                    <i data-lucide="chevron-left"></i>
+                  </button>
+                  <div class="page-buttons" id="hirePageButtons" aria-label="페이지 번호"></div>
+                  <button class="page-button" type="button" id="hireNextPage" aria-label="다음 페이지">
+                    <i data-lucide="chevron-right"></i>
+                  </button>
+                </div>
               </div>
           </section>
         </section>
@@ -3280,6 +3391,7 @@
                   <div class="field">
                     <label for="settingGradeLevels">직급/레벨</label>
                     <textarea id="settingGradeLevels" class="textarea-code" data-setting-list="gradeLevels"></textarea>
+                    <small>인턴 · L1 사원급 · L2 주임/대리급 · L3 과장급 · L4 차장급 · L5 부장급 · 임원</small>
                   </div>
                   <div class="field">
                     <label for="settingWorkTypes">근무형태</label>
@@ -3482,6 +3594,7 @@
               <div class="field">
                 <label for="gradeLevel">직급/레벨</label>
                     <select id="gradeLevel" name="gradeLevel"></select>
+                <small>인턴 · L1 사원급 · L2 주임/대리급 · L3 과장급 · L4 차장급 · L5 부장급 · 임원</small>
               </div>
               <div class="field">
                 <label for="employmentType">고용형태</label>
@@ -4210,6 +4323,10 @@
       draggedOrgNodeId: "",
       employeePage: 1,
       employeePageSize: 10,
+      hirePage: 1,
+      hirePageSize: 10,
+      retirementPage: 1,
+      retirementPageSize: 10,
       filters: {
         search: "",
         department: "all",
@@ -4461,17 +4578,35 @@
       statContractRisk: document.querySelector("#statContractRisk"),
       statProbationRisk: document.querySelector("#statProbationRisk"),
       statCompleteness: document.querySelector("#statCompleteness"),
+      statAverageTenure: document.querySelector("#statAverageTenure"),
+      statHiredThisYear: document.querySelector("#statHiredThisYear"),
+      statRecentHires: document.querySelector("#statRecentHires"),
       genderBars: document.querySelector("#genderBars"),
       locationBars: document.querySelector("#locationBars"),
       jobGroupBars: document.querySelector("#jobGroupBars"),
       gradeBars: document.querySelector("#gradeBars"),
+      hireDepartmentBars: document.querySelector("#hireDepartmentBars"),
+      hireMonthBars: document.querySelector("#hireMonthBars"),
       riskList: document.querySelector("#riskList"),
       departmentAnalyticsTable: document.querySelector("#departmentAnalyticsTable"),
       employmentCrossTable: document.querySelector("#employmentCrossTable"),
       tenureAgeMatrixTable: document.querySelector("#tenureAgeMatrixTable"),
       riskDetailTable: document.querySelector("#riskDetailTable"),
       qualityDetailTable: document.querySelector("#qualityDetailTable"),
+      hireDetailTable: document.querySelector("#hireDetailTable"),
+      hirePagination: document.querySelector("#hirePagination"),
+      hirePageInfo: document.querySelector("#hirePageInfo"),
+      hirePageSize: document.querySelector("#hirePageSize"),
+      hirePrevPage: document.querySelector("#hirePrevPage"),
+      hireNextPage: document.querySelector("#hireNextPage"),
+      hirePageButtons: document.querySelector("#hirePageButtons"),
       retirementDetailTable: document.querySelector("#retirementDetailTable"),
+      retirementPagination: document.querySelector("#retirementPagination"),
+      retirementPageInfo: document.querySelector("#retirementPageInfo"),
+      retirementPageSize: document.querySelector("#retirementPageSize"),
+      retirementPrevPage: document.querySelector("#retirementPrevPage"),
+      retirementNextPage: document.querySelector("#retirementNextPage"),
+      retirementPageButtons: document.querySelector("#retirementPageButtons"),
       documentBars: document.querySelector("#documentBars"),
       documentChecklist: document.querySelector("#documentChecklist"),
       documentTable: document.querySelector("#documentTable"),
@@ -4982,6 +5117,17 @@
       return [employee.department, employee.team, employee.part].map((value) => text(value, "")).filter(Boolean).join(" / ") || "-";
     }
 
+    function gradeLevelLabel(value) {
+      const labels = {
+        L1: "L1 (사원급)",
+        L2: "L2 (주임/대리급)",
+        L3: "L3 (과장급)",
+        L4: "L4 (차장급)",
+        L5: "L5 (부장급)"
+      };
+      return labels[value] || value;
+    }
+
     function uniqueValues(key) {
       const seen = new Set();
       return state.employees
@@ -5019,14 +5165,14 @@
       fillSelect(elements.part, parts, "", "선택 안 함");
       fillSelect(elements.position, positions, "", "선택");
       fillSelect(elements.jobGroup, jobGroups, "", "선택 안 함");
-      fillSelect(elements.gradeLevel, gradeLevels, "", "선택 안 함");
+      fillSelect(elements.gradeLevel, gradeLevels, "", "선택 안 함", gradeLevelLabel);
       fillSelect(elements.workType, workTypes, "", "선택 안 함");
       fillSelect(elements.location, locations, "", "선택 안 함");
       fillSelect(elements.assignmentNewDepartment, departments, "", "변경 없음");
       fillSelect(elements.assignmentNewTeam, teams, "", "변경 없음");
       fillSelect(elements.assignmentNewPart, parts, "", "변경 없음");
       fillSelect(elements.assignmentNewPosition, positions, "", "변경 없음");
-      fillSelect(elements.assignmentNewGradeLevel, gradeLevels, "", "변경 없음");
+      fillSelect(elements.assignmentNewGradeLevel, gradeLevels, "", "변경 없음", gradeLevelLabel);
       fillSelect(elements.assignmentNewLocation, locations, "", "변경 없음");
       fillDatalist(elements.managerList, state.employees.map((employee) => employee.name).filter(Boolean).sort((a, b) => a.localeCompare(b, "ko")));
       fillSelect(elements.employmentType, state.settings.employmentTypes, "정규직");
@@ -5043,7 +5189,7 @@
       });
     }
 
-    function fillSelect(select, values, fallbackValue = "", blankLabel = "") {
+    function fillSelect(select, values, fallbackValue = "", blankLabel = "", labelFormatter = (value) => value) {
       if (!select) return;
       const current = select.value || fallbackValue;
       select.replaceChildren();
@@ -5056,7 +5202,7 @@
       values.forEach((value) => {
         const option = document.createElement("option");
         option.value = value;
-        option.textContent = value;
+        option.textContent = labelFormatter(value);
         select.append(option);
       });
       select.value = values.includes(current) || (blankLabel && current === "") ? current : (values[0] || "");
@@ -5121,6 +5267,10 @@
 
     function retiredEmployees() {
       return state.employees.filter((employee) => employee.status === "퇴직" || text(employee.retirementDate, ""));
+    }
+
+    function hiredEmployees() {
+      return state.employees.filter((employee) => text(employee.joinDate, ""));
     }
 
     function yearsBetween(dateString, now = new Date()) {
@@ -6747,7 +6897,7 @@
         elements.assignmentCurrentInfo.textContent = "대상 사원을 선택하세요.";
         return;
       }
-      elements.assignmentCurrentInfo.textContent = `현재 정보: ${orgPathLabel(employee)} · ${text(employee.position)} · ${text(employee.gradeLevel)} · ${text(employee.employmentType)} · ${text(employee.location)}`;
+      elements.assignmentCurrentInfo.textContent = `현재 정보: ${orgPathLabel(employee)} · ${text(employee.position)} · ${gradeLevelLabel(text(employee.gradeLevel, "")) || "-"} · ${text(employee.employmentType)} · ${text(employee.location)}`;
     }
 
     function syncAssignmentFormFromEmployee() {
@@ -7008,7 +7158,7 @@
       const lines = values ? [
         ["조직", [values.department, values.team, values.part].map((value) => text(value, "")).filter(Boolean).join(" / ") || "-"],
         ["직책", text(values.position)],
-        ["레벨", text(values.gradeLevel)],
+        ["레벨", gradeLevelLabel(text(values.gradeLevel, "")) || "-"],
         ["고용", text(values.employmentType)],
         ["근무지", text(values.location)],
         ["계약종료", formatDate(values.contractEndDate)]
@@ -7617,18 +7767,35 @@
       renderGenericStatBars(elements.genderBars, "gender", "성별 데이터가 없습니다.", ["여성", "남성", "기타/응답안함", "미입력"]);
       renderGenericStatBars(elements.locationBars, "location", "근무지 데이터가 없습니다.", state.settings.locations);
       renderGenericStatBars(elements.jobGroupBars, "jobGroup", "직군 데이터가 없습니다.", state.settings.jobGroups);
-      renderGenericStatBars(elements.gradeBars, "gradeLevel", "직급/레벨 데이터가 없습니다.", state.settings.gradeLevels);
+      renderGenericStatBars(elements.gradeBars, "gradeLevel", "직급/레벨 데이터가 없습니다.", state.settings.gradeLevels, gradeLevelLabel);
+      renderHireDepartmentBars();
+      renderHireMonthBars();
       renderRetirementDepartmentBars();
       renderDepartmentAnalyticsTable();
       renderEmploymentCrossTable();
       renderTenureAgeMatrixTable();
+      renderHireDetailTable();
       renderRetirementDetailTable();
     }
 
     function renderStatsKpis() {
       const active = activeEmployees();
+      const hired = hiredEmployees();
       const retired = retiredEmployees();
       const currentYear = new Date().getFullYear();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const hiredThisYear = hired.filter((employee) => dateYear(employee.joinDate) === currentYear).length;
+      const recentHires = hired.filter((employee) => {
+        const joinDate = parseLocalDate(employee.joinDate);
+        if (!joinDate) return false;
+        const diffDays = (today - joinDate) / (24 * 60 * 60 * 1000);
+        return diffDays >= 0 && diffDays <= 30;
+      }).length;
+      const activeTenures = active.map((employee) => yearsBetween(employee.joinDate)).filter((value) => value !== null);
+      const averageTenure = activeTenures.length
+        ? `${(activeTenures.reduce((sum, value) => sum + value, 0) / activeTenures.length).toFixed(1)}년`
+        : "-";
       const retiredThisYear = retired.filter((employee) => {
         if (!employee.retirementDate) return false;
         const date = new Date(`${employee.retirementDate}T00:00:00`);
@@ -7637,9 +7804,12 @@
       const retirementRate = state.employees.length ? Math.round((retired.length / state.employees.length) * 100) : 0;
 
       elements.statActiveTotal.textContent = String(active.length);
+      elements.statHiredThisYear.textContent = String(hiredThisYear);
+      elements.statRecentHires.textContent = String(recentHires);
       elements.statContractRisk.textContent = String(retired.length);
       elements.statProbationRisk.textContent = String(retiredThisYear);
       elements.statCompleteness.textContent = `${retirementRate}%`;
+      elements.statAverageTenure.textContent = averageTenure;
     }
 
     function isDateWithinDays(dateString, days) {
@@ -7652,14 +7822,19 @@
       return diffDays >= 0 && diffDays <= days;
     }
 
-    function renderGenericStatBars(container, key, emptyMessage, preferredOrder = []) {
+    function dateYear(dateString) {
+      const date = parseLocalDate(dateString);
+      return date ? date.getFullYear() : null;
+    }
+
+    function renderGenericStatBars(container, key, emptyMessage, preferredOrder = [], labelFormatter = (value) => value) {
       const employees = activeEmployees();
       const counts = countBy(employees, key);
       const ordered = [
         ...preferredOrder.filter((label) => counts[label]),
         ...Object.keys(counts).filter((label) => !preferredOrder.includes(label)).sort((a, b) => a.localeCompare(b, "ko"))
       ];
-      const rows = ordered.map((label) => [label, counts[label] || 0]);
+      const rows = ordered.map((label) => [labelFormatter(label), counts[label] || 0]);
       renderBars(container, rows, employees.length, emptyMessage);
     }
 
@@ -7783,7 +7958,8 @@
     function ageBucket(employee) {
       const age = getAge(employee.birthDate);
       if (age === null) return "미입력";
-      if (age < 30) return "20대 이하";
+      if (age < 20) return "20대 미만";
+      if (age < 30) return "20대";
       if (age < 40) return "30대";
       if (age < 50) return "40대";
       return "50대 이상";
@@ -7791,7 +7967,7 @@
 
     function renderTenureAgeMatrixTable() {
       const source = activeEmployees();
-      const ageRows = ["20대 이하", "30대", "40대", "50대 이상", "미입력"];
+      const ageRows = ["20대 미만", "20대", "30대", "40대", "50대 이상", "미입력"];
       const tenureCols = ["1년 미만", "1-3년", "3-5년", "5년 이상", "미입력"];
       const rows = ageRows.map((ageLabel) => ({
         ageLabel,
@@ -7973,7 +8149,8 @@
     function renderAgeBars() {
       const employees = activeEmployees();
       const groups = {
-        "20대 이하": 0,
+        "20대 미만": 0,
+        "20대": 0,
         "30대": 0,
         "40대": 0,
         "50대 이상": 0,
@@ -7983,7 +8160,8 @@
       employees.forEach((employee) => {
         const age = getAge(employee.birthDate);
         if (age === null) groups["미입력"] += 1;
-        else if (age < 30) groups["20대 이하"] += 1;
+        else if (age < 20) groups["20대 미만"] += 1;
+        else if (age < 30) groups["20대"] += 1;
         else if (age < 40) groups["30대"] += 1;
         else if (age < 50) groups["40대"] += 1;
         else groups["50대 이상"] += 1;
@@ -7998,6 +8176,25 @@
       renderBars(elements.statusBars, rows, total, "상태 데이터가 없습니다.");
     }
 
+    function renderHireDepartmentBars() {
+      const currentYear = new Date().getFullYear();
+      const hires = hiredEmployees().filter((employee) => dateYear(employee.joinDate) === currentYear);
+      const counts = countBy(hires, "department");
+      const rows = Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ko"));
+      renderBars(elements.hireDepartmentBars, rows, hires.length, "올해 입사자 데이터가 없습니다.");
+    }
+
+    function renderHireMonthBars() {
+      const currentYear = new Date().getFullYear();
+      const groups = Array.from({ length: 12 }, (_, index) => [`${index + 1}월`, 0]);
+      hiredEmployees().forEach((employee) => {
+        const date = parseLocalDate(employee.joinDate);
+        if (!date || date.getFullYear() !== currentYear) return;
+        groups[date.getMonth()][1] += 1;
+      });
+      renderBars(elements.hireMonthBars, groups, groups.reduce((sum, [, count]) => sum + count, 0), "올해 입사자 데이터가 없습니다.");
+    }
+
     function renderRetirementDepartmentBars() {
       const retired = retiredEmployees();
       const counts = countBy(retired, "department");
@@ -8005,13 +8202,76 @@
       renderBars(elements.retirementDepartmentBars, rows, retired.length, "퇴직자 데이터가 없습니다.");
     }
 
+    function renderHireDetailTable() {
+      const rows = [...hiredEmployees()].sort((a, b) => {
+        const dateCompare = text(b.joinDate, "").localeCompare(text(a.joinDate, ""));
+        return dateCompare || text(a.name).localeCompare(text(b.name), "ko");
+      });
+      const pageSize = Math.max(1, Number(state.hirePageSize) || 10);
+      const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+      state.hirePage = Math.min(Math.max(1, state.hirePage), totalPages);
+      const startIndex = (state.hirePage - 1) * pageSize;
+      const endIndex = Math.min(startIndex + pageSize, rows.length);
+      const visibleRows = rows.slice(startIndex, endIndex);
+      renderHirePagination(rows.length, state.hirePage, pageSize, totalPages, startIndex, endIndex);
+
+      renderTableRows(elements.hireDetailTable, visibleRows, 6, (employee) => {
+        const tr = document.createElement("tr");
+        tr.append(
+          makePersonCell(employee),
+          makeCell(text(employee.department)),
+          makeCell(text(employee.position)),
+          makeCell(text(employee.employmentType)),
+          makeCell(formatDate(employee.joinDate)),
+          makeBadgeCell(employee.status)
+        );
+        return tr;
+      }, "입사자 데이터가 없습니다.", "입사일이 등록되면 표시됩니다.");
+    }
+
+    function setHirePage(page) {
+      state.hirePage = Math.max(1, Number(page) || 1);
+      renderHireDetailTable();
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function renderHirePagination(total, page, pageSize, totalPages, startIndex, endIndex) {
+      elements.hirePagination.hidden = total === 0;
+      if (!total) return;
+
+      elements.hirePageSize.value = String(pageSize);
+      elements.hirePageInfo.textContent = `${startIndex + 1}-${endIndex}명 표시 / 총 ${total}명`;
+      elements.hirePrevPage.disabled = page <= 1;
+      elements.hireNextPage.disabled = page >= totalPages;
+      elements.hirePageButtons.replaceChildren();
+
+      employeePageNumbers(page, totalPages).forEach((pageNumber) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "page-button";
+        button.classList.toggle("is-active", pageNumber === page);
+        button.textContent = String(pageNumber);
+        button.setAttribute("aria-label", `${pageNumber}페이지로 이동`);
+        if (pageNumber === page) button.setAttribute("aria-current", "page");
+        button.addEventListener("click", () => setHirePage(pageNumber));
+        elements.hirePageButtons.append(button);
+      });
+    }
+
     function renderRetirementDetailTable() {
       const rows = [...retiredEmployees()].sort((a, b) => {
         const dateCompare = text(b.retirementDate, "").localeCompare(text(a.retirementDate, ""));
         return dateCompare || text(a.name).localeCompare(text(b.name), "ko");
       });
+      const pageSize = Math.max(1, Number(state.retirementPageSize) || 10);
+      const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+      state.retirementPage = Math.min(Math.max(1, state.retirementPage), totalPages);
+      const startIndex = (state.retirementPage - 1) * pageSize;
+      const endIndex = Math.min(startIndex + pageSize, rows.length);
+      const visibleRows = rows.slice(startIndex, endIndex);
+      renderRetirementPagination(rows.length, state.retirementPage, pageSize, totalPages, startIndex, endIndex);
 
-      renderTableRows(elements.retirementDetailTable, rows, 6, (employee) => {
+      renderTableRows(elements.retirementDetailTable, visibleRows, 6, (employee) => {
         const retirementDate = employee.retirementDate ? new Date(`${employee.retirementDate}T00:00:00`) : new Date();
         const tenure = yearsBetween(employee.joinDate, retirementDate);
         const tr = document.createElement("tr");
@@ -8025,6 +8285,35 @@
         );
         return tr;
       }, "퇴직자 데이터가 없습니다.", "퇴직 상태 또는 퇴직일이 등록되면 표시됩니다.");
+    }
+
+    function setRetirementPage(page) {
+      state.retirementPage = Math.max(1, Number(page) || 1);
+      renderRetirementDetailTable();
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function renderRetirementPagination(total, page, pageSize, totalPages, startIndex, endIndex) {
+      elements.retirementPagination.hidden = total === 0;
+      if (!total) return;
+
+      elements.retirementPageSize.value = String(pageSize);
+      elements.retirementPageInfo.textContent = `${startIndex + 1}-${endIndex}명 표시 / 총 ${total}명`;
+      elements.retirementPrevPage.disabled = page <= 1;
+      elements.retirementNextPage.disabled = page >= totalPages;
+      elements.retirementPageButtons.replaceChildren();
+
+      employeePageNumbers(page, totalPages).forEach((pageNumber) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "page-button";
+        button.classList.toggle("is-active", pageNumber === page);
+        button.textContent = String(pageNumber);
+        button.setAttribute("aria-label", `${pageNumber}페이지로 이동`);
+        if (pageNumber === page) button.setAttribute("aria-current", "page");
+        button.addEventListener("click", () => setRetirementPage(pageNumber));
+        elements.retirementPageButtons.append(button);
+      });
     }
 
     function renderQualityBars(total) {
@@ -8844,6 +9133,20 @@
       });
       on(elements.employeePrevPage, "click", () => setEmployeePage(state.employeePage - 1));
       on(elements.employeeNextPage, "click", () => setEmployeePage(state.employeePage + 1));
+      on(elements.hirePageSize, "change", (event) => {
+        state.hirePageSize = Number(event.target.value) || 10;
+        state.hirePage = 1;
+        renderHireDetailTable();
+      });
+      on(elements.hirePrevPage, "click", () => setHirePage(state.hirePage - 1));
+      on(elements.hireNextPage, "click", () => setHirePage(state.hirePage + 1));
+      on(elements.retirementPageSize, "change", (event) => {
+        state.retirementPageSize = Number(event.target.value) || 10;
+        state.retirementPage = 1;
+        renderRetirementDetailTable();
+      });
+      on(elements.retirementPrevPage, "click", () => setRetirementPage(state.retirementPage - 1));
+      on(elements.retirementNextPage, "click", () => setRetirementPage(state.retirementPage + 1));
       on(elements.orgSearch, "input", (event) => {
         state.filters.orgSearch = event.target.value;
         renderOrganization();
