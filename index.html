@@ -687,30 +687,26 @@
 
     .certificate-grid {
       width: min(100%, 780px);
-      display: grid;
-      grid-template-columns: 210px minmax(0, 1fr);
-      border-top: 1px solid #222222;
-      border-left: 1px solid #222222;
+      border-collapse: collapse;
+      table-layout: fixed;
       margin: 0 auto 92px;
     }
 
-    .certificate-grid dt,
-    .certificate-grid dd {
-      margin: 0;
+    .certificate-grid th,
+    .certificate-grid td {
       min-height: 47px;
       padding: 12px 16px;
-      border-right: 1px solid #222222;
-      border-bottom: 1px solid #222222;
-      display: flex;
-      align-items: center;
+      border: 1px solid #222222;
       font-size: 1rem;
+      line-height: 1.55;
+      vertical-align: middle;
     }
 
-    .certificate-grid dt {
+    .certificate-grid th {
+      width: 210px;
       background: #e3e3e3;
       font-weight: 700;
       color: #111111;
-      justify-content: center;
       letter-spacing: 0.22em;
       padding-left: calc(16px + 0.22em);
       text-align: center;
@@ -1749,9 +1745,9 @@
         margin-bottom: 28mm;
       }
 
-      .certificate-grid dt,
-      .certificate-grid dd {
-        min-height: 10mm;
+      .certificate-grid th,
+      .certificate-grid td {
+        height: 10mm;
         padding-top: 2.5mm;
         padding-bottom: 2.5mm;
       }
@@ -6398,16 +6394,21 @@
       const title = document.createElement("h3");
       title.textContent = certificateType;
 
-      const grid = document.createElement("dl");
+      const grid = document.createElement("table");
       grid.className = "certificate-grid";
+      const tbody = document.createElement("tbody");
       certificateRows(certificateType, employee, purpose, destination, issueDate).forEach(({ label, value, className = "" }) => {
-        const dt = document.createElement("dt");
-        dt.textContent = label;
-        const dd = document.createElement("dd");
-        dd.textContent = value;
-        if (className) dd.className = className;
-        grid.append(dt, dd);
+        const tr = document.createElement("tr");
+        const th = document.createElement("th");
+        th.scope = "row";
+        th.textContent = label;
+        const td = document.createElement("td");
+        td.textContent = value;
+        if (className) td.className = className;
+        tr.append(th, td);
+        tbody.append(tr);
       });
+      grid.append(tbody);
 
       const body = document.createElement("p");
       body.className = "certificate-body";
