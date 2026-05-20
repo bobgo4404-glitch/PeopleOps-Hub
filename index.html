@@ -1695,7 +1695,7 @@
 
     @page {
       size: A4 portrait;
-      margin: 10mm 8mm;
+      margin: 0;
     }
 
     @media print {
@@ -1704,8 +1704,8 @@
         background: #ffffff;
         margin: 0 !important;
         padding: 0 !important;
-        width: auto;
-        min-height: auto;
+        width: 210mm;
+        min-height: 297mm;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
@@ -1742,35 +1742,37 @@
         border: 0;
         border-radius: 0;
         box-sizing: border-box;
-        width: 100%;
-        height: auto;
+        width: 210mm;
+        height: 297mm;
         min-height: 0;
         margin: 0 auto;
-        padding: 12mm 0 0;
+        padding: 25mm 17mm 18mm;
         overflow: visible;
       }
 
       .certificate-document h3 {
         width: 176mm;
-        margin: 2mm auto 18mm;
+        margin: 7mm auto 20mm;
+        font-size: 1.75rem;
       }
 
       .certificate-grid {
         width: 176mm;
-        margin-bottom: 26mm;
+        margin-bottom: 28mm;
         border-width: 1px;
       }
 
       .certificate-grid th,
       .certificate-grid td {
-        height: 10mm;
+        height: 11mm;
         padding-top: 2.5mm;
         padding-bottom: 2.5mm;
         border-width: 0 1px 1px 0;
+        font-size: 1rem;
       }
 
       .certificate-grid th {
-        width: 56mm;
+        width: 54mm;
       }
 
       .certificate-grid td {
@@ -1789,7 +1791,7 @@
 
       .certificate-footer {
         width: 176mm;
-        margin-top: 21mm;
+        margin-top: 22mm;
       }
 
       .print-only {
