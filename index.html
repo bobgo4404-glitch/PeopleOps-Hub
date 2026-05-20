@@ -768,6 +768,14 @@
       transform: rotate(-12deg);
     }
 
+    .certificate-stamp-image {
+      width: 112px;
+      height: auto;
+      margin-left: 18px;
+      object-fit: contain;
+      vertical-align: middle;
+    }
+
     .print-only {
       display: none;
     }
@@ -3179,6 +3187,11 @@
                     <input id="settingRepresentativeName" type="text" data-setting-field="representativeName" />
                   </div>
                   <div class="field">
+                    <label for="settingCompanySealImage">직인 이미지</label>
+                    <input id="settingCompanySealImage" type="file" accept="image/png,image/jpeg,image/webp" />
+                    <small id="settingCompanySealStatus">기본 직인 이미지 사용 중</small>
+                  </div>
+                  <div class="field">
                     <label for="settingHrOwner">인사 운영 담당</label>
                     <input id="settingHrOwner" type="text" data-setting-field="hrOwner" />
                   </div>
@@ -3657,6 +3670,7 @@
       businessNumber: "",
       companyAddress: "",
       representativeName: "",
+      companySealImage: "company-seals.png",
       hrOwner: "인사팀",
       fiscalStartMonth: "1",
       annualLeaveBasis: "anniversary",
@@ -3702,6 +3716,7 @@
       companyName: "회사명",
       companyAddress: "",
       representativeName: "",
+      companySealImage: "company-seals.png",
       hrOwner: "",
       organizationNodes: [],
       departments: [],
@@ -4361,6 +4376,8 @@
       certificateIssueDate: document.querySelector("#certificateIssueDate"),
       certificatePrintButton: document.querySelector("#certificatePrintButton"),
       certificatePreview: document.querySelector("#certificatePreview"),
+      settingCompanySealImage: document.querySelector("#settingCompanySealImage"),
+      settingCompanySealStatus: document.querySelector("#settingCompanySealStatus"),
       lifecycleSummary: document.querySelector("#lifecycleSummary"),
       onboardingTable: document.querySelector("#onboardingTable"),
       probationTable: document.querySelector("#probationTable"),
@@ -6239,9 +6256,7 @@
         const valueEl = document.createElement("span");
         valueEl.textContent = value;
         if (index === 2) {
-          const stamp = document.createElement("span");
-          stamp.className = "certificate-stamp";
-          stamp.textContent = "직인";
+          const stamp = makeCertificateStamp();
           valueEl.append(stamp);
         }
         companyInfo.append(labelEl, valueEl);
@@ -6249,6 +6264,21 @@
       footer.append(date, companyInfo);
 
       elements.certificatePreview.append(number, title, grid, body, footer);
+    }
+
+    function makeCertificateStamp() {
+      const sealImage = text(state.settings.companySealImage, "");
+      if (sealImage) {
+        const stamp = document.createElement("img");
+        stamp.className = "certificate-stamp-image";
+        stamp.src = sealImage;
+        stamp.alt = "직인";
+        return stamp;
+      }
+      const stamp = document.createElement("span");
+      stamp.className = "certificate-stamp";
+      stamp.textContent = "직인";
+      return stamp;
     }
 
     function certificateRows(certificateType, employee, purpose, destination, issueDate) {
@@ -8100,6 +8130,12 @@
         const key = field.dataset.settingTextarea;
         field.value = state.settings[key] || "";
       });
+      if (elements.settingCompanySealImage) elements.settingCompanySealImage.value = "";
+      if (elements.settingCompanySealStatus) {
+        elements.settingCompanySealStatus.textContent = state.settings.companySealImage
+          ? "직인 이미지가 증명서에 표시됩니다."
+          : "직인 이미지가 없으면 기본 직인 표시로 출력됩니다.";
+      }
       elements.brandCompany.textContent = state.settings.companyName || "인적정보 관리 콘솔";
       elements.employeeNoPreview.textContent = generateEmployeeNo();
       elements.settingDeptCount.textContent = String((state.settings.departments || []).length);
@@ -8129,6 +8165,29 @@
       renderStatistics();
       showToast("운영 설정이 저장되었습니다.");
       if (window.lucide) window.lucide.createIcons();
+    }
+
+    function handleCompanySealUpload(event) {
+      if (!requireWritePermission()) {
+        event.target.value = "";
+        return;
+      }
+      const file = event.target.files?.[0];
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        showToast("이미지 파일만 등록할 수 있습니다.");
+        event.target.value = "";
+        return;
+      }
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        state.settings.companySealImage = String(reader.result || "");
+        saveSettings();
+        renderSettings();
+        renderCertificatePreview();
+        showToast("직인 이미지를 저장했습니다.");
+      });
+      reader.readAsDataURL(file);
     }
 
     function openEmployeeModal(id = null) {
@@ -8725,6 +8784,7 @@
         showToast("설정된 규칙으로 사번을 생성했습니다.");
       });
       on(elements.settingsForm, "submit", saveSettingsFromForm);
+      on(elements.settingCompanySealImage, "change", handleCompanySealUpload);
       on(elements.organizationForm, "submit", saveOrganizationNode);
       on(elements.orgOpenSettings, "click", () => switchView("settings"));
       on(elements.orgAddChild, "click", () => startOrganizationNodeCreate("child"));
