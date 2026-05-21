@@ -1932,11 +1932,11 @@
             </article>
             <article class="metric-card">
               <div class="metric-top">
-                <span class="metric-label">부서 수</span>
+                <span class="metric-label">조직 수</span>
                 <span class="metric-icon"><i data-lucide="building-2"></i></span>
               </div>
               <p class="metric-value" id="kpiDepartment">0</p>
-              <span class="metric-note">등록 인원 기준 자동 산출</span>
+              <span class="metric-note">조직도 기준 자동 산출</span>
             </article>
             <article class="metric-card">
               <div class="metric-top">
@@ -5373,14 +5373,15 @@
     function renderKpis() {
       const active = activeEmployees();
       const total = state.employees.length;
-      const departmentCount = new Set(active.map((employee) => text(employee.department, "")).filter(Boolean)).size;
+      const organizationCount = (state.settings.organizationNodes || [])
+        .filter((node) => node.id !== ROOT_ORG_ID && text(node.name, "") && node.type !== "회사").length;
       const regularCount = active.filter((employee) => employee.employmentType === "정규직").length;
       const tenures = active.map((employee) => yearsBetween(employee.joinDate)).filter((value) => value !== null);
       const avgTenure = tenures.length ? tenures.reduce((sum, value) => sum + value, 0) / tenures.length : 0;
 
       elements.kpiActive.textContent = String(active.length);
       elements.kpiTotalNote.textContent = `전체 등록 ${total}명`;
-      elements.kpiDepartment.textContent = String(departmentCount);
+      elements.kpiDepartment.textContent = String(organizationCount);
       elements.kpiRegularRate.textContent = active.length ? `${Math.round((regularCount / active.length) * 100)}%` : "0%";
       elements.kpiTenure.textContent = `${avgTenure.toFixed(1)}년`;
     }
