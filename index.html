@@ -1744,7 +1744,8 @@
         border: 0;
         border-radius: 0;
         box-sizing: border-box;
-        width: 210mm;
+        width: 100%;
+        max-width: 210mm;
         height: 297mm;
         min-height: 0;
         margin: 0 auto;
@@ -1757,11 +1758,11 @@
       }
 
       .certificate-grid {
-        width: 174mm !important;
-        max-width: 174mm !important;
+        width: 100% !important;
+        max-width: 100% !important;
         box-sizing: border-box;
-        border: 1px solid #222222;
-        box-shadow: none;
+        border: 0;
+        box-shadow: inset 0 0 0 1px #222222;
         margin-bottom: 28mm;
       }
 
@@ -1776,6 +1777,8 @@
 
       .certificate-grid td {
         border-right: 0;
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
 
       .certificate-grid tr:last-child th,
