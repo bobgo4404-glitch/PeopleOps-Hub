@@ -686,7 +686,8 @@
     }
 
     .certificate-grid {
-      width: min(100%, 720px);
+      width: min(100%, 680px);
+      min-width: 0;
       box-sizing: border-box;
       border-collapse: collapse;
       border-spacing: 0;
@@ -1746,10 +1747,13 @@
       }
 
       .certificate-grid {
-        width: min(160mm, 100%) !important;
-        max-width: 160mm !important;
+        width: 148mm !important;
+        min-width: 0 !important;
+        max-width: 148mm !important;
         box-sizing: border-box;
         border: 1px solid #222222;
+        margin-left: auto;
+        margin-right: auto;
         margin-bottom: 28mm;
       }
 
@@ -2240,6 +2244,17 @@
                   <div class="field">
                     <label for="certificateIssueDate">발급일</label>
                     <input id="certificateIssueDate" type="date" />
+                  </div>
+                  <div class="field">
+                    <label for="certificateResidentMode">주민번호 표시</label>
+                    <select id="certificateResidentMode">
+                      <option value="masked">일부 표시</option>
+                      <option value="full">전체 표시</option>
+                    </select>
+                  </div>
+                  <div class="field full" id="certificateResidentFullField" hidden>
+                    <label for="certificateResidentFull">전체 주민등록번호</label>
+                    <input id="certificateResidentFull" type="text" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="예: 710316-2345678" />
                   </div>
                 </div>
                 <div class="form-actions">
@@ -4506,6 +4521,9 @@
       certificatePurpose: document.querySelector("#certificatePurpose"),
       certificateDestination: document.querySelector("#certificateDestination"),
       certificateIssueDate: document.querySelector("#certificateIssueDate"),
+      certificateResidentMode: document.querySelector("#certificateResidentMode"),
+      certificateResidentFullField: document.querySelector("#certificateResidentFullField"),
+      certificateResidentFull: document.querySelector("#certificateResidentFull"),
       certificatePrintButton: document.querySelector("#certificatePrintButton"),
       certificatePreview: document.querySelector("#certificatePreview"),
       settingCompanySealImage: document.querySelector("#settingCompanySealImage"),
@@ -6385,6 +6403,7 @@
         elements.certificateEmployee.value = employees[0].id;
       }
       if (!elements.certificateIssueDate.value) elements.certificateIssueDate.value = new Date().toISOString().slice(0, 10);
+      syncCertificateResidentControls(elements.certificateEmployee.value !== currentValue);
       renderCertificatePreview();
     }
 
@@ -6394,6 +6413,8 @@
       const purpose = text(elements.certificatePurpose.value, "제출용");
       const destination = text(elements.certificateDestination.value, "요청 기관");
       const issueDate = elements.certificateIssueDate.value || new Date().toISOString().slice(0, 10);
+      const residentDisplayMode = elements.certificateResidentMode?.value || "masked";
+      const residentFullValue = elements.certificateResidentFull?.value || "";
       const certificateNumber = makeCertificateNumber(employee, certificateType, issueDate);
 
       elements.certificatePreview.replaceChildren();
@@ -6412,7 +6433,7 @@
       const grid = document.createElement("table");
       grid.className = "certificate-grid";
       const tbody = document.createElement("tbody");
-      certificateRows(certificateType, employee, purpose, destination, issueDate).forEach(({ label, value, className = "" }) => {
+      certificateRows(certificateType, employee, purpose, destination, issueDate, residentDisplayMode, residentFullValue).forEach(({ label, value, className = "" }) => {
         const tr = document.createElement("tr");
         const th = document.createElement("th");
         th.scope = "row";
@@ -6471,11 +6492,11 @@
       return stamp;
     }
 
-    function certificateRows(certificateType, employee, purpose, destination, issueDate) {
+    function certificateRows(certificateType, employee, purpose, destination, issueDate, residentDisplayMode = "masked", residentFullValue = "") {
       const periodEnd = certificateType === "퇴직증명서" && employee.retirementDate ? employee.retirementDate : issueDate;
       return [
         { label: "성명", value: text(employee.name, "") },
-        { label: "주민등록번호", value: residentRegistrationDisplay(employee) },
+        { label: "주민등록번호", value: residentRegistrationDisplay(employee, residentDisplayMode, residentFullValue) },
         { label: "직급", value: text(employee.position, "") },
         { label: "부서", value: orgPathLabel(employee) },
         { label: "현주소", value: text(employee.address, "") },
@@ -6483,6 +6504,36 @@
         { label: "용도", value: purpose },
         { label: "제출처", value: destination }
       ];
+    }
+
+    function formatResidentRegistrationInput(value) {
+      const digits = text(value, "").replace(/\D/g, "").slice(0, 13);
+      if (digits.length <= 6) return digits;
+      return `${digits.slice(0, 6)}-${digits.slice(6)}`;
+    }
+
+    function completeResidentRegistrationNumber(value) {
+      const digits = text(value, "").replace(/\D/g, "");
+      if (digits.length !== 13) return "";
+      return `${digits.slice(0, 6)}-${digits.slice(6)}`;
+    }
+
+    function syncCertificateResidentControls(clearValue = false) {
+      const isFullMode = elements.certificateResidentMode?.value === "full";
+      if (elements.certificateResidentFullField) {
+        elements.certificateResidentFullField.hidden = !isFullMode;
+      }
+      if ((!isFullMode || clearValue) && elements.certificateResidentFull) {
+        elements.certificateResidentFull.value = "";
+      }
+    }
+
+    function validateCertificateResidentDisplay() {
+      if (elements.certificateResidentMode?.value !== "full") return true;
+      if (completeResidentRegistrationNumber(elements.certificateResidentFull?.value || "")) return true;
+      showToast("전체 주민등록번호 13자리를 입력하세요.");
+      elements.certificateResidentFull?.focus();
+      return false;
     }
 
     function formatKoreanDate(dateString) {
@@ -6499,7 +6550,9 @@
       return `${date.getFullYear()}  년  ${String(date.getMonth() + 1).padStart(2, "0")}  월  ${String(date.getDate()).padStart(2, "0")}  일`;
     }
 
-    function residentRegistrationDisplay(employee) {
+    function residentRegistrationDisplay(employee, displayMode = "masked", fullValue = "") {
+      const completeNumber = displayMode === "full" ? completeResidentRegistrationNumber(fullValue) : "";
+      if (completeNumber) return completeNumber;
       const birthDate = text(employee.birthDate, "");
       const birth = birthDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
       if (!birth) return "";
@@ -6537,6 +6590,7 @@
         showToast("증명서 대상 사원을 선택하세요.");
         return;
       }
+      if (!validateCertificateResidentDisplay()) return;
       renderCertificates();
       showToast("증명서 문서를 생성했습니다. 출력 버튼으로 인쇄할 수 있습니다.");
     }
@@ -6558,6 +6612,7 @@
         showToast("출력할 대상 사원을 선택하세요.");
         return;
       }
+      if (!validateCertificateResidentDisplay()) return;
       const originalTitle = document.title;
       const certificateType = elements.certificateType.value || "재직증명서";
       document.title = certificatePrintFileName(employee, certificateType);
@@ -9153,7 +9208,23 @@
       on(elements.certificateForm, "submit", createCertificateRecord);
       on(elements.certificatePrintButton, "click", printCertificate);
       on(elements.certificateEmployeeSearch, "input", renderCertificates);
-      [elements.certificateEmployee, elements.certificateType, elements.certificatePurpose, elements.certificateDestination, elements.certificateIssueDate].forEach((field) => {
+      on(elements.certificateEmployee, "input", renderCertificatePreview);
+      on(elements.certificateEmployee, "change", () => {
+        syncCertificateResidentControls(true);
+        renderCertificatePreview();
+      });
+      on(elements.certificateResidentMode, "change", () => {
+        syncCertificateResidentControls();
+        renderCertificatePreview();
+      });
+      on(elements.certificateResidentFull, "input", (event) => {
+        const formattedValue = formatResidentRegistrationInput(event.target.value);
+        if (event.target.value !== formattedValue) {
+          event.target.value = formattedValue;
+        }
+        renderCertificatePreview();
+      });
+      [elements.certificateType, elements.certificatePurpose, elements.certificateDestination, elements.certificateIssueDate].forEach((field) => {
         on(field, "input", renderCertificatePreview);
         on(field, "change", renderCertificatePreview);
       });
