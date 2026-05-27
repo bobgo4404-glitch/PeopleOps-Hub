@@ -563,6 +563,31 @@
       outline: none;
     }
 
+    .field .checkbox-field {
+      min-height: 40px;
+      border: 1px solid var(--line-strong);
+      border-radius: 7px;
+      background: #ffffff;
+      color: var(--text);
+      padding: 0 11px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 760;
+    }
+
+    .field .checkbox-field input {
+      width: 16px;
+      min-height: 16px;
+      height: 16px;
+      margin: 0;
+      padding: 0;
+      accent-color: var(--primary);
+      box-shadow: none;
+    }
+
     .search-field {
       position: relative;
       min-width: min(320px, 100%);
@@ -774,6 +799,8 @@
       margin-left: 18px;
       object-fit: contain;
       vertical-align: middle;
+      background: transparent;
+      image-rendering: auto;
     }
 
     .print-only {
@@ -1778,6 +1805,13 @@
         margin-top: 22mm;
       }
 
+      .certificate-stamp-image {
+        width: 27mm;
+        max-height: 20mm;
+        background: transparent !important;
+        image-rendering: auto;
+      }
+
       .print-only {
         display: block;
       }
@@ -2246,11 +2280,11 @@
                     <input id="certificateIssueDate" type="date" />
                   </div>
                   <div class="field">
-                    <label for="certificateResidentMode">주민번호 표시</label>
-                    <select id="certificateResidentMode">
-                      <option value="masked">일부 표시</option>
-                      <option value="full">전체 표시</option>
-                    </select>
+                    <label for="certificateResidentFullToggle">주민번호 표시</label>
+                    <label class="checkbox-field" for="certificateResidentFullToggle">
+                      <input id="certificateResidentFullToggle" type="checkbox" />
+                      <span>전체 표시</span>
+                    </label>
                   </div>
                   <div class="field full" id="certificateResidentFullField" hidden>
                     <label for="certificateResidentFull">전체 주민등록번호</label>
@@ -4365,6 +4399,8 @@
       }
     };
 
+    const certificateSealImageCache = new Map();
+
     const titles = {
       dashboard: ["Overview", "전사 인적관리 대시보드"],
       employees: ["People Directory", "사원 정보 관리"],
@@ -4521,7 +4557,7 @@
       certificatePurpose: document.querySelector("#certificatePurpose"),
       certificateDestination: document.querySelector("#certificateDestination"),
       certificateIssueDate: document.querySelector("#certificateIssueDate"),
-      certificateResidentMode: document.querySelector("#certificateResidentMode"),
+      certificateResidentFullToggle: document.querySelector("#certificateResidentFullToggle"),
       certificateResidentFullField: document.querySelector("#certificateResidentFullField"),
       certificateResidentFull: document.querySelector("#certificateResidentFull"),
       certificatePrintButton: document.querySelector("#certificatePrintButton"),
@@ -6413,7 +6449,7 @@
       const purpose = text(elements.certificatePurpose.value, "제출용");
       const destination = text(elements.certificateDestination.value, "요청 기관");
       const issueDate = elements.certificateIssueDate.value || new Date().toISOString().slice(0, 10);
-      const residentDisplayMode = elements.certificateResidentMode?.value || "masked";
+      const residentDisplayMode = certificateResidentDisplayMode();
       const residentFullValue = elements.certificateResidentFull?.value || "";
       const certificateNumber = makeCertificateNumber(employee, certificateType, issueDate);
 
@@ -6482,14 +6518,125 @@
       if (sealImage) {
         const stamp = document.createElement("img");
         stamp.className = "certificate-stamp-image";
-        stamp.src = sealImage;
+        stamp.decoding = "sync";
+        stamp.loading = "eager";
+        stamp.src = cachedCertificateSealImage(sealImage);
         stamp.alt = "직인";
+        prepareCertificateSealImage(sealImage).then((optimizedSource) => {
+          if (stamp.isConnected && optimizedSource) {
+            stamp.src = optimizedSource;
+          }
+        });
         return stamp;
       }
       const stamp = document.createElement("span");
       stamp.className = "certificate-stamp";
       stamp.textContent = "직인";
       return stamp;
+    }
+
+    function canOptimizeCertificateSealImage(source) {
+      return /^data:image\/(png|jpe?g|webp);base64,/i.test(text(source, ""));
+    }
+
+    function cachedCertificateSealImage(source) {
+      const cached = certificateSealImageCache.get(source);
+      return cached?.optimized || source;
+    }
+
+    function prepareCertificateSealImage(source) {
+      if (!canOptimizeCertificateSealImage(source)) return Promise.resolve(source);
+      const cached = certificateSealImageCache.get(source);
+      if (cached?.optimized) return Promise.resolve(cached.optimized);
+      if (cached?.promise) return cached.promise;
+
+      const promise = cleanCertificateSealImage(source)
+        .then((optimized) => {
+          const result = optimized || source;
+          certificateSealImageCache.set(source, { optimized: result });
+          certificateSealImageCache.set(result, { optimized: result });
+          return result;
+        })
+        .catch(() => {
+          certificateSealImageCache.set(source, { optimized: source });
+          return source;
+        });
+      certificateSealImageCache.set(source, { promise });
+      return promise;
+    }
+
+    function loadImageElement(source) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = source;
+      });
+    }
+
+    async function cleanCertificateSealImage(source) {
+      const image = await loadImageElement(source);
+      const naturalWidth = image.naturalWidth || image.width;
+      const naturalHeight = image.naturalHeight || image.height;
+      if (!naturalWidth || !naturalHeight) return source;
+
+      const baseScale = naturalWidth > 900 ? 900 / naturalWidth : 1;
+      const baseWidth = Math.max(1, Math.round(naturalWidth * baseScale));
+      const baseHeight = Math.max(1, Math.round(naturalHeight * baseScale));
+      const baseCanvas = document.createElement("canvas");
+      baseCanvas.width = baseWidth;
+      baseCanvas.height = baseHeight;
+      const baseContext = baseCanvas.getContext("2d", { willReadFrequently: true });
+      if (!baseContext) return source;
+      baseContext.clearRect(0, 0, baseWidth, baseHeight);
+      baseContext.imageSmoothingEnabled = true;
+      baseContext.imageSmoothingQuality = "high";
+      baseContext.drawImage(image, 0, 0, baseWidth, baseHeight);
+
+      const imageData = baseContext.getImageData(0, 0, baseWidth, baseHeight);
+      const data = imageData.data;
+      for (let index = 0; index < data.length; index += 4) {
+        const red = data[index];
+        const green = data[index + 1];
+        const blue = data[index + 2];
+        const alpha = data[index + 3];
+        const max = Math.max(red, green, blue);
+        const min = Math.min(red, green, blue);
+        const saturation = max - min;
+        const brightness = (red + green + blue) / 3;
+        const isPaperPixel = alpha < 18 || (brightness > 232 && saturation < 34) || (red > 244 && green > 244 && blue > 244);
+        if (isPaperPixel) {
+          data[index + 3] = 0;
+        } else if (alpha < 245) {
+          data[index + 3] = Math.min(255, Math.round(alpha * 1.35));
+        }
+      }
+      baseContext.putImageData(imageData, 0, 0);
+
+      const outputScale = Math.max(1, Math.min(4, Math.ceil(540 / baseWidth)));
+      if (outputScale === 1) return baseCanvas.toDataURL("image/png");
+
+      const outputCanvas = document.createElement("canvas");
+      outputCanvas.width = baseWidth * outputScale;
+      outputCanvas.height = baseHeight * outputScale;
+      const outputContext = outputCanvas.getContext("2d");
+      if (!outputContext) return baseCanvas.toDataURL("image/png");
+      outputContext.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
+      outputContext.imageSmoothingEnabled = true;
+      outputContext.imageSmoothingQuality = "high";
+      outputContext.drawImage(baseCanvas, 0, 0, outputCanvas.width, outputCanvas.height);
+      return outputCanvas.toDataURL("image/png");
+    }
+
+    async function waitForCertificateImages() {
+      const images = [...elements.certificatePreview.querySelectorAll("img")];
+      await Promise.all(images.map((image) => {
+        if (image.complete && image.naturalWidth) return Promise.resolve();
+        return new Promise((resolve) => {
+          image.addEventListener("load", resolve, { once: true });
+          image.addEventListener("error", resolve, { once: true });
+        });
+      }));
     }
 
     function certificateRows(certificateType, employee, purpose, destination, issueDate, residentDisplayMode = "masked", residentFullValue = "") {
@@ -6518,8 +6665,12 @@
       return `${digits.slice(0, 6)}-${digits.slice(6)}`;
     }
 
+    function certificateResidentDisplayMode() {
+      return elements.certificateResidentFullToggle?.checked ? "full" : "masked";
+    }
+
     function syncCertificateResidentControls(clearValue = false) {
-      const isFullMode = elements.certificateResidentMode?.value === "full";
+      const isFullMode = certificateResidentDisplayMode() === "full";
       if (elements.certificateResidentFullField) {
         elements.certificateResidentFullField.hidden = !isFullMode;
       }
@@ -6529,7 +6680,7 @@
     }
 
     function validateCertificateResidentDisplay() {
-      if (elements.certificateResidentMode?.value !== "full") return true;
+      if (certificateResidentDisplayMode() !== "full") return true;
       if (completeResidentRegistrationNumber(elements.certificateResidentFull?.value || "")) return true;
       showToast("전체 주민등록번호 13자리를 입력하세요.");
       elements.certificateResidentFull?.focus();
@@ -6606,13 +6757,14 @@
       return `[${company}]_[${name}]_[${type}]`;
     }
 
-    function printCertificate() {
+    async function printCertificate() {
       const employee = state.employees.find((item) => item.id === elements.certificateEmployee.value);
       if (!employee) {
         showToast("출력할 대상 사원을 선택하세요.");
         return;
       }
       if (!validateCertificateResidentDisplay()) return;
+      await prepareCertificateSealImage(text(state.settings.companySealImage, ""));
       const originalTitle = document.title;
       const certificateType = elements.certificateType.value || "재직증명서";
       document.title = certificatePrintFileName(employee, certificateType);
@@ -6624,6 +6776,7 @@
       window.addEventListener("afterprint", restoreTitle, { once: true });
       window.addEventListener("focus", restoreTitle, { once: true });
       renderCertificatePreview();
+      await waitForCertificateImages();
       window.print();
     }
 
@@ -8590,8 +8743,9 @@
         return;
       }
       const reader = new FileReader();
-      reader.addEventListener("load", () => {
-        state.settings.companySealImage = String(reader.result || "");
+      reader.addEventListener("load", async () => {
+        const sealSource = String(reader.result || "");
+        state.settings.companySealImage = await prepareCertificateSealImage(sealSource);
         saveSettings();
         renderSettings();
         renderCertificatePreview();
@@ -9213,7 +9367,7 @@
         syncCertificateResidentControls(true);
         renderCertificatePreview();
       });
-      on(elements.certificateResidentMode, "change", () => {
+      on(elements.certificateResidentFullToggle, "change", () => {
         syncCertificateResidentControls();
         renderCertificatePreview();
       });
