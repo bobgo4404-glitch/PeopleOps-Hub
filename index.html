@@ -2967,6 +2967,58 @@
               <div class="chart-grid" id="gradeBars"></div>
           </section>
 
+          <div class="grid two-column">
+            <section class="panel" aria-labelledby="position-gender-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="position-gender-title">직책/직급별 남녀 현황</h2>
+                  <p>재직자 기준 직책/직급별 성별 구성을 확인합니다.</p>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <caption class="sr-only">직책/직급별 남녀 통계표</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">직책/직급</th>
+                      <th scope="col">여성</th>
+                      <th scope="col">남성</th>
+                      <th scope="col">기타/응답안함</th>
+                      <th scope="col">미입력</th>
+                      <th scope="col">합계</th>
+                    </tr>
+                  </thead>
+                  <tbody id="positionGenderTable"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="panel" aria-labelledby="job-group-gender-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="job-group-gender-title">직군별 남녀 현황</h2>
+                  <p>재직자 기준 직군별 성별 구성을 확인합니다.</p>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <caption class="sr-only">직군별 남녀 통계표</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">직군</th>
+                      <th scope="col">여성</th>
+                      <th scope="col">남성</th>
+                      <th scope="col">기타/응답안함</th>
+                      <th scope="col">미입력</th>
+                      <th scope="col">합계</th>
+                    </tr>
+                  </thead>
+                  <tbody id="jobGroupGenderTable"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+
           <section class="panel" aria-labelledby="department-analytics-title">
             <div class="section-head">
               <div>
@@ -4657,6 +4709,8 @@
       hireDepartmentBars: document.querySelector("#hireDepartmentBars"),
       hireMonthBars: document.querySelector("#hireMonthBars"),
       riskList: document.querySelector("#riskList"),
+      positionGenderTable: document.querySelector("#positionGenderTable"),
+      jobGroupGenderTable: document.querySelector("#jobGroupGenderTable"),
       departmentAnalyticsTable: document.querySelector("#departmentAnalyticsTable"),
       employmentCrossTable: document.querySelector("#employmentCrossTable"),
       tenureAgeMatrixTable: document.querySelector("#tenureAgeMatrixTable"),
@@ -8045,6 +8099,8 @@
       renderHireDepartmentBars();
       renderHireMonthBars();
       renderRetirementDepartmentBars();
+      renderPositionGenderTable();
+      renderJobGroupGenderTable();
       renderDepartmentAnalyticsTable();
       renderEmploymentCrossTable();
       renderTenureAgeMatrixTable();
@@ -8195,6 +8251,68 @@
         );
         return tr;
       }, "조직별 통계 데이터가 없습니다.", "사원 부서 정보가 등록되면 조직별 현황표가 표시됩니다.");
+    }
+
+    function orderedStatLabels(source, key, preferredOrder = []) {
+      const preferred = preferredOrder.map((value) => text(value, "미입력")).filter(Boolean);
+      const existing = [...new Set(source.map((employee) => text(employee[key], "미입력")))]
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b, "ko"));
+      const labels = [...preferred, ...existing.filter((label) => !preferred.includes(label))];
+      return [...new Set(labels)];
+    }
+
+    function genderStatValue(employee) {
+      const value = text(employee.gender, "");
+      if (!value) return "미입력";
+      const normalized = value.replace(/\s+/g, "").toLowerCase();
+      if (["여성", "여", "여자", "female", "f", "woman"].includes(normalized)) return "여성";
+      if (["남성", "남", "남자", "male", "m", "man"].includes(normalized)) return "남성";
+      if (normalized === "미입력") return "미입력";
+      return "기타/응답안함";
+    }
+
+    function genderBreakdownRows(key, preferredOrder = [], labelFormatter = (value) => value) {
+      const source = activeEmployees();
+      const genderColumns = ["여성", "남성", "기타/응답안함", "미입력"];
+      return orderedStatLabels(source, key, preferredOrder).map((label) => {
+        const employees = source.filter((employee) => text(employee[key], "미입력") === label);
+        return {
+          label: labelFormatter(label),
+          counts: genderColumns.map((gender) => employees.filter((employee) => genderStatValue(employee) === gender).length),
+          total: employees.length
+        };
+      }).filter((row) => row.total);
+    }
+
+    function renderGenderBreakdownTable(tbody, rows, emptyTitle, emptyBody) {
+      renderTableRows(tbody, rows, 6, (row) => {
+        const tr = document.createElement("tr");
+        tr.append(
+          makeCell(row.label),
+          ...row.counts.map((count) => makeCell(`${count}명`)),
+          makeCell(`${row.total}명`)
+        );
+        return tr;
+      }, emptyTitle, emptyBody);
+    }
+
+    function renderPositionGenderTable() {
+      renderGenderBreakdownTable(
+        elements.positionGenderTable,
+        genderBreakdownRows("position", state.settings.positions),
+        "직책/직급별 남녀 통계 데이터가 없습니다.",
+        "직책/직급과 성별 정보가 등록되면 남녀 현황표가 표시됩니다."
+      );
+    }
+
+    function renderJobGroupGenderTable() {
+      renderGenderBreakdownTable(
+        elements.jobGroupGenderTable,
+        genderBreakdownRows("jobGroup", state.settings.jobGroups),
+        "직군별 남녀 통계 데이터가 없습니다.",
+        "직군과 성별 정보가 등록되면 남녀 현황표가 표시됩니다."
+      );
     }
 
     function renderEmploymentCrossTable() {
