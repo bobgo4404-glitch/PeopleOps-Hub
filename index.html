@@ -6895,6 +6895,10 @@
       return years === null ? "-" : `${years.toFixed(1)}년`;
     }
 
+    function hasUploadedCompanySealImage() {
+      return /^data:image\//i.test(text(state.settings.companySealImage, ""));
+    }
+
     function appendPersonnelRecordSection(container, titleText, rows) {
       const section = document.createElement("section");
       section.className = "personnel-record-section";
@@ -6932,7 +6936,7 @@
       const number = document.createElement("span");
       number.textContent = `발급번호: ${certificateNumber}`;
       const issued = document.createElement("span");
-      issued.textContent = `작성일: ${formatDate(issueDate)}`;
+      issued.textContent = `발급일: ${formatDate(issueDate)}`;
       meta.append(number, issued);
 
       appendPersonnelRecordSection(elements.certificatePreview, "기본 인적사항", [
@@ -6973,7 +6977,10 @@
       manager.textContent = `담당: ${state.settings.hrOwner || "인사담당"}`;
       const company = document.createElement("span");
       company.className = "certificate-seal";
-      company.append(document.createTextNode(state.settings.companyName || "회사명"), makeCertificateStamp());
+      company.append(document.createTextNode(state.settings.companyName || "회사명"));
+      if (hasUploadedCompanySealImage()) {
+        company.append(makeCertificateStamp());
+      }
       footer.append(manager, company);
 
       elements.certificatePreview.prepend(title, meta);
