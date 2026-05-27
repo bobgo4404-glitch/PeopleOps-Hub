@@ -940,6 +940,40 @@
       text-transform: uppercase;
     }
 
+    .sort-button {
+      min-height: 24px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      color: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+      white-space: nowrap;
+    }
+
+    .sort-button:hover,
+    .sort-button.is-active {
+      color: var(--primary-strong);
+    }
+
+    .sort-indicator {
+      width: 16px;
+      height: 16px;
+      display: inline-grid;
+      place-items: center;
+      color: var(--subtle);
+      font-size: 0.75rem;
+      line-height: 1;
+    }
+
+    .sort-button.is-active .sort-indicator {
+      color: var(--primary);
+    }
+
     tbody tr {
       transition: background 150ms ease;
     }
@@ -2078,14 +2112,46 @@
                 <caption class="sr-only">사원 등록 정보 목록</caption>
                 <thead>
                   <tr>
-                    <th scope="col">사원</th>
-                    <th scope="col">소속</th>
-                    <th scope="col">직책</th>
-                    <th scope="col">고용형태</th>
-                    <th scope="col">연락처</th>
-                    <th scope="col">입사일</th>
-                    <th scope="col">상태</th>
-                    <th scope="col">정보완성도</th>
+                    <th scope="col">
+                      <button class="sort-button" type="button" data-employee-sort="person" data-sort-label="사원">
+                        사원 <span class="sort-indicator" aria-hidden="true">↕</span>
+                      </button>
+                    </th>
+                    <th scope="col">
+                      <button class="sort-button" type="button" data-employee-sort="affiliation" data-sort-label="소속">
+                        소속 <span class="sort-indicator" aria-hidden="true">↕</span>
+                      </button>
+                    </th>
+                    <th scope="col">
+                      <button class="sort-button" type="button" data-employee-sort="position" data-sort-label="직책">
+                        직책 <span class="sort-indicator" aria-hidden="true">↕</span>
+                      </button>
+                    </th>
+                    <th scope="col">
+                      <button class="sort-button" type="button" data-employee-sort="employmentType" data-sort-label="고용형태">
+                        고용형태 <span class="sort-indicator" aria-hidden="true">↕</span>
+                      </button>
+                    </th>
+                    <th scope="col">
+                      <button class="sort-button" type="button" data-employee-sort="contact" data-sort-label="연락처">
+                        연락처 <span class="sort-indicator" aria-hidden="true">↕</span>
+                      </button>
+                    </th>
+                    <th scope="col">
+                      <button class="sort-button" type="button" data-employee-sort="joinDate" data-sort-label="입사일">
+                        입사일 <span class="sort-indicator" aria-hidden="true">↕</span>
+                      </button>
+                    </th>
+                    <th scope="col">
+                      <button class="sort-button" type="button" data-employee-sort="status" data-sort-label="상태">
+                        상태 <span class="sort-indicator" aria-hidden="true">↕</span>
+                      </button>
+                    </th>
+                    <th scope="col">
+                      <button class="sort-button" type="button" data-employee-sort="completeness" data-sort-label="정보완성도">
+                        정보완성도 <span class="sort-indicator" aria-hidden="true">↕</span>
+                      </button>
+                    </th>
                     <th scope="col">관리</th>
                   </tr>
                 </thead>
@@ -4438,6 +4504,10 @@
       draggedOrgNodeId: "",
       employeePage: 1,
       employeePageSize: 10,
+      employeeSort: {
+        key: "affiliation",
+        direction: "asc"
+      },
       hirePage: 1,
       hirePageSize: 10,
       retirementPage: 1,
@@ -4662,6 +4732,7 @@
       compensationChecklist: document.querySelector("#compensationChecklist"),
       employeeTable: document.querySelector("#employeeTable"),
       employeeTableWrap: document.querySelector("#employeeTableWrap"),
+      employeeSortButtons: document.querySelectorAll("[data-employee-sort]"),
       employeePagination: document.querySelector("#employeePagination"),
       employeePageInfo: document.querySelector("#employeePageInfo"),
       employeePageSize: document.querySelector("#employeePageSize"),
@@ -5656,12 +5727,86 @@
       });
     }
 
-    function renderEmployeeTable() {
-      const employees = getFilteredEmployees().sort((a, b) => {
-        const departmentCompare = text(a.department).localeCompare(text(b.department), "ko");
-        if (departmentCompare !== 0) return departmentCompare;
-        return text(a.name).localeCompare(text(b.name), "ko");
+    function employeeAffiliationSortText(employee) {
+      return [employee.department, employee.team, employee.part].map((value) => text(value, "")).filter(Boolean).join(" / ");
+    }
+
+    function employeeSortValue(employee, key) {
+      switch (key) {
+        case "person":
+          return `${text(employee.name, "")} ${text(employee.employeeNo, "")}`.trim();
+        case "affiliation":
+          return employeeAffiliationSortText(employee);
+        case "position":
+          return text(employee.position, "");
+        case "employmentType":
+          return text(employee.employmentType, "");
+        case "contact":
+          return `${text(employee.email, "")} ${text(employee.phone, "")}`.trim();
+        case "joinDate": {
+          const date = parseLocalDate(employee.joinDate);
+          return date ? date.getTime() : null;
+        }
+        case "status":
+          return text(employee.status, "");
+        case "completeness":
+          return profileCompleteness(employee);
+        default:
+          return employeeAffiliationSortText(employee);
+      }
+    }
+
+    function compareEmployeeRows(a, b) {
+      const sort = state.employeeSort || { key: "affiliation", direction: "asc" };
+      const direction = sort.direction === "desc" ? -1 : 1;
+      const valueA = employeeSortValue(a, sort.key);
+      const valueB = employeeSortValue(b, sort.key);
+      const emptyA = valueA === null || valueA === "";
+      const emptyB = valueB === null || valueB === "";
+
+      if (emptyA && !emptyB) return 1;
+      if (!emptyA && emptyB) return -1;
+      if (!emptyA && !emptyB) {
+        const comparison = typeof valueA === "number" && typeof valueB === "number"
+          ? valueA - valueB
+          : String(valueA).localeCompare(String(valueB), "ko", { numeric: true, sensitivity: "base" });
+        if (comparison !== 0) return comparison * direction;
+      }
+
+      const nameCompare = text(a.name, "").localeCompare(text(b.name, ""), "ko", { numeric: true, sensitivity: "base" });
+      if (nameCompare !== 0) return nameCompare;
+      return text(a.employeeNo, "").localeCompare(text(b.employeeNo, ""), "ko", { numeric: true, sensitivity: "base" });
+    }
+
+    function updateEmployeeSortHeaders() {
+      const sort = state.employeeSort || { key: "affiliation", direction: "asc" };
+      elements.employeeSortButtons.forEach((button) => {
+        const active = button.dataset.employeeSort === sort.key;
+        const nextDirection = active && sort.direction === "asc" ? "내림차순" : "오름차순";
+        const label = button.dataset.sortLabel || button.textContent.trim();
+        const indicator = button.querySelector(".sort-indicator");
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-label", `${label} ${nextDirection} 정렬`);
+        button.setAttribute("title", `${label} ${nextDirection} 정렬`);
+        button.closest("th")?.setAttribute("aria-sort", active ? (sort.direction === "asc" ? "ascending" : "descending") : "none");
+        if (indicator) indicator.textContent = active ? (sort.direction === "asc" ? "↑" : "↓") : "↕";
       });
+    }
+
+    function setEmployeeSort(key) {
+      if (!key) return;
+      if (state.employeeSort.key === key) {
+        state.employeeSort.direction = state.employeeSort.direction === "asc" ? "desc" : "asc";
+      } else {
+        state.employeeSort = { key, direction: "asc" };
+      }
+      resetEmployeePage();
+      renderEmployeeTable();
+    }
+
+    function renderEmployeeTable() {
+      updateEmployeeSortHeaders();
+      const employees = getFilteredEmployees().sort(compareEmployeeRows);
       const pageSize = Math.max(1, Number(state.employeePageSize) || 10);
       const totalPages = Math.max(1, Math.ceil(employees.length / pageSize));
       state.employeePage = Math.min(Math.max(1, state.employeePage), totalPages);
@@ -9524,6 +9669,9 @@
         state.filters.search = event.target.value;
         resetEmployeePage();
         renderEmployeeTable();
+      });
+      elements.employeeSortButtons.forEach((button) => {
+        button.addEventListener("click", () => setEmployeeSort(button.dataset.employeeSort));
       });
       on(elements.departmentFilter, "change", (event) => {
         state.filters.department = event.target.value;
