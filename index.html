@@ -1253,6 +1253,110 @@
       text-align: right;
     }
 
+    .comparison-legend {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 760;
+    }
+
+    .comparison-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .swatch.hire {
+      background: var(--primary);
+    }
+
+    .swatch.retirement {
+      background: var(--danger);
+    }
+
+    .yearly-lifecycle-chart {
+      display: grid;
+      gap: 13px;
+    }
+
+    .yearly-lifecycle-row {
+      display: grid;
+      grid-template-columns: minmax(54px, 0.18fr) minmax(120px, 1fr) minmax(74px, auto);
+      align-items: center;
+      gap: 12px;
+    }
+
+    .yearly-lifecycle-year {
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .yearly-lifecycle-bars {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .yearly-lifecycle-bar {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      align-items: center;
+      gap: 8px;
+    }
+
+    .yearly-lifecycle-series {
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 780;
+      white-space: nowrap;
+    }
+
+    .yearly-lifecycle-track {
+      height: 10px;
+      border: 1px solid #e2e8e6;
+      border-radius: 999px;
+      overflow: hidden;
+      background: var(--surface-muted);
+    }
+
+    .yearly-lifecycle-fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+    }
+
+    .yearly-lifecycle-fill.has-value {
+      min-width: 4px;
+    }
+
+    .yearly-lifecycle-fill.hire {
+      background: linear-gradient(90deg, var(--primary), #58a0a6);
+    }
+
+    .yearly-lifecycle-fill.retirement {
+      background: linear-gradient(90deg, var(--danger), #d76c6c);
+    }
+
+    .yearly-lifecycle-count {
+      display: grid;
+      gap: 2px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .yearly-lifecycle-count strong {
+      color: var(--text);
+      font-size: 0.84rem;
+      font-weight: 820;
+    }
+
     .donut-wrap {
       display: grid;
       grid-template-columns: 180px minmax(0, 1fr);
@@ -3146,6 +3250,20 @@
             </section>
           </div>
 
+          <section class="panel" aria-labelledby="yearly-lifecycle-title">
+            <div class="section-head">
+              <div>
+                <h2 id="yearly-lifecycle-title">연도별 입퇴사 추이</h2>
+                <p>입사일과 퇴직일 기준으로 연도별 입사·퇴사 인원을 비교합니다.</p>
+              </div>
+              <div class="comparison-legend" aria-hidden="true">
+                <span><span class="swatch hire"></span>입사</span>
+                <span><span class="swatch retirement"></span>퇴사</span>
+              </div>
+            </div>
+            <div class="yearly-lifecycle-chart" id="yearlyLifecycleBars"></div>
+          </section>
+
           <section class="panel" aria-labelledby="grade-stat-title">
               <div class="section-head">
                 <div>
@@ -4902,6 +5020,7 @@
       gradeBars: document.querySelector("#gradeBars"),
       hireDepartmentBars: document.querySelector("#hireDepartmentBars"),
       hireMonthBars: document.querySelector("#hireMonthBars"),
+      yearlyLifecycleBars: document.querySelector("#yearlyLifecycleBars"),
       riskList: document.querySelector("#riskList"),
       positionGenderTable: document.querySelector("#positionGenderTable"),
       jobGroupGenderTable: document.querySelector("#jobGroupGenderTable"),
@@ -8524,6 +8643,7 @@
       renderHireDepartmentBars();
       renderHireMonthBars();
       renderRetirementDepartmentBars();
+      renderYearlyLifecycleBars();
       renderPositionGenderTable();
       renderJobGroupGenderTable();
       renderDepartmentAnalyticsTable();
@@ -9017,6 +9137,77 @@
       const counts = countBy(retired, "department");
       const rows = Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ko"));
       renderBars(elements.retirementDepartmentBars, rows, retired.length, "퇴직자 데이터가 없습니다.");
+    }
+
+    function yearlyLifecycleRows() {
+      const rowsByYear = new Map();
+      const ensureYear = (year) => {
+        if (!rowsByYear.has(year)) rowsByYear.set(year, { year, hires: 0, retirements: 0 });
+        return rowsByYear.get(year);
+      };
+
+      state.employees.forEach((employee) => {
+        const hireYear = dateYear(employee.joinDate);
+        const retirementYear = dateYear(employee.retirementDate);
+        if (hireYear) ensureYear(hireYear).hires += 1;
+        if (retirementYear) ensureYear(retirementYear).retirements += 1;
+      });
+
+      return [...rowsByYear.values()].sort((a, b) => a.year - b.year);
+    }
+
+    function makeYearlyLifecycleBar(label, count, max, variant) {
+      const bar = document.createElement("div");
+      bar.className = "yearly-lifecycle-bar";
+      const series = document.createElement("span");
+      series.className = "yearly-lifecycle-series";
+      series.textContent = label;
+      const track = document.createElement("div");
+      track.className = "yearly-lifecycle-track";
+      const fill = document.createElement("div");
+      fill.className = `yearly-lifecycle-fill ${variant}`;
+      fill.classList.toggle("has-value", count > 0);
+      fill.style.width = `${max ? Math.round((count / max) * 100) : 0}%`;
+      track.append(fill);
+      bar.append(series, track);
+      return bar;
+    }
+
+    function renderYearlyLifecycleBars() {
+      const rows = yearlyLifecycleRows();
+      elements.yearlyLifecycleBars.replaceChildren();
+      if (!rows.length) {
+        elements.yearlyLifecycleBars.append(makeEmptyBlock("연도별 입퇴사 데이터가 없습니다.", "입사일 또는 퇴직일을 등록하면 표시됩니다."));
+        return;
+      }
+
+      const max = Math.max(...rows.flatMap((row) => [row.hires, row.retirements]), 1);
+      rows.forEach((row) => {
+        const item = document.createElement("div");
+        item.className = "yearly-lifecycle-row";
+
+        const year = document.createElement("span");
+        year.className = "yearly-lifecycle-year";
+        year.textContent = `${row.year}년`;
+
+        const bars = document.createElement("div");
+        bars.className = "yearly-lifecycle-bars";
+        bars.append(
+          makeYearlyLifecycleBar("입사", row.hires, max, "hire"),
+          makeYearlyLifecycleBar("퇴사", row.retirements, max, "retirement")
+        );
+
+        const count = document.createElement("div");
+        count.className = "yearly-lifecycle-count";
+        const hires = document.createElement("strong");
+        hires.textContent = `입사 ${row.hires}명`;
+        const retirements = document.createElement("span");
+        retirements.textContent = `퇴사 ${row.retirements}명`;
+        count.append(hires, retirements);
+
+        item.append(year, bars, count);
+        elements.yearlyLifecycleBars.append(item);
+      });
     }
 
     function renderHireDetailTable() {
