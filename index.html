@@ -3602,6 +3602,16 @@
 
           <div class="grid kpi-grid" id="monthlyReportSummary" aria-label="월간업무보고 요약"></div>
 
+          <section class="panel monthly-report-gap-panel" aria-labelledby="monthly-report-gap-title">
+            <div class="section-head">
+              <div>
+                <h2 id="monthly-report-gap-title">차이 원인</h2>
+                <p id="monthlyReportGapSummary">조직도와 월간업무보고 집계 차이를 확인합니다.</p>
+              </div>
+            </div>
+            <ul class="insight-list" id="monthlyReportGapList"></ul>
+          </section>
+
           <section class="panel" aria-labelledby="monthly-report-table-title">
             <div class="section-head">
               <div>
@@ -5212,6 +5222,8 @@
       monthlyReportPeriodLabel: document.querySelector("#monthlyReportPeriodLabel"),
       monthlyReportHeadcountHeader: document.querySelector("#monthlyReportHeadcountHeader"),
       monthlyReportTable: document.querySelector("#monthlyReportTable"),
+      monthlyReportGapSummary: document.querySelector("#monthlyReportGapSummary"),
+      monthlyReportGapList: document.querySelector("#monthlyReportGapList"),
       monthlyReportMatchSummary: document.querySelector("#monthlyReportMatchSummary"),
       monthlyReportMatchTable: document.querySelector("#monthlyReportMatchTable"),
       monthlyReportReconcileSummary: document.querySelector("#monthlyReportReconcileSummary"),
@@ -8832,6 +8844,17 @@
         });
       }
 
+      renderMonthlyReportGapSummary({
+        orgCount,
+        reportCount,
+        diff,
+        basisExcludedEmployees,
+        unmatchedEmployees,
+        duplicateRows,
+        fixedDiff,
+        rows
+      });
+
       renderTableRows(elements.monthlyReportReconcileTable, rows, 6, (row) => {
         const tr = document.createElement("tr");
         tr.append(
@@ -8844,6 +8867,31 @@
         );
         return tr;
       }, "차이 항목이 없습니다.", "조직도 현재 인원과 월간업무보고 합계가 일치합니다.");
+    }
+
+    function renderMonthlyReportGapSummary({ orgCount, reportCount, diff, basisExcludedEmployees, unmatchedEmployees, duplicateRows, fixedDiff, rows }) {
+      if (!elements.monthlyReportGapSummary || !elements.monthlyReportGapList) return;
+      const signedDiff = diff > 0 ? `+${diff}` : String(diff);
+      elements.monthlyReportGapSummary.textContent = `조직도 ${orgCount}명 / 월간업무보고 ${reportCount}명 / 차이 ${signedDiff}명`;
+      const items = rows.map((row) => {
+        if (row.employee) {
+          return {
+            title: `${row.type}: ${row.employee.name || "(이름 없음)"}`,
+            body: `${orgPathLabel(row.employee)} · 입사 ${formatDate(row.employee.joinDate)} · 퇴직 ${formatDate(row.employee.retirementDate)} · ${row.note}`
+          };
+        }
+        return {
+          title: row.type,
+          body: row.note
+        };
+      });
+      if (diff !== 0 && !items.length) {
+        items.push({
+          title: "차이 원인 추가 확인 필요",
+          body: `기준일 제외 ${basisExcludedEmployees.length}명, 미포함 ${unmatchedEmployees.length}명, 중복포함 ${duplicateRows.length}명, 고정값 차이 ${fixedDiff}명으로는 차이가 완전히 설명되지 않습니다.`
+        });
+      }
+      renderInsightItems(elements.monthlyReportGapList, items, "차이 없음", "조직도 현재 인원과 월간업무보고 합계가 일치합니다.");
     }
 
     function monthlyReportRowTitle(row) {
