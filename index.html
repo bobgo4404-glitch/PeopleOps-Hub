@@ -8706,7 +8706,7 @@
           const counts = monthlyStatsCounts(subtotalStats.get(row.group) || emptyMonthlyStats());
           tr.append(
             makeMonthlyCell(""),
-            makeMonthlyCell(row.label, "monthly-report-label"),
+            makeMonthlyCell(`${row.group} ${row.label}`, "monthly-report-label"),
             makeMonthlyCell(counts.current),
             makeMonthlyCell(counts.hires),
             makeMonthlyCell(counts.retirements),
@@ -8775,15 +8775,27 @@
       const nonFixedRows = monthlyReportRows.filter((row) => row.type === "detail" && !Number.isFinite(Number(row.fixedCurrent)));
       const fixedRows = monthlyReportRows.filter((row) => row.type === "detail" && Number.isFinite(Number(row.fixedCurrent)));
       const reportEmployeeIds = new Set();
+      const reportAssignments = new Map();
       nonFixedRows.forEach((row) => {
         const stats = detailStats.get(row);
-        stats?.currentIds.forEach((id) => reportEmployeeIds.add(id));
+        stats?.currentIds.forEach((id) => {
+          reportEmployeeIds.add(id);
+          if (!reportAssignments.has(id)) reportAssignments.set(id, []);
+          reportAssignments.get(id).push(monthlyReportRowTitle(row));
+        });
       });
       const basisExcludedEmployees = orgEmployees.filter((employee) => !isCurrentForMonthlyReport(employee, range));
       const reportBasisEmployees = orgEmployees.filter((employee) => isCurrentForMonthlyReport(employee, range));
       const fixedCoveredEmployees = reportBasisEmployees.filter((employee) => fixedRows.some((row) => employeeMatchesMonthlyReportRow(employee, row)));
       fixedCoveredEmployees.forEach((employee) => reportEmployeeIds.add(employee.id));
       const unmatchedEmployees = reportBasisEmployees.filter((employee) => !reportEmployeeIds.has(employee.id));
+      const duplicateRows = [...reportAssignments.entries()]
+        .filter(([, rows]) => rows.length > 1)
+        .map(([id, rows]) => ({
+          employee: state.employees.find((employee) => employee.id === id),
+          rows
+        }))
+        .filter((item) => item.employee);
       const fixedConfigured = fixedRows.reduce((sum, row) => sum + Number(row.fixedCurrent || 0), 0);
       const fixedActual = new Set(fixedCoveredEmployees.map((employee) => employee.id)).size;
       const fixedDiff = fixedActual - fixedConfigured;
@@ -8791,7 +8803,7 @@
       const signedDiff = diff > 0 ? `+${diff}` : String(diff);
       const signedFixedDiff = fixedDiff > 0 ? `+${fixedDiff}` : String(fixedDiff);
       const basisLabel = range.isCurrentMonth ? "현재월 기준 제외" : "월말 기준 제외";
-      elements.monthlyReportReconcileSummary.textContent = `조직도 ${orgCount}명 - 월간업무보고 ${reportCount}명 = ${signedDiff}명 · ${basisLabel} ${basisExcludedEmployees.length}명 · 매칭 누락 ${unmatchedEmployees.length}명 · 고정값 차이 ${signedFixedDiff}명`;
+      elements.monthlyReportReconcileSummary.textContent = `조직도 ${orgCount}명 - 월간업무보고 ${reportCount}명 = ${signedDiff}명 · ${basisLabel} ${basisExcludedEmployees.length}명 · 월간보고 미포함 ${unmatchedEmployees.length}명 · 월간보고 중복포함 ${duplicateRows.length}명 · 고정값 차이 ${signedFixedDiff}명`;
 
       const rows = [
         ...basisExcludedEmployees.map((employee) => ({
@@ -8802,9 +8814,14 @@
             : `${monthlyReportMonthLabel(range.value)} 월말 기준으로는 제외되지만 조직도 현재 인원에는 포함`
         })),
         ...unmatchedEmployees.map((employee) => ({
-          type: "매칭 누락",
+          type: "월간보고 미포함",
           employee,
           note: "월간업무보고 매칭 기준에 해당 조직명이 없어 합계에서 제외"
+        })),
+        ...duplicateRows.map(({ employee, rows }) => ({
+          type: "월간보고 중복포함",
+          employee,
+          note: `중복 행: ${rows.join(", ")}`
         }))
       ];
       if (fixedDiff !== 0) {
@@ -8827,6 +8844,10 @@
         );
         return tr;
       }, "차이 항목이 없습니다.", "조직도 현재 인원과 월간업무보고 합계가 일치합니다.");
+    }
+
+    function monthlyReportRowTitle(row) {
+      return [row.group, row.label].map((value) => text(value, "")).filter(Boolean).join(" / ") || row.label || "-";
     }
 
     function monthlyReportMatchInfo(row) {
