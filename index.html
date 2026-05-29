@@ -4888,7 +4888,7 @@
     };
 
     const monthlyReportRows = [
-      { type: "detail", group: "", label: "대표이사", criteria: ["대표이사"] },
+      { type: "detail", group: "", label: "대표이사", criteria: ["대표이사"], fixedCurrent: 2, fixedNote: "홍성훈+1인" },
       { type: "detail", group: "생산본부", label: "본부장", criteria: ["김종규 본부장"] },
       { type: "detail", group: "생산본부", label: "생산관리팀", criteria: ["생산관리팀"] },
       { type: "detail", group: "생산본부", label: "제조팀", criteria: ["원료제조파트"] },
@@ -4913,7 +4913,7 @@
       { type: "detail", group: "경영지원본부", label: "본부장", criteria: ["강준석 본부장"] },
       { type: "detail", group: "경영지원본부", label: "경영지원팀", criteria: ["경영지원팀", "재무기획팀"] },
       { type: "detail", group: "경영지원본부", label: "IT팀", criteria: ["IT팀"] },
-      { type: "detail", group: "경영지원본부", label: "기타비상근", criteria: ["김광섭고문", "중증장애인 4명"] },
+      { type: "detail", group: "경영지원본부", label: "기타비상근", criteria: ["기타비상근"], fixedCurrent: 5, fixedNote: "기타비상근 5명 고정" },
       { type: "subtotal", group: "경영지원본부", label: "소계" },
       { type: "total", group: "", label: "전체합계" }
     ];
@@ -8546,12 +8546,19 @@
         hireIds: new Set(),
         retirementIds: new Set(),
         otherIds: new Set(),
-        otherLabels: []
+        otherLabels: [],
+        fixedCurrent: null,
+        fixedNote: ""
       };
     }
 
     function monthlyReportStatsForRow(row, range) {
       const stats = emptyMonthlyStats();
+      if (Number.isFinite(Number(row.fixedCurrent))) {
+        stats.fixedCurrent = Number(row.fixedCurrent);
+        stats.fixedNote = text(row.fixedNote, "고정값");
+        return stats;
+      }
       state.employees.forEach((employee) => {
         if (!employeeMatchesMonthlyCriteria(employee, row.criteria)) return;
         if (isCurrentAtMonthEnd(employee, range.end)) stats.currentIds.add(employee.id);
@@ -8571,7 +8578,11 @@
     function mergeMonthlyStats(items) {
       const merged = emptyMonthlyStats();
       items.filter(Boolean).forEach((stats) => {
-        stats.currentIds.forEach((id) => merged.currentIds.add(id));
+        if (Number.isFinite(stats.fixedCurrent)) {
+          merged.fixedCurrent = (Number.isFinite(merged.fixedCurrent) ? merged.fixedCurrent : 0) + stats.fixedCurrent;
+        } else {
+          stats.currentIds.forEach((id) => merged.currentIds.add(id));
+        }
         stats.hireIds.forEach((id) => merged.hireIds.add(id));
         stats.retirementIds.forEach((id) => merged.retirementIds.add(id));
         stats.otherIds.forEach((id) => merged.otherIds.add(id));
@@ -8581,8 +8592,9 @@
     }
 
     function monthlyStatsCounts(stats) {
+      const fixedCurrent = Number.isFinite(stats.fixedCurrent) ? stats.fixedCurrent : 0;
       return {
-        current: stats.currentIds.size,
+        current: stats.currentIds.size + fixedCurrent,
         hires: stats.hireIds.size,
         retirements: stats.retirementIds.size,
         other: stats.otherIds.size
@@ -8691,6 +8703,7 @@
     }
 
     function monthlyReportNote(stats, matchInfo) {
+      if (stats.fixedNote) return stats.fixedNote;
       if (matchInfo?.status === "missing") return "매칭 필요";
       if (matchInfo?.status === "partial") return "일부 매칭";
       if (stats.otherIds.size) return [...new Set(stats.otherLabels)].slice(0, 2).join(", ");
@@ -8703,13 +8716,14 @@
       const employee = matchRows.filter((row) => row.status === "employee").length;
       const partial = matchRows.filter((row) => row.status === "partial").length;
       const missing = matchRows.filter((row) => row.status === "missing").length;
-      elements.monthlyReportMatchSummary.textContent = `총 ${total}개 기준 중 조직도 매칭 ${matched}개, 사원정보 보조 매칭 ${employee}개, 일부 매칭 ${partial}개, 미매칭 ${missing}개`;
+      const fixed = matchRows.filter((row) => row.status === "fixed").length;
+      elements.monthlyReportMatchSummary.textContent = `총 ${total}개 기준 중 고정값 ${fixed}개, 조직도 매칭 ${matched}개, 사원정보 보조 매칭 ${employee}개, 일부 매칭 ${partial}개, 미매칭 ${missing}개`;
       renderTableRows(elements.monthlyReportMatchTable, matchRows, 5, (item) => {
         const tr = document.createElement("tr");
         tr.append(
           makeCell(item.row.group || "-"),
           makeCell(item.row.label),
-          makeCell(item.row.criteria.join(", ")),
+          makeCell(item.row.fixedNote || item.row.criteria.join(", ")),
           makeStatusCell(item.label, item.variant),
           makeCell(item.detail)
         );
@@ -8718,7 +8732,19 @@
     }
 
     function monthlyReportMatchInfo(row) {
+      if (Number.isFinite(Number(row.fixedCurrent))) {
+        return {
+          row,
+          status: "fixed",
+          label: "고정값",
+          variant: "success",
+          detail: `${Number(row.fixedCurrent)}명 고정 · ${text(row.fixedNote, "고정값")}`
+        };
+      }
       const criteria = row.criteria || [];
+      if (!criteria.length) {
+        return { row, status: "missing", label: "미매칭", variant: "danger", detail: "매칭 기준 없음" };
+      }
       const checks = criteria.map((criterion) => monthlyCriterionMatchInfo(criterion));
       const foundCount = checks.filter((item) => item.orgNames.length || item.employeeCount).length;
       const orgCount = checks.filter((item) => item.orgNames.length).length;
@@ -8766,7 +8792,7 @@
     }
 
     function normalizeMonthlyLabel(value) {
-      return text(value, "").replace(/\s+/g, "").toLowerCase();
+      return text(value, "").replace(/[\s_]+/g, "").toLowerCase();
     }
 
     function monthlyOrgNamesForLabel(label) {
