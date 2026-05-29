@@ -8487,10 +8487,10 @@
       const subtotalStats = new Map();
       [...new Set(monthlyReportRows.filter((row) => row.type === "subtotal").map((row) => row.group))].forEach((group) => {
         const rows = monthlyReportRows.filter((row) => row.type === "detail" && row.group === group);
-        subtotalStats.set(group, mergeMonthlyStats(rows.map((row) => detailStats.get(row))));
+        subtotalStats.set(group, sumMonthlyStats(rows.map((row) => detailStats.get(row))));
       });
 
-      const totalStats = mergeMonthlyStats([...detailStats.values()]);
+      const totalStats = sumMonthlyStats([...detailStats.values()]);
       renderMonthlyReportSummary(totalStats, range);
       renderMonthlyReportTable(detailStats, subtotalStats, totalStats, range, matchRows);
       renderMonthlyReportMatchTable(matchRows);
@@ -8584,7 +8584,8 @@
         otherIds: new Set(),
         otherLabels: [],
         fixedCurrent: null,
-        fixedNote: ""
+        fixedNote: "",
+        countOverrides: null
       };
     }
 
@@ -8611,23 +8612,21 @@
       return stats;
     }
 
-    function mergeMonthlyStats(items) {
-      const merged = emptyMonthlyStats();
-      items.filter(Boolean).forEach((stats) => {
-        if (Number.isFinite(stats.fixedCurrent)) {
-          merged.fixedCurrent = (Number.isFinite(merged.fixedCurrent) ? merged.fixedCurrent : 0) + stats.fixedCurrent;
-        } else {
-          stats.currentIds.forEach((id) => merged.currentIds.add(id));
-        }
-        stats.hireIds.forEach((id) => merged.hireIds.add(id));
-        stats.retirementIds.forEach((id) => merged.retirementIds.add(id));
-        stats.otherIds.forEach((id) => merged.otherIds.add(id));
-        merged.otherLabels.push(...stats.otherLabels);
-      });
-      return merged;
+    function sumMonthlyStats(items) {
+      const summed = emptyMonthlyStats();
+      summed.countOverrides = items.filter(Boolean).reduce((acc, stats) => {
+        const counts = monthlyStatsCounts(stats);
+        acc.current += counts.current;
+        acc.hires += counts.hires;
+        acc.retirements += counts.retirements;
+        acc.other += counts.other;
+        return acc;
+      }, { current: 0, hires: 0, retirements: 0, other: 0 });
+      return summed;
     }
 
     function monthlyStatsCounts(stats) {
+      if (stats.countOverrides) return { ...stats.countOverrides };
       const fixedCurrent = Number.isFinite(stats.fixedCurrent) ? stats.fixedCurrent : 0;
       return {
         current: stats.currentIds.size + fixedCurrent,
