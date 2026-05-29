@@ -6228,10 +6228,32 @@
       return employee.department === node.name || employee.team === node.name || employee.part === node.name;
     }
 
+    function employeeDirectOrgName(employee) {
+      return [employee.part, employee.team, employee.department]
+        .map((value) => text(value, ""))
+        .find(Boolean) || "";
+    }
+
+    function orgNodeNameExists(name) {
+      return Boolean(name) && orgNodes().some((node) => node.name === name);
+    }
+
+    function employeeDirectlyBelongsToOrgNode(employee, node) {
+      const directOrgName = employeeDirectOrgName(employee);
+      if (!directOrgName) return false;
+      if (orgNodeNameExists(directOrgName)) return directOrgName === node.name;
+      return employeeBelongsToOrgNode(employee, node);
+    }
+
     function employeesForOrgNode(nodeId, includeDescendants = true) {
       const ids = includeDescendants ? descendantOrgIds(nodeId) : [nodeId];
       const nodes = orgNodes().filter((node) => ids.includes(node.id));
-      return filteredEmployeesForOrg().filter((employee) => nodes.some((node) => employeeBelongsToOrgNode(employee, node)));
+      return filteredEmployeesForOrg().filter((employee) => {
+        if (!includeDescendants) return nodes.some((node) => employeeDirectlyBelongsToOrgNode(employee, node));
+        const directOrgName = employeeDirectOrgName(employee);
+        if (orgNodeNameExists(directOrgName)) return nodes.some((node) => node.name === directOrgName);
+        return nodes.some((node) => employeeBelongsToOrgNode(employee, node));
+      });
     }
 
     function orgIconName(type) {
@@ -6365,9 +6387,9 @@
       populateOrgParentOptions(node.parentId || ROOT_ORG_ID, node.id);
 
       const directChildren = childOrgNodes(node.id).length;
-      const memberCount = employeesForOrgNode(node.id).length;
+      const memberCount = employeesForOrgNode(node.id, false).length;
       const path = orgNodePath(node.id).map((pathNode) => pathNode.name).join(" > ");
-      elements.orgSelectedSummary.textContent = `${path} · 하위 조직 ${directChildren}개 · 배치 인원 ${memberCount}명`;
+      elements.orgSelectedSummary.textContent = `${path} · 하위 조직 ${directChildren}개 · 직접 배치 ${memberCount}명`;
 
       const siblings = node.id === ROOT_ORG_ID ? [] : childOrgNodes(node.parentId);
       const siblingIndex = siblings.findIndex((item) => item.id === node.id);
@@ -6397,7 +6419,7 @@
       title.textContent = node.name;
       const count = document.createElement("span");
       count.className = "badge";
-      count.textContent = `${employeesForOrgNode(node.id).length}명`;
+      count.textContent = `${directMembers.length}명`;
       header.append(title, count);
 
       const teamGrid = document.createElement("div");
