@@ -8596,7 +8596,7 @@
         return stats;
       }
       state.employees.forEach((employee) => {
-        if (!employeeMatchesMonthlyCriteria(employee, row.criteria)) return;
+        if (!employeeMatchesMonthlyReportRow(employee, row)) return;
         if (isCurrentForMonthlyReport(employee, range)) stats.currentIds.add(employee.id);
         if (isDateInMonthlyRange(employee.joinDate, range)) stats.hireIds.add(employee.id);
         if (isDateInMonthlyRange(employee.retirementDate, range)) stats.retirementIds.add(employee.id);
@@ -8782,7 +8782,7 @@
       });
       const basisExcludedEmployees = orgEmployees.filter((employee) => !isCurrentForMonthlyReport(employee, range));
       const reportBasisEmployees = orgEmployees.filter((employee) => isCurrentForMonthlyReport(employee, range));
-      const fixedCoveredEmployees = reportBasisEmployees.filter((employee) => fixedRows.some((row) => employeeMatchesMonthlyCriteria(employee, row.criteria)));
+      const fixedCoveredEmployees = reportBasisEmployees.filter((employee) => fixedRows.some((row) => employeeMatchesMonthlyReportRow(employee, row)));
       fixedCoveredEmployees.forEach((employee) => reportEmployeeIds.add(employee.id));
       const unmatchedEmployees = reportBasisEmployees.filter((employee) => !reportEmployeeIds.has(employee.id));
       const fixedConfigured = fixedRows.reduce((sum, row) => sum + Number(row.fixedCurrent || 0), 0);
@@ -8844,7 +8844,7 @@
       if (!criteria.length) {
         return { row, status: "missing", label: "미매칭", variant: "danger", detail: "매칭 기준 없음" };
       }
-      const checks = criteria.map((criterion) => monthlyCriterionMatchInfo(criterion));
+      const checks = criteria.map((criterion) => monthlyCriterionMatchInfo(criterion, row));
       const foundCount = checks.filter((item) => item.orgNames.length || item.employeeCount).length;
       const orgCount = checks.filter((item) => item.orgNames.length).length;
       let status = "missing";
@@ -8873,10 +8873,12 @@
       return { row, status, label, variant, detail };
     }
 
-    function monthlyCriterionMatchInfo(criterion) {
+    function monthlyCriterionMatchInfo(criterion, row = null) {
       const parsed = parseMonthlyCriterion(criterion);
-      const orgNames = monthlyOrgNamesForLabel(parsed.include);
-      const employeeCount = state.employees.filter((employee) => employeeMatchesMonthlyCriterion(employee, parsed)).length;
+      const orgNames = row ? monthlyReportOrgNamesForCriterion(parsed, row) : monthlyOrgNamesForLabel(parsed.include);
+      const employeeCount = state.employees.filter((employee) => row
+        ? employeeMatchesMonthlyReportCriterion(employee, parsed, row)
+        : employeeMatchesMonthlyCriterion(employee, parsed)).length;
       return { criterion, orgNames, employeeCount };
     }
 
@@ -8905,9 +8907,67 @@
       if (!normalized) return [];
       const names = new Set();
       directMonthlyOrgNodesForLabel(label).forEach((node) => {
-        if (node?.name) names.add(node.name);
+        descendantOrgIds(node.id).forEach((id) => {
+          const descendant = findOrgNode(id);
+          if (descendant?.name) names.add(descendant.name);
+        });
       });
       return [...names];
+    }
+
+    function monthlyReportOrgNamesForCriterion(parsed, row) {
+      const roots = directMonthlyOrgNodesForLabel(parsed.include);
+      if (!roots.length) return [];
+      const excludedIds = monthlyReportExcludedOrgIds(roots, row, parsed);
+      const names = new Set();
+      roots.forEach((root) => {
+        descendantOrgIds(root.id).forEach((id) => {
+          if (excludedIds.has(id)) return;
+          const node = findOrgNode(id);
+          if (node?.name) names.add(node.name);
+        });
+      });
+      return [...names];
+    }
+
+    function monthlyReportExcludedOrgIds(currentRoots, currentRow, parsed) {
+      const currentRootDescendants = new Map(currentRoots.map((root) => [root.id, new Set(descendantOrgIds(root.id))]));
+      const excluded = new Set();
+      const addDescendants = (node) => {
+        descendantOrgIds(node.id).forEach((id) => excluded.add(id));
+      };
+      (parsed.exclusions || []).forEach((label) => {
+        directMonthlyOrgNodesForLabel(label).forEach(addDescendants);
+      });
+      monthlyReportRows
+        .filter((row) => row !== currentRow && row.type === "detail" && !Number.isFinite(Number(row.fixedCurrent)))
+        .forEach((row) => {
+          (row.criteria || []).forEach((criterion) => {
+            const other = parseMonthlyCriterion(criterion);
+            directMonthlyOrgNodesForLabel(other.include).forEach((otherRoot) => {
+              const isDescendantOfCurrentRoot = currentRoots.some((root) => root.id !== otherRoot.id && currentRootDescendants.get(root.id)?.has(otherRoot.id));
+              if (isDescendantOfCurrentRoot) addDescendants(otherRoot);
+            });
+          });
+        });
+      return excluded;
+    }
+
+    function employeeMatchesMonthlyReportRow(employee, row) {
+      return (row.criteria || []).some((criterion) => employeeMatchesMonthlyReportCriterion(employee, parseMonthlyCriterion(criterion), row));
+    }
+
+    function employeeMatchesMonthlyReportCriterion(employee, parsed, row) {
+      const allowedNames = monthlyReportOrgNamesForCriterion(parsed, row);
+      if (allowedNames.length) {
+        const allowed = allowedNames.map(normalizeMonthlyLabel);
+        const directOrgName = normalizeMonthlyLabel(employeeDirectOrgName(employee));
+        if (directOrgName) return allowed.includes(directOrgName);
+        const orgValues = [employee.department, employee.team, employee.part].map(normalizeMonthlyLabel).filter(Boolean);
+        return orgValues.some((value) => allowed.includes(value));
+      }
+      if (parsed.exclusions.some((label) => employeeMatchesMonthlySimple(employee, label))) return false;
+      return employeeMatchesMonthlySimple(employee, parsed.include);
     }
 
     function employeeMatchesMonthlyCriteria(employee, criteria = []) {
@@ -8925,7 +8985,8 @@
       if (orgNames.length) {
         const allowed = orgNames.map(normalizeMonthlyLabel);
         const directOrgName = normalizeMonthlyLabel(employeeDirectOrgName(employee));
-        return Boolean(directOrgName && allowed.includes(directOrgName));
+        if (directOrgName) return allowed.includes(directOrgName);
+        return orgValues.some((value) => allowed.includes(value));
       }
       const normalized = normalizeMonthlyLabel(label);
       const position = text(employee.position, "");
