@@ -8483,7 +8483,6 @@
       monthlyReportRows
         .filter((row) => row.type === "detail")
         .forEach((row) => detailStats.set(row, monthlyReportStatsForRow(row, range)));
-      allocateMonthlyReportEmployeeStats(detailStats, range);
 
       const subtotalStats = new Map();
       [...new Set(monthlyReportRows.filter((row) => row.type === "subtotal").map((row) => row.group))].forEach((group) => {
@@ -8626,53 +8625,6 @@
         merged.otherLabels.push(...stats.otherLabels);
       });
       return merged;
-    }
-
-    function allocateMonthlyReportEmployeeStats(detailStats, range) {
-      const fixedRows = monthlyReportRows.filter((row) => row.type === "detail" && Number.isFinite(Number(row.fixedCurrent)));
-      const reportRows = monthlyReportRows.filter((row) => row.type === "detail" && !Number.isFinite(Number(row.fixedCurrent)));
-      reportRows.forEach((row) => {
-        const stats = detailStats.get(row);
-        if (!stats) return;
-        stats.currentIds.clear();
-        stats.hireIds.clear();
-        stats.retirementIds.clear();
-      });
-      state.employees.forEach((employee) => {
-        if (fixedRows.some((row) => employeeMatchesMonthlyCriteria(employee, row.criteria))) return;
-        const row = bestMonthlyReportRowForEmployee(employee, reportRows);
-        if (!row) return;
-        const stats = detailStats.get(row);
-        if (!stats) return;
-        if (isCurrentForMonthlyReport(employee, range)) stats.currentIds.add(employee.id);
-        if (isDateInMonthlyRange(employee.joinDate, range)) stats.hireIds.add(employee.id);
-        if (isDateInMonthlyRange(employee.retirementDate, range)) stats.retirementIds.add(employee.id);
-      });
-    }
-
-    function bestMonthlyReportRowForEmployee(employee, rows) {
-      return rows
-        .map((row, index) => ({ row, score: monthlyReportEmployeeRowScore(employee, row), index }))
-        .filter((item) => item.score > 0)
-        .sort((a, b) => b.score - a.score || a.index - b.index)[0]?.row || null;
-    }
-
-    function monthlyReportEmployeeRowScore(employee, row) {
-      return Math.max(0, ...(row.criteria || []).map((criterion) => monthlyReportEmployeeCriterionScore(employee, parseMonthlyCriterion(criterion))));
-    }
-
-    function monthlyReportEmployeeCriterionScore(employee, parsed) {
-      if (parsed.exclusions.some((label) => employeeMatchesMonthlySimple(employee, label))) return 0;
-      const include = normalizeMonthlyLabel(parsed.include);
-      const directOrgName = normalizeMonthlyLabel(employeeDirectOrgName(employee));
-      const orgValues = [employee.department, employee.team, employee.part].map(normalizeMonthlyLabel).filter(Boolean);
-      const personValues = monthlyEmployeePersonLabels(employee).map(normalizeMonthlyLabel);
-      if (personValues.includes(include)) return 120000;
-      if (directOrgName && directOrgName === include) return 100000;
-      if (orgValues.includes(include)) return 90000 + orgValues.indexOf(include);
-      const descendantNames = monthlyOrgNamesForLabel(parsed.include).map(normalizeMonthlyLabel);
-      if (directOrgName && descendantNames.includes(directOrgName)) return 10000 + orgValues.length;
-      return employeeMatchesMonthlyCriterion(employee, parsed) ? 1000 : 0;
     }
 
     function monthlyStatsCounts(stats) {
@@ -8953,10 +8905,7 @@
       if (!normalized) return [];
       const names = new Set();
       directMonthlyOrgNodesForLabel(label).forEach((node) => {
-        descendantOrgIds(node.id).forEach((id) => {
-          const descendant = findOrgNode(id);
-          if (descendant?.name) names.add(descendant.name);
-        });
+        if (node?.name) names.add(node.name);
       });
       return [...names];
     }
@@ -8975,7 +8924,8 @@
       const orgValues = [employee.department, employee.team, employee.part].map(normalizeMonthlyLabel).filter(Boolean);
       if (orgNames.length) {
         const allowed = orgNames.map(normalizeMonthlyLabel);
-        if (orgValues.some((value) => allowed.includes(value))) return true;
+        const directOrgName = normalizeMonthlyLabel(employeeDirectOrgName(employee));
+        return Boolean(directOrgName && allowed.includes(directOrgName));
       }
       const normalized = normalizeMonthlyLabel(label);
       const position = text(employee.position, "");
