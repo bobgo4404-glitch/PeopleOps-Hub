@@ -3250,6 +3250,16 @@
             </section>
           </div>
 
+          <section class="panel" aria-labelledby="active-month-title">
+            <div class="section-head">
+              <div>
+                <h2 id="active-month-title">월별 재직 인원</h2>
+                <p>당해년도 1월부터 12월까지 월말 기준 재직 인원수를 확인합니다.</p>
+              </div>
+            </div>
+            <div class="chart-grid" id="activeMonthBars"></div>
+          </section>
+
           <section class="panel" aria-labelledby="yearly-lifecycle-title">
             <div class="section-head">
               <div>
@@ -5020,6 +5030,7 @@
       gradeBars: document.querySelector("#gradeBars"),
       hireDepartmentBars: document.querySelector("#hireDepartmentBars"),
       hireMonthBars: document.querySelector("#hireMonthBars"),
+      activeMonthBars: document.querySelector("#activeMonthBars"),
       yearlyLifecycleBars: document.querySelector("#yearlyLifecycleBars"),
       riskList: document.querySelector("#riskList"),
       positionGenderTable: document.querySelector("#positionGenderTable"),
@@ -8642,6 +8653,7 @@
       renderGenericStatBars(elements.gradeBars, "gradeLevel", "직급/레벨 데이터가 없습니다.", state.settings.gradeLevels, gradeLevelLabel);
       renderHireDepartmentBars();
       renderHireMonthBars();
+      renderActiveMonthBars();
       renderRetirementDepartmentBars();
       renderYearlyLifecycleBars();
       renderPositionGenderTable();
@@ -9130,6 +9142,23 @@
         groups[date.getMonth()][1] += 1;
       });
       renderBars(elements.hireMonthBars, groups, groups.reduce((sum, [, count]) => sum + count, 0), "올해 입사자 데이터가 없습니다.");
+    }
+
+    function renderActiveMonthBars() {
+      const currentYear = new Date().getFullYear();
+      const rows = Array.from({ length: 12 }, (_, index) => {
+        const monthEnd = new Date(currentYear, index + 1, 0);
+        const count = state.employees.filter((employee) => {
+          const joinDate = parseLocalDate(employee.joinDate);
+          if (!joinDate || joinDate > monthEnd) return false;
+          const retirementDate = parseLocalDate(employee.retirementDate);
+          if (retirementDate) return retirementDate >= monthEnd;
+          return employee.status !== "퇴직";
+        }).length;
+        return [`${index + 1}월`, count];
+      });
+      const max = Math.max(...rows.map(([, count]) => count), 0);
+      renderBars(elements.activeMonthBars, rows, max, "당해년도 재직 인원 데이터가 없습니다.");
     }
 
     function renderRetirementDepartmentBars() {
