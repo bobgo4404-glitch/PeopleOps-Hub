@@ -5505,7 +5505,7 @@
                   <div class="field">
                     <label for="settingGradeLevels">직급/레벨</label>
                     <textarea id="settingGradeLevels" class="textarea-code" data-setting-list="gradeLevels"></textarea>
-                    <small>인턴 · L1 사원급 · L2 주임/대리급 · L3 과장급 · L4 차장급 · L5 부장급 · 임원</small>
+                    <small>인턴 · L1 사원급 · L2 주임급 · L2 대리급 · L3 과장급 · L4 차장급 · L5 부장급 · 임원</small>
                   </div>
                   <div class="field">
                     <label for="settingWorkTypes">근무형태</label>
@@ -5708,7 +5708,7 @@
               <div class="field">
                 <label for="gradeLevel">직급/레벨</label>
                     <select id="gradeLevel" name="gradeLevel"></select>
-                <small>인턴 · L1 사원급 · L2 주임/대리급 · L3 과장급 · L4 차장급 · L5 부장급 · 임원</small>
+                <small>인턴 · L1 사원급 · L2 주임급 · L2 대리급 · L3 과장급 · L4 차장급 · L5 부장급 · 임원</small>
               </div>
               <div class="field">
                 <label for="employmentType">고용형태</label>
@@ -5935,7 +5935,7 @@
       employmentTypes: ["정규직", "계약직", "파견/외주", "인턴"],
       locations: ["서울 본사", "판교 오피스", "부산 지사", "원격"],
       jobGroups: ["인사직군", "개발직군", "디자인직군", "재무직군", "사업직군", "운영직군", "품질직군"],
-      gradeLevels: ["임원", "L5", "L4", "L3", "L2", "L1", "인턴"],
+      gradeLevels: ["임원", "L5", "L4", "L3", "L2-대리", "L2-주임", "L2", "L1", "인턴"],
       workTypes: ["전일제", "단시간", "시차출퇴근", "원격", "하이브리드"]
     };
 
@@ -6956,6 +6956,7 @@
       ["departments", "teams", "parts", "positions", "employmentTypes", "locations", "jobGroups", "gradeLevels", "workTypes"].forEach((key) => {
         merged[key] = Array.isArray(merged[key]) && merged[key].length ? merged[key] : defaultSettings[key];
       });
+      merged.gradeLevels = gradeLevelOptions(merged.gradeLevels);
       merged.teams = translateList(merged.teams, legacyTeamLabels);
       merged.jobGroups = translateList(merged.jobGroups, legacyJobGroupLabels);
       merged.organizationNodes = normalizeOrganizationNodes(merged.organizationNodes, text(merged.companyName, defaultSettings.companyName));
@@ -7330,12 +7331,44 @@
     function gradeLevelLabel(value) {
       const labels = {
         L1: "L1 (사원급)",
-        L2: "L2 (주임/대리급)",
+        "L2-주임": "L2 (주임급)",
+        "L2-대리": "L2 (대리급)",
+        "L2-미분류": "L2 (주임/대리 미분류)",
+        L2: "L2 (주임/대리 미분류)",
         L3: "L3 (과장급)",
         L4: "L4 (차장급)",
         L5: "L5 (부장급)"
       };
       return labels[value] || value;
+    }
+
+    function gradeLevelOptions(values = []) {
+      const preferred = ["임원", "L5", "L4", "L3", "L2-대리", "L2-주임", "L2", "L1", "인턴"];
+      const seen = new Set();
+      return [...preferred, ...(values || [])]
+        .map((value) => text(value, "").trim())
+        .filter((value) => {
+          if (!value || seen.has(value)) return false;
+          seen.add(value);
+          return true;
+        });
+    }
+
+    function gradeAnalyticsValue(employee) {
+      const grade = text(employee.gradeLevel, "");
+      const compactGrade = grade.replace(/\s+/g, "");
+      const gradeHasLead = compactGrade.includes("주임");
+      const gradeHasAssistant = compactGrade.includes("대리");
+      if (gradeHasLead && !gradeHasAssistant) return "L2-주임";
+      if (gradeHasAssistant && !gradeHasLead) return "L2-대리";
+      if (!compactGrade.includes("L2")) return grade || "미입력";
+
+      const compactPosition = text(employee.position, "").replace(/\s+/g, "");
+      const positionHasLead = compactPosition.includes("주임");
+      const positionHasAssistant = compactPosition.includes("대리");
+      if (positionHasAssistant && !positionHasLead) return "L2-대리";
+      if (positionHasLead && !positionHasAssistant) return "L2-주임";
+      return "L2-미분류";
     }
 
     function uniqueValues(key) {
@@ -7366,7 +7399,7 @@
       const parts = combinedValues("part", "parts");
       const positions = combinedValues("position", "positions");
       const jobGroups = combinedValues("jobGroup", "jobGroups");
-      const gradeLevels = combinedValues("gradeLevel", "gradeLevels");
+      const gradeLevels = gradeLevelOptions(combinedValues("gradeLevel", "gradeLevels"));
       const workTypes = combinedValues("workType", "workTypes");
       const locations = combinedValues("location", "locations");
 
@@ -11191,7 +11224,7 @@
       renderGenericStatBars(elements.genderBars, "gender", "성별 데이터가 없습니다.", ["여성", "남성", "기타/응답안함", "미입력"]);
       renderGenericStatBars(elements.locationBars, "location", "근무지 데이터가 없습니다.", state.settings.locations);
       renderGenericStatBars(elements.jobGroupBars, "jobGroup", "직군 데이터가 없습니다.", state.settings.jobGroups);
-      renderGenericStatBars(elements.gradeBars, "gradeLevel", "직급/레벨 데이터가 없습니다.", state.settings.gradeLevels, gradeLevelLabel);
+      renderGradeAnalyticsBars();
       renderHireDepartmentBars();
       renderHireMonthBars();
       renderActiveMonthBars();
@@ -11268,6 +11301,22 @@
       ];
       const rows = ordered.map((label) => [labelFormatter(label), counts[label] || 0]);
       renderBars(container, rows, employees.length, emptyMessage);
+    }
+
+    function renderGradeAnalyticsBars() {
+      const employees = activeEmployees();
+      const counts = employees.reduce((acc, employee) => {
+        const grade = gradeAnalyticsValue(employee);
+        acc[grade] = (acc[grade] || 0) + 1;
+        return acc;
+      }, {});
+      const preferredOrder = ["임원", "L5", "L4", "L3", "L2-대리", "L2-주임", "L2-미분류", "L1", "인턴", "미입력"];
+      const ordered = [
+        ...preferredOrder.filter((grade) => counts[grade]),
+        ...Object.keys(counts).filter((grade) => !preferredOrder.includes(grade)).sort((a, b) => a.localeCompare(b, "ko"))
+      ];
+      const rows = ordered.map((grade) => [gradeLevelLabel(grade), counts[grade] || 0]);
+      renderBars(elements.gradeBars, rows, employees.length, "직급/레벨 데이터가 없습니다.");
     }
 
     function renderGovernmentReadiness() {
@@ -12460,7 +12509,7 @@
         ["근무형태", ...(state.settings.workTypes || [])],
         ["근무지", ...(state.settings.locations || [])],
         ["직군", ...(state.settings.jobGroups || [])],
-        ["직급/레벨", ...(state.settings.gradeLevels || [])],
+        ["직급/레벨", ...gradeLevelOptions(state.settings.gradeLevels || [])],
         ["상태", "재직", "휴직", "퇴직"]
       ];
       window.XLSX.utils.book_append_sheet(workbook, window.XLSX.utils.aoa_to_sheet(optionRows), "선택값");
