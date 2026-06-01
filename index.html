@@ -668,6 +668,143 @@
       height: 18px;
     }
 
+    .analytics-command {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #ffffff;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .analytics-filter-bar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .filter-token {
+      min-height: 54px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fbfcfd;
+      padding: 10px 12px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .filter-token span {
+      color: var(--muted);
+      font-size: 0.73rem;
+      font-weight: 820;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .filter-token strong {
+      font-size: 0.95rem;
+      line-height: 1.25;
+    }
+
+    .analytics-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .analytics-tabs a {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      color: var(--primary-strong);
+      background: var(--surface);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 820;
+      white-space: nowrap;
+    }
+
+    .analytics-tabs a:first-child {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .analytics-grid-main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(340px, 0.9fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .analytics-stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .analytics-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .analytics-card-head h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .analytics-card-head span {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 760;
+    }
+
+    .readiness-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .readiness-grid.wide {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .readiness-card {
+      min-height: 104px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fbfcfd;
+      padding: 12px;
+      display: grid;
+      gap: 7px;
+    }
+
+    .readiness-card strong {
+      font-size: 0.9rem;
+    }
+
+    .readiness-card span {
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .readiness-card .signal-badge {
+      width: fit-content;
+    }
+
+    .analytics-section-title {
+      margin: 4px 0 -4px;
+      font-size: 1.05rem;
+    }
+
     .button {
       min-height: 40px;
       border-radius: 7px;
@@ -2503,7 +2640,8 @@
       .strategy-grid,
       .feature-grid,
       .role-dashboard-grid,
-      .workflow-grid {
+      .workflow-grid,
+      .readiness-grid.wide {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
@@ -2511,6 +2649,7 @@
       .org-workbench,
       .blueprint-hero,
       .dashboard-hero,
+      .analytics-grid-main,
       .dashboard-grid,
       .ia-tree {
         grid-template-columns: 1fr;
@@ -2558,6 +2697,9 @@
       .feature-grid,
       .role-dashboard-grid,
       .workflow-grid,
+      .readiness-grid,
+      .readiness-grid.wide,
+      .analytics-filter-bar,
       .form-grid {
         grid-template-columns: 1fr;
       }
@@ -2623,7 +2765,8 @@
       .stat-card,
       .dashboard-hero,
       .role-panel,
-      .workflow-card {
+      .workflow-card,
+      .analytics-command {
         padding: 14px;
       }
 
@@ -4379,128 +4522,46 @@
           <div class="notice">
             <i data-lucide="shield-alert"></i>
             <span>
-              가정: 한국 사업장 기준의 HR 운영 통계 설계입니다. 법정 제출 여부와 서식은 사업장 규모, 업종, 관할 기관, 최신 법령에 따라 달라질 수 있으므로 실제 제출 전 추가 확인이 필요합니다.
+              법정 제출 여부와 서식은 사업장 규모, 업종, 관할 기관, 최신 법령에 따라 달라질 수 있습니다. 아래 통계는 제출 전 검토용 운영 지표이며, 실제 신고·제출은 추가 확인이 필요합니다.
             </span>
           </div>
 
-          <section class="panel" aria-labelledby="analytics-core-title">
+          <section class="analytics-command" aria-labelledby="analytics-command-title">
             <div class="section-head">
               <div>
-                <h2 id="analytics-core-title">인력 구성·라이프사이클 통계 설계</h2>
-                <p>인사 원장과 조직도를 기준으로 경영 보고와 월간 보고에 필요한 핵심 통계를 산출합니다.</p>
+                <h2 id="analytics-command-title">통계 운영 기준</h2>
+                <p>통계 산출 기준과 분석 범위를 고정해 월간 보고, 경영 보고, 정부 대응 검토에 동일하게 사용합니다.</p>
               </div>
             </div>
-            <div class="table-wrap">
-              <table class="matrix-table">
-                <caption class="sr-only">인력 구성 및 라이프사이클 통계 설계표</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">통계</th>
-                    <th scope="col">차트 유형</th>
-                    <th scope="col">데이터 소스</th>
-                    <th scope="col">필터 조건</th>
-                    <th scope="col">다운로드 형식</th>
-                    <th scope="col">활용 목적</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr><td>고용형태 분포</td><td>도넛, 100% 누적 막대</td><td>사원관리: 고용형태, 재직상태</td><td>기준일, 조직, 사업장, 직군, 재직상태</td><td>CSV, XLSX, PNG</td><td>정규직·계약직·파견/외주·인턴 구성 점검</td></tr>
-                  <tr><td>정규직/계약직/파견직 현황</td><td>누적 막대, 교차표</td><td>사원관리: 고용형태, 계약 종료일</td><td>조직, 직급, 사업장, 계약 종료 기간</td><td>CSV, XLSX</td><td>비정규·외부 인력 비중과 계약 리스크 관리</td></tr>
-                  <tr><td>성별 분포</td><td>막대, 피벗 테이블</td><td>사원관리: 성별</td><td>조직, 직급, 직책, 직군, 사업장</td><td>CSV, XLSX, PNG</td><td>조직 다양성, 여성 인력 현황, 직급별 구성 검토</td></tr>
-                  <tr><td>연령대 분포</td><td>히스토그램, 막대</td><td>사원관리: 생년월일</td><td>기준일, 조직, 직급, 고용형태</td><td>CSV, XLSX, PNG</td><td>고령자 고용, 세대 구성, 승계 리스크 파악</td></tr>
-                  <tr><td>근속연수 분포</td><td>구간 막대, 박스 플롯</td><td>사원관리: 입사일, 퇴직일</td><td>기준일, 조직, 직군, 직급</td><td>CSV, XLSX</td><td>조직 안정성, 신규·장기근속 비중, 이탈 위험 탐색</td></tr>
-                  <tr><td>입사연도별 현황</td><td>연도별 막대</td><td>사원관리: 입사일</td><td>입사연도, 조직, 고용형태</td><td>CSV, XLSX</td><td>채용 규모 변화와 입사 cohort 분석</td></tr>
-                  <tr><td>월별 입사 현황</td><td>월별 막대</td><td>사원관리: 입사일</td><td>연도, 월, 조직, 직군</td><td>CSV, XLSX, PNG</td><td>채용 집중 시기와 온보딩 업무량 예측</td></tr>
-                  <tr><td>월별 퇴사 현황</td><td>월별 막대</td><td>사원관리: 퇴직일, 퇴직상태</td><td>연도, 월, 조직, 고용형태</td><td>CSV, XLSX, PNG</td><td>이탈 피크와 조직별 퇴사 리스크 확인</td></tr>
-                  <tr><td>연도별 입퇴사 추이</td><td>복합 막대, 라인</td><td>입사일, 퇴직일</td><td>연도 범위, 조직, 직군</td><td>CSV, XLSX, PNG</td><td>조직 성장률과 채용·이탈 균형 분석</td></tr>
-                  <tr><td>월별 재직인원</td><td>라인, 스텝 차트</td><td>입사일, 퇴직일, 상태</td><td>연도, 월, 조직, 사업장</td><td>CSV, XLSX</td><td>월말 기준 인원 보고와 인력 예측 기초값</td></tr>
-                  <tr><td>조직별 인원현황</td><td>정렬 막대, 피벗 테이블</td><td>조직도, 사원 소속</td><td>기준일, 상위조직, 재직상태</td><td>CSV, XLSX</td><td>조직별 현원, 조직 비대칭, 관리 범위 파악</td></tr>
-                  <tr><td>직급별 인원현황</td><td>막대, 피라미드</td><td>사원관리: 직급/레벨</td><td>조직, 직군, 사업장</td><td>CSV, XLSX, PNG</td><td>직급 구조, 승진 병목, 인력 레벨 믹스 분석</td></tr>
-                  <tr><td>직책별 인원현황</td><td>막대, 교차표</td><td>사원관리: 직책</td><td>조직, 직급, 직군</td><td>CSV, XLSX</td><td>관리자 수, 직책 공백, 책임 구조 점검</td></tr>
-                  <tr><td>부서별 인원현황</td><td>정렬 막대, 테이블</td><td>사원관리: 부서, 팀, 파트</td><td>부서, 팀, 재직상태, 고용형태</td><td>CSV, XLSX</td><td>월간업무보고와 부서별 인원 현황 작성</td></tr>
-                  <tr><td>사업장별 인원현황</td><td>지도형 요약, 막대</td><td>사원관리: 근무지/사업장</td><td>사업장, 법인, 고용형태, 상태</td><td>CSV, XLSX</td><td>사업장별 법정 기준 검토와 현장 인력 배치 확인</td></tr>
-                </tbody>
-              </table>
+            <div class="analytics-filter-bar" aria-label="통계 필터 기준">
+              <div class="filter-token">
+                <span>기준일</span>
+                <strong id="analyticsAsOfDate">오늘</strong>
+              </div>
+              <div class="filter-token">
+                <span>대상</span>
+                <strong>재직·휴직 인원</strong>
+              </div>
+              <div class="filter-token">
+                <span>분석 단위</span>
+                <strong>조직 · 직급 · 고용형태 · 사업장</strong>
+              </div>
+              <div class="filter-token">
+                <span>원천 데이터</span>
+                <strong>사원관리 · 조직도 · 업무기록</strong>
+              </div>
+            </div>
+            <div class="analytics-tabs" aria-label="통계 영역 바로가기">
+              <a href="#analytics-kpi">KPI</a>
+              <a href="#analytics-composition">인력 구성</a>
+              <a href="#analytics-lifecycle">입퇴사 추이</a>
+              <a href="#analytics-government">정부 대응</a>
+              <a href="#analytics-organization">조직별 현황</a>
+              <a href="#analytics-detail">상세 명부</a>
             </div>
           </section>
 
-          <section class="panel" aria-labelledby="government-stat-title">
-            <div class="section-head">
-              <div>
-                <h2 id="government-stat-title">정부 대응 통계 설계</h2>
-                <p>제출 의무 자체는 확정하지 않고, 제출 대응이 가능한 원천 데이터와 집계 구조를 준비합니다.</p>
-              </div>
-            </div>
-            <div class="table-wrap">
-              <table class="matrix-table">
-                <caption class="sr-only">정부 대응 통계 설계표</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">통계</th>
-                    <th scope="col">차트 유형</th>
-                    <th scope="col">데이터 소스</th>
-                    <th scope="col">필터 조건</th>
-                    <th scope="col">다운로드 형식</th>
-                    <th scope="col">활용 목적</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr><td>장애인 고용 현황</td><td>기준 충족표, 월별 추이</td><td>사원관리: 장애 여부, 재직상태, 사업장</td><td>기준일, 사업장, 고용형태, 상시근로자 기준</td><td>XLSX, CSV</td><td>장애인 고용계획·실시상황 등 대응 가능 데이터 준비. 적용 여부 추가 확인 필요</td></tr>
-                  <tr><td>고령자 고용 현황</td><td>연령대 막대, 기준표</td><td>생년월일, 입사일, 재직상태</td><td>기준일, 사업장, 직군, 고용형태</td><td>XLSX, CSV</td><td>고령자 고용현황·정년제도 관련 내부 점검. 제출 대상 추가 확인 필요</td></tr>
-                  <tr><td>여성 인력 현황</td><td>성별 막대, 직급별 교차표</td><td>성별, 조직, 직급, 직책</td><td>기준일, 조직, 직급, 관리자 여부</td><td>XLSX, CSV, PNG</td><td>여성 인력·여성 관리자 비중, 다양성 지표 검토</td></tr>
-                  <tr><td>육아휴직 현황</td><td>월별 추이, 대상자 목록</td><td>휴직·복직 기록, 상태, 기간</td><td>기간, 성별, 조직, 사업장</td><td>XLSX, CSV</td><td>일·가정 양립 관련 운영 현황 관리. 세부 법정 서식은 추가 확인 필요</td></tr>
-                  <tr><td>출산휴가 현황</td><td>월별 추이, 캘린더</td><td>휴가 기록, 시작일, 종료일</td><td>기간, 조직, 사업장, 상태</td><td>XLSX, CSV</td><td>출산전후휴가 운영 현황과 복귀 예정 관리</td></tr>
-                  <tr><td>근로형태별 현황</td><td>100% 누적 막대, 표</td><td>고용형태, 근무형태, 단시간 여부</td><td>기준일, 사업장, 조직, 직군</td><td>XLSX, CSV</td><td>고용형태 공시·내부 인력 구성 검토. 공시 대상 여부 추가 확인 필요</td></tr>
-                  <tr><td>기간제 근로자 현황</td><td>계약 만료 타임라인, 표</td><td>고용형태, 계약 시작·종료일</td><td>만료 기간, 조직, 사업장, 직무</td><td>XLSX, CSV</td><td>기간제 인력 규모, 계약 갱신·전환 검토, 차별 리스크 점검</td></tr>
-                  <tr><td>외국인 근로자 현황</td><td>국적별 막대, 만료표</td><td>국적, 체류·근로 가능 정보, 계약정보</td><td>국적, 사업장, 만료 기간, 고용형태</td><td>XLSX, CSV</td><td>외국인 근로자 고용관리와 체류·계약 만료 점검. 민감정보 최소 수집 필요</td></tr>
-                  <tr><td>법정 제출 대응 가능 통계 목록</td><td>체크리스트, 상태 배지</td><td>통계 카탈로그, 기준일 스냅샷, 원천 데이터 품질</td><td>제출명, 기준일, 담당자, 사업장</td><td>XLSX, PDF</td><td>제출 가능/보완 필요/전문가 검토 필요 상태를 관리</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="source-links" aria-label="제도 확인용 공식자료">
-              <a href="https://www.law.go.kr/법령/장애인고용촉진및직업재활법" target="_blank" rel="noreferrer">장애인고용촉진 및 직업재활법</a>
-              <a href="https://www.law.go.kr/법령/고용상연령차별금지및고령자고용촉진에관한법률" target="_blank" rel="noreferrer">고령자고용촉진 관련 법령</a>
-              <a href="https://www.law.go.kr/법령/고용정책기본법" target="_blank" rel="noreferrer">고용정책 기본법</a>
-              <a href="https://www.law.go.kr/법령/남녀고용평등과일ㆍ가정양립지원에관한법률" target="_blank" rel="noreferrer">남녀고용평등·일가정양립법</a>
-            </div>
-          </section>
-
-          <section class="panel" aria-labelledby="advanced-analytics-title">
-            <div class="section-head">
-              <div>
-                <h2 id="advanced-analytics-title">고도화 People Analytics 지표</h2>
-                <p>운영 통계를 넘어 조직 리스크와 인재 전략을 판단하는 지표입니다.</p>
-              </div>
-            </div>
-            <div class="table-wrap">
-              <table class="matrix-table">
-                <caption class="sr-only">고도화 People Analytics 지표 설계표</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">통계</th>
-                    <th scope="col">차트 유형</th>
-                    <th scope="col">데이터 소스</th>
-                    <th scope="col">필터 조건</th>
-                    <th scope="col">다운로드 형식</th>
-                    <th scope="col">활용 목적</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr><td>이직률</td><td>라인, 조직별 막대</td><td>퇴직일, 월별 평균 재직인원</td><td>기간, 조직, 직군, 고용형태</td><td>CSV, XLSX, PNG</td><td>조직별 이탈 리스크와 관리 개입 우선순위 판단</td></tr>
-                  <tr><td>퇴사율</td><td>라인, 월별 막대</td><td>퇴직자, 재직자 기준 모수</td><td>기간, 조직, 퇴직유형</td><td>CSV, XLSX</td><td>월별 퇴사 흐름과 원인 분석 기초</td></tr>
-                  <tr><td>유지율</td><td>코호트 히트맵</td><td>입사일, 퇴직일</td><td>입사연도, 조직, 직군</td><td>CSV, XLSX, PNG</td><td>채용 cohort별 잔존율과 온보딩 품질 평가</td></tr>
-                  <tr><td>조직 성장률</td><td>라인, 증감 카드</td><td>월별 재직인원, 입퇴사</td><td>기간, 조직, 사업장</td><td>CSV, XLSX</td><td>인력 확장·축소 추세와 계획 대비 실적 관리</td></tr>
-                  <tr><td>평균 근속연수</td><td>KPI, 분포 막대</td><td>입사일, 퇴직일, 기준일</td><td>조직, 직군, 직급, 고용형태</td><td>CSV, XLSX</td><td>조직 안정성, 세대 교체, 지식 축적 수준 확인</td></tr>
-                  <tr><td>신규 채용 성과</td><td>퍼널, 코호트</td><td>입사일, 수습 평가, 유지율, 채용경로</td><td>기간, 채용경로, 조직, 직무</td><td>CSV, XLSX</td><td>채용 품질, 수습 통과율, 6개월 유지율 분석</td></tr>
-                  <tr><td>조직 안정성 지수</td><td>스코어 카드, 레이더</td><td>이직률, 근속, 공석, 교육 이수, 계약 만료</td><td>조직, 기간, 직군</td><td>PDF, XLSX</td><td>고위험 조직 조기 탐지와 경영진 보고</td></tr>
-                  <tr><td>핵심인재 현황</td><td>매트릭스, 목록</td><td>평가, 직책, 역량, 교육, 승계 후보</td><td>조직, 직군, 직급, 후보 상태</td><td>XLSX</td><td>핵심 역할 유지와 승계계획 수립. 평가 기준 명확화 필요</td></tr>
-                  <tr><td>승진 현황</td><td>연도별 막대, 직급 이동표</td><td>발령 이력, 직급 변경일</td><td>기간, 조직, 성별, 직군</td><td>CSV, XLSX</td><td>승진 속도, 직급 병목, 형평성 검토</td></tr>
-                  <tr><td>교육 이수 현황</td><td>이수율 카드, 미이수 목록</td><td>교육 기록, 이수 상태, 기한</td><td>교육명, 조직, 직급, 기간</td><td>CSV, XLSX</td><td>법정의무교육·직무교육 이수 관리와 알림</td></tr>
-                  <tr><td>자격증 보유 현황</td><td>분류 막대, 만료 목록</td><td>자격/면허 기록, 갱신일</td><td>자격명, 조직, 직무, 만료 기간</td><td>CSV, XLSX</td><td>직무 적합성, 필수 자격 만료 리스크 관리</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
+          <h2 class="analytics-section-title" id="analytics-kpi">핵심 KPI</h2>
 
           <div class="grid kpi-grid" aria-label="상세 인사 운영 지표">
             <article class="metric-card">
@@ -4559,7 +4620,41 @@
               <p class="metric-value" id="statAverageTenure">0년</p>
               <span class="metric-note">재직자 입사일 기준</span>
             </article>
+            <article class="metric-card">
+              <div class="metric-top">
+                <span class="metric-label">정보완성도</span>
+                <span class="metric-icon"><i data-lucide="database-zap"></i></span>
+              </div>
+              <p class="metric-value" id="statDataQuality">0%</p>
+              <span class="metric-note">사원 프로파일 평균</span>
+            </article>
           </div>
+
+          <div class="analytics-grid-main">
+            <section class="panel" aria-labelledby="analytics-risk-title">
+              <div class="analytics-card-head">
+                <div>
+                  <h3 id="analytics-risk-title">조직 리스크 신호</h3>
+                  <span>계약, 수습, 개인정보, 데이터 품질 기준</span>
+                </div>
+                <span class="signal-badge">Action</span>
+              </div>
+              <ul class="insight-list" id="riskList"></ul>
+            </section>
+
+            <section class="panel" id="analytics-government" aria-labelledby="analytics-government-title">
+              <div class="analytics-card-head">
+                <div>
+                  <h3 id="analytics-government-title">정부 대응 현황</h3>
+                  <span>제출 검토용 데이터 준비 상태</span>
+                </div>
+                <span class="signal-badge">Review</span>
+              </div>
+              <div class="readiness-grid" id="governmentReadinessGrid"></div>
+            </section>
+          </div>
+
+          <h2 class="analytics-section-title" id="analytics-composition">인력 구성 분석</h2>
 
           <div class="grid three-column">
             <article class="stat-card">
@@ -4602,6 +4697,8 @@
               <div class="chart-grid" id="jobGroupBars"></div>
             </article>
           </div>
+
+          <h2 class="analytics-section-title" id="analytics-lifecycle">입퇴사·재직 추이</h2>
 
           <div class="grid two-column">
             <section class="panel" aria-labelledby="status-stat-title">
@@ -4733,6 +4830,8 @@
             </section>
           </div>
 
+          <h2 class="analytics-section-title" id="analytics-organization">조직별 현황</h2>
+
           <section class="panel" aria-labelledby="department-analytics-title">
             <div class="section-head">
               <div>
@@ -4807,6 +4906,8 @@
               </div>
             </section>
           </div>
+
+          <h2 class="analytics-section-title" id="analytics-detail">상세 명부</h2>
 
           <section class="panel" aria-labelledby="hire-detail-title">
               <div class="section-head">
@@ -6501,6 +6602,8 @@
       employmentDonut: document.querySelector("#employmentDonut"),
       employmentLegend: document.querySelector("#employmentLegend"),
       donutTotal: document.querySelector("#donutTotal"),
+      analyticsAsOfDate: document.querySelector("#analyticsAsOfDate"),
+      governmentReadinessGrid: document.querySelector("#governmentReadinessGrid"),
       tenureBars: document.querySelector("#tenureBars"),
       ageBars: document.querySelector("#ageBars"),
       statusBars: document.querySelector("#statusBars"),
@@ -6511,6 +6614,7 @@
       statProbationRisk: document.querySelector("#statProbationRisk"),
       statCompleteness: document.querySelector("#statCompleteness"),
       statAverageTenure: document.querySelector("#statAverageTenure"),
+      statDataQuality: document.querySelector("#statDataQuality"),
       statHiredThisYear: document.querySelector("#statHiredThisYear"),
       statRecentHires: document.querySelector("#statRecentHires"),
       genderBars: document.querySelector("#genderBars"),
@@ -10945,7 +11049,16 @@
 
     function renderStatistics() {
       const total = activeEmployees().length;
+      if (elements.analyticsAsOfDate) {
+        elements.analyticsAsOfDate.textContent = new Intl.DateTimeFormat("ko-KR", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
+        }).format(new Date());
+      }
       renderStatsKpis();
+      renderRiskList();
+      renderGovernmentReadiness();
       renderEmploymentDonut(total);
       renderTenureBars();
       renderAgeBars();
@@ -10992,6 +11105,9 @@
         return !Number.isNaN(date.getTime()) && date.getFullYear() === currentYear;
       }).length;
       const retirementRate = state.employees.length ? Math.round((retired.length / state.employees.length) * 100) : 0;
+      const dataQuality = state.employees.length
+        ? Math.round(state.employees.reduce((sum, employee) => sum + profileCompleteness(employee), 0) / state.employees.length)
+        : 0;
 
       elements.statActiveTotal.textContent = String(active.length);
       elements.statHiredThisYear.textContent = String(hiredThisYear);
@@ -11000,6 +11116,7 @@
       elements.statProbationRisk.textContent = String(retiredThisYear);
       elements.statCompleteness.textContent = `${retirementRate}%`;
       elements.statAverageTenure.textContent = averageTenure;
+      if (elements.statDataQuality) elements.statDataQuality.textContent = `${dataQuality}%`;
     }
 
     function isDateWithinDays(dateString, days) {
@@ -11073,6 +11190,61 @@
         wrap.append(title, body);
         li.append(dot, wrap);
         elements.riskList.append(li);
+      });
+    }
+
+    function renderGovernmentReadiness() {
+      if (!elements.governmentReadinessGrid) return;
+      const active = activeEmployees();
+      const women = active.filter((employee) => genderStatValue(employee) === "여성").length;
+      const seniors = active.filter((employee) => {
+        const age = getAge(employee.birthDate);
+        return age !== null && age >= 55;
+      }).length;
+      const disabled = active.filter((employee) => {
+        const value = text(employee.disabilityStatus, "");
+        if (!value) return false;
+        return !["비대상", "해당없음", "없음", "미입력"].includes(value);
+      }).length;
+      const nonFullTime = active.filter((employee) => {
+        const value = text(employee.workType, "");
+        return value && value !== "전일제";
+      }).length;
+      const fixedTerm = active.filter((employee) => employee.employmentType === "계약직" || text(employee.contractEndDate, "")).length;
+      const foreign = active.filter((employee) => {
+        const value = text(employee.nationality, "");
+        if (!value) return false;
+        return !["대한민국", "한국", "Korea", "Republic of Korea"].includes(value);
+      }).length;
+      const leave = active.filter((employee) => employee.status === "휴직").length;
+      const maternitySourceReady = (state.operationRecords.documents || []).some((record) => /출산|육아|휴직|복직/.test(`${record.subject || ""} ${record.memo || ""}`));
+
+      const rows = [
+        ["장애인 고용", `${disabled}명`, "장애 여부 기준. 상시근로자 산정과 의무고용률은 제출 전 확인 필요", disabled ? "집계됨" : "원천확인"],
+        ["고령자 고용", `${seniors}명`, "만 55세 이상 기준 1차 집계. 법정 기준 연령은 제출 목적별 확인 필요", "집계됨"],
+        ["여성 인력", `${women}명`, "성별 입력값 기준. 관리자·직급별 여성 비율은 교차표에서 확인", "집계됨"],
+        ["육아휴직", `${leave}명`, "현재 휴직 상태 기준. 휴직 사유 코드는 추가 구조화 필요", leave ? "검토" : "대기"],
+        ["출산휴가", maternitySourceReady ? "기록 있음" : "미구성", "출산휴가 전용 시작일·종료일 필드가 필요", maternitySourceReady ? "집계됨" : "필드필요"],
+        ["근로형태", `${nonFullTime}명`, "단시간·시차출퇴근·하이브리드 등 근무형태 기준", "집계됨"],
+        ["기간제 근로자", `${fixedTerm}명`, "계약직 또는 계약 종료일 입력자 기준", fixedTerm ? "검토" : "대기"],
+        ["외국인 근로자", `${foreign}명`, "국적 기준. 체류자격·만료일은 민감정보 최소 수집 원칙으로 별도 설계 필요", foreign ? "검토" : "원천확인"]
+      ];
+
+      elements.governmentReadinessGrid.replaceChildren();
+      rows.forEach(([title, value, body, badge]) => {
+        const card = document.createElement("article");
+        card.className = "readiness-card";
+        const pill = document.createElement("span");
+        pill.className = "signal-badge";
+        pill.textContent = badge;
+        const heading = document.createElement("strong");
+        heading.textContent = title;
+        const count = document.createElement("strong");
+        count.textContent = value;
+        const description = document.createElement("span");
+        description.textContent = body;
+        card.append(pill, heading, count, description);
+        elements.governmentReadinessGrid.append(card);
       });
     }
 
