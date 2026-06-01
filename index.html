@@ -8512,21 +8512,47 @@
         .filter((row) => row.type === "detail")
         .forEach((row) => detailStats.set(row, monthlyReportStatsForRow(row, range)));
 
+      const displayDetailStats = monthlyReportDisplayDetailStats(detailStats, range);
       const subtotalStats = new Map();
       [...new Set(monthlyReportRows.filter((row) => row.type === "subtotal").map((row) => row.group))].forEach((group) => {
         const rows = monthlyReportRows.filter((row) => row.type === "detail" && row.group === group);
-        subtotalStats.set(group, sumMonthlyStats(rows.map((row) => detailStats.get(row))));
+        subtotalStats.set(group, sumMonthlyStats(rows.map((row) => displayDetailStats.get(row))));
       });
 
-      const rawTotalStats = sumMonthlyStats([...detailStats.values()]);
-      const totalStats = monthlyReportUniqueTotalStats(detailStats, rawTotalStats, range);
+      const totalStats = monthlyReportUniqueTotalStats(displayDetailStats);
       renderMonthlyReportSummary(totalStats, range);
-      renderMonthlyReportTable(detailStats, subtotalStats, totalStats, range, matchRows);
+      renderMonthlyReportTable(displayDetailStats, subtotalStats, totalStats, range, matchRows);
       renderMonthlyReportMatchTable(matchRows);
       renderMonthlyReportReconciliation(detailStats, totalStats, range);
     }
 
-    function monthlyReportUniqueTotalStats(detailStats, fallbackStats, range) {
+    function monthlyReportDisplayDetailStats(detailStats, range) {
+      const displayStats = new Map();
+      const assignedCurrentIds = new Set();
+      monthlyReportRows
+        .filter((row) => row.type === "detail")
+        .forEach((row) => {
+          const rawStats = detailStats.get(row) || emptyMonthlyStats();
+          const stats = emptyMonthlyStats();
+          stats.fixedNote = rawStats.fixedNote;
+          stats.hireIds = new Set(rawStats.hireIds);
+          stats.retirementIds = new Set(rawStats.retirementIds);
+          stats.otherIds = new Set(rawStats.otherIds);
+          stats.otherLabels = [...rawStats.otherLabels];
+          const currentIds = Number.isFinite(Number(row.fixedCurrent))
+            ? fixedRowAccountedEmployees(row, range).map((employee) => employee.id)
+            : [...rawStats.currentIds];
+          currentIds.forEach((id) => {
+            if (assignedCurrentIds.has(id)) return;
+            assignedCurrentIds.add(id);
+            stats.currentIds.add(id);
+          });
+          displayStats.set(row, stats);
+        });
+      return displayStats;
+    }
+
+    function monthlyReportUniqueTotalStats(detailStats) {
       const stats = emptyMonthlyStats();
       monthlyReportRows
         .filter((row) => row.type === "detail")
@@ -8536,16 +8562,12 @@
           rowStats?.hireIds.forEach((id) => stats.hireIds.add(id));
           rowStats?.retirementIds.forEach((id) => stats.retirementIds.add(id));
           rowStats?.otherIds.forEach((id) => stats.otherIds.add(id));
-          if (Number.isFinite(Number(row.fixedCurrent))) {
-            fixedRowAccountedEmployees(row, range).forEach((employee) => stats.currentIds.add(employee.id));
-          }
         });
-      const fallbackCounts = monthlyStatsCounts(fallbackStats || emptyMonthlyStats());
       stats.countOverrides = {
         current: stats.currentIds.size,
-        hires: fallbackCounts.hires,
-        retirements: fallbackCounts.retirements,
-        other: fallbackCounts.other
+        hires: stats.hireIds.size,
+        retirements: stats.retirementIds.size,
+        other: stats.otherIds.size
       };
       return stats;
     }
