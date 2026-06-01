@@ -4942,7 +4942,7 @@
     };
 
     const defaultMonthlyReportRows = [
-      { type: "detail", group: "", label: "대표이사", criteria: ["대표이사"], fixedCurrent: 2, fixedNote: "홍성훈+1인", accountedCriteria: ["홍성훈"] },
+      { type: "detail", group: "", label: "대표이사", criteria: ["대표이사"], aliases: ["홍성훈 대표이사", "홍성훈"] },
       { type: "detail", group: "생산본부", label: "본부장", criteria: ["김종규 본부장", "생산본부 본부장"] },
       { type: "detail", group: "생산본부", label: "생산관리팀", criteria: ["생산관리팀"], aliases: ["생산관리부", "생산관리부문", "생산관리파트", "생산관리"] },
       { type: "detail", group: "생산본부", label: "제조팀", criteria: ["원료제조파트"] },
@@ -4967,7 +4967,7 @@
       { type: "detail", group: "경영지원본부", label: "본부장", criteria: ["강준석 본부장", "경영지원본부 본부장"] },
       { type: "detail", group: "경영지원본부", label: "경영지원팀", criteria: ["경영지원본부(본부장/IT팀/기타비상근 제외)", "경영지원팀", "재무기획팀"] },
       { type: "detail", group: "경영지원본부", label: "IT팀", criteria: ["IT팀"] },
-      { type: "detail", group: "경영지원본부", label: "기타비상근", criteria: ["기타비상근"], fixedCurrent: 5, fixedNote: "기타비상근 5명 고정" },
+      { type: "detail", group: "경영지원본부", label: "기타비상근", criteria: ["기타비상근"] },
       { type: "subtotal", group: "경영지원본부", label: "소계" },
       { type: "total", group: "", label: "전체합계" }
     ];
@@ -5395,22 +5395,14 @@
       return Array.isArray(values) ? values.map((value) => text(value, "")).filter(Boolean).join("\n") : "";
     }
 
-    function hasMonthlyFixedCurrent(row = {}) {
-      return text(row.fixedCurrent, "") !== "" && Number.isFinite(Number(row.fixedCurrent));
-    }
-
     function cloneMonthlyReportRow(row = {}) {
       const cloned = {
         type: ["detail", "subtotal", "total"].includes(row.type) ? row.type : "detail",
         group: text(row.group, ""),
         label: text(row.label, ""),
         criteria: Array.isArray(row.criteria) ? row.criteria.map((value) => text(value, "")).filter(Boolean) : listFromMappingCell(row.criteria),
-        aliases: Array.isArray(row.aliases) ? row.aliases.map((value) => text(value, "")).filter(Boolean) : listFromMappingCell(row.aliases),
-        fixedCurrent: hasMonthlyFixedCurrent(row) ? Number(row.fixedCurrent) : "",
-        fixedNote: text(row.fixedNote, ""),
-        accountedCriteria: Array.isArray(row.accountedCriteria) ? row.accountedCriteria.map((value) => text(value, "")).filter(Boolean) : listFromMappingCell(row.accountedCriteria)
+        aliases: Array.isArray(row.aliases) ? row.aliases.map((value) => text(value, "")).filter(Boolean) : listFromMappingCell(row.aliases)
       };
-      if (!hasMonthlyFixedCurrent(cloned)) cloned.fixedCurrent = "";
       return cloned;
     }
 
@@ -5418,7 +5410,7 @@
       const source = Array.isArray(rows) && rows.length ? rows : defaultMonthlyReportRows;
       const normalized = source
         .map(cloneMonthlyReportRow)
-        .filter((row) => row.type !== "detail" || row.label || row.criteria.length || row.aliases.length || hasMonthlyFixedCurrent(row));
+        .filter((row) => row.type !== "detail" || row.label || row.criteria.length || row.aliases.length);
       if (!normalized.some((row) => row.type === "total")) normalized.push(cloneMonthlyReportRow({ type: "total", label: "전체합계" }));
       return normalized;
     }
@@ -6676,22 +6668,22 @@
       const teamGrid = document.createElement("div");
       teamGrid.className = "org-teams";
 
+      if (directMembers.length) {
+        teamGrid.append(makeOrgMemberBox("직접 배치 인원", node.type, directMembers, null, node.id));
+      }
+
       children.forEach((child) => {
         teamGrid.append(makeOrgMemberBox(child.name, child.type, employeesForOrgNode(child.id), () => {
           state.selectedOrgNodeId = child.id;
           renderOrganization();
-        }));
+        }, child.id));
       });
-
-      if (directMembers.length) {
-        teamGrid.append(makeOrgMemberBox("직접 배치 인원", node.type, directMembers));
-      }
 
       departmentSection.append(header, teamGrid);
       elements.orgBoard.append(departmentSection);
     }
 
-    function makeOrgMemberBox(titleText, type, members, onTitleClick = null) {
+    function makeOrgMemberBox(titleText, type, members, onTitleClick = null, priorityNodeId = "") {
       const box = document.createElement("section");
       box.className = "org-team";
       const h4 = document.createElement("h4");
@@ -6720,8 +6712,7 @@
         item.append(body);
         list.append(item);
       } else {
-        members
-          .sort((a, b) => text(a.name).localeCompare(text(b.name), "ko"))
+        sortOrgMembersForDisplay(members, priorityNodeId)
           .slice(0, 8)
           .forEach((employee) => {
             const li = document.createElement("li");
@@ -6741,6 +6732,20 @@
       }
       box.append(h4, list);
       return box;
+    }
+
+    function sortOrgMembersForDisplay(members = [], priorityNodeId = "") {
+      const priorityNode = priorityNodeId ? findOrgNode(priorityNodeId) : null;
+      return [...members].sort((a, b) => {
+        if (priorityNode) {
+          const aDirect = employeeDirectlyBelongsToOrgNode(a, priorityNode) ? 0 : 1;
+          const bDirect = employeeDirectlyBelongsToOrgNode(b, priorityNode) ? 0 : 1;
+          if (aDirect !== bDirect) return aDirect - bDirect;
+        }
+        const orgCompare = orgPathLabel(a).localeCompare(orgPathLabel(b), "ko");
+        if (orgCompare !== 0) return orgCompare;
+        return text(a.name).localeCompare(text(b.name), "ko");
+      });
     }
 
     function startOrganizationNodeCreate(mode = "child") {
@@ -8587,33 +8592,64 @@
       renderMonthlyReportSummary(totalStats, range);
       renderMonthlyReportTable(displayDetailStats, subtotalStats, totalStats, range, matchRows);
       renderMonthlyReportMatchTable(matchRows);
-      renderMonthlyReportReconciliation(detailStats, totalStats, range);
+      renderMonthlyReportReconciliation(displayDetailStats, totalStats, range);
     }
 
     function monthlyReportDisplayDetailStats(detailStats, range) {
       const displayStats = new Map();
-      const assignedCurrentIds = new Set();
-      monthlyReportRows
-        .filter((row) => row.type === "detail")
-        .forEach((row) => {
-          const rawStats = detailStats.get(row) || emptyMonthlyStats();
-          const stats = emptyMonthlyStats();
-          stats.fixedNote = rawStats.fixedNote;
-          stats.hireIds = new Set(rawStats.hireIds);
-          stats.retirementIds = new Set(rawStats.retirementIds);
-          stats.otherIds = new Set(rawStats.otherIds);
-          stats.otherLabels = [...rawStats.otherLabels];
-          const currentIds = hasMonthlyFixedCurrent(row)
-            ? fixedRowAccountedEmployees(row, range).map((employee) => employee.id)
-            : [...rawStats.currentIds];
-          currentIds.forEach((id) => {
-            if (assignedCurrentIds.has(id)) return;
-            assignedCurrentIds.add(id);
-            stats.currentIds.add(id);
-          });
-          displayStats.set(row, stats);
+      const detailRows = monthlyReportRows.filter((row) => row.type === "detail");
+      detailRows.forEach((row) => {
+        const rawStats = detailStats.get(row) || emptyMonthlyStats();
+        const stats = emptyMonthlyStats();
+        stats.otherIds = new Set(rawStats.otherIds);
+        stats.otherLabels = [...rawStats.otherLabels];
+        displayStats.set(row, stats);
+      });
+
+      [
+        { key: "currentIds", predicate: (employee) => isCurrentForMonthlyReport(employee, range) },
+        { key: "hireIds", predicate: (employee) => isDateInMonthlyRange(employee.joinDate, range) },
+        { key: "retirementIds", predicate: (employee) => isDateInMonthlyRange(employee.retirementDate, range) }
+      ].forEach(({ key, predicate }) => {
+        state.employees.filter(predicate).forEach((employee) => {
+          const matchedRows = detailRows.filter((row) => detailStats.get(row)?.[key].has(employee.id));
+          const targetRow = monthlyReportBestDisplayRow(employee, matchedRows);
+          if (targetRow) displayStats.get(targetRow)?.[key].add(employee.id);
         });
+      });
       return displayStats;
+    }
+
+    function monthlyReportBestDisplayRow(employee, rows = []) {
+      if (!rows.length) return null;
+      return rows
+        .map((row, index) => ({ row, index, score: monthlyReportRowSpecificityForEmployee(employee, row) }))
+        .sort((a, b) => b.score - a.score || a.index - b.index)[0].row;
+    }
+
+    function monthlyReportRowSpecificityForEmployee(employee, row) {
+      const directOrgName = employeeDirectOrgName(employee);
+      const directOrgNodes = directMonthlyOrgNodesForLabel(directOrgName);
+      let bestScore = 0;
+      monthlyReportCriteriaForRow(row).forEach((criterion) => {
+        const parsed = parseMonthlyCriterion(criterion);
+        if (!employeeMatchesMonthlyReportCriterion(employee, parsed, row)) return;
+        if (employeeMatchesMonthlyPersonCriterion(employee, parsed.include)) {
+          bestScore = Math.max(bestScore, 10000);
+          return;
+        }
+        const roots = directMonthlyOrgNodesForLabel(parsed.include);
+        roots.forEach((root) => {
+          const rootDescendants = new Set(descendantOrgIds(root.id));
+          const matchedDirectNode = directOrgNodes.find((node) => rootDescendants.has(node.id));
+          if (!matchedDirectNode) return;
+          const rootDepth = orgNodePath(root.id).length;
+          const isDirectRoot = matchedDirectNode.id === root.id;
+          bestScore = Math.max(bestScore, 1000 + rootDepth * 10 + (isDirectRoot ? 5 : 0));
+        });
+        if (!roots.length && employeeMatchesMonthlySimple(employee, parsed.include)) bestScore = Math.max(bestScore, 500);
+      });
+      return bestScore;
     }
 
     function monthlyReportUniqueTotalStats(detailStats) {
@@ -8722,19 +8758,12 @@
         retirementIds: new Set(),
         otherIds: new Set(),
         otherLabels: [],
-        fixedCurrent: null,
-        fixedNote: "",
         countOverrides: null
       };
     }
 
     function monthlyReportStatsForRow(row, range) {
       const stats = emptyMonthlyStats();
-      if (hasMonthlyFixedCurrent(row)) {
-        stats.fixedCurrent = Number(row.fixedCurrent);
-        stats.fixedNote = text(row.fixedNote, "고정값");
-        return stats;
-      }
       state.employees.forEach((employee) => {
         if (!employeeMatchesMonthlyReportRow(employee, row)) return;
         if (isCurrentForMonthlyReport(employee, range)) stats.currentIds.add(employee.id);
@@ -8766,9 +8795,8 @@
 
     function monthlyStatsCounts(stats) {
       if (stats.countOverrides) return { ...stats.countOverrides };
-      const hasFixedCurrent = Number.isFinite(stats.fixedCurrent);
       return {
-        current: hasFixedCurrent ? stats.fixedCurrent : stats.currentIds.size,
+        current: stats.currentIds.size,
         hires: stats.hireIds.size,
         retirements: stats.retirementIds.size,
         other: stats.otherIds.size
@@ -8878,7 +8906,6 @@
     }
 
     function monthlyReportNote(stats, matchInfo) {
-      if (stats.fixedNote) return stats.fixedNote;
       if (matchInfo?.status === "missing") return "매칭 필요";
       if (matchInfo?.status === "partial") return "일부 매칭";
       if (stats.otherIds.size) return [...new Set(stats.otherLabels)].slice(0, 2).join(", ");
@@ -8891,14 +8918,13 @@
       const employee = matchRows.filter((row) => row.status === "employee").length;
       const partial = matchRows.filter((row) => row.status === "partial").length;
       const missing = matchRows.filter((row) => row.status === "missing").length;
-      const fixed = matchRows.filter((row) => row.status === "fixed").length;
-      elements.monthlyReportMatchSummary.textContent = `총 ${total}개 기준 중 고정값 ${fixed}개, 조직도 매칭 ${matched}개, 사원정보 보조 매칭 ${employee}개, 일부 매칭 ${partial}개, 미매칭 ${missing}개`;
+      elements.monthlyReportMatchSummary.textContent = `총 ${total}개 기준 중 조직도 매칭 ${matched}개, 사원정보 보조 매칭 ${employee}개, 일부 매칭 ${partial}개, 미매칭 ${missing}개`;
       renderTableRows(elements.monthlyReportMatchTable, matchRows, 5, (item) => {
         const tr = document.createElement("tr");
         tr.append(
           makeCell(item.row.group || "-"),
           makeCell(item.row.label),
-          makeCell(item.row.fixedNote || item.row.criteria.join(", ")),
+          makeCell(item.row.criteria.join(", ")),
           makeStatusCell(item.label, item.variant),
           makeCell(item.detail)
         );
@@ -8912,8 +8938,6 @@
       const reportCount = monthlyStatsCounts(totalStats).current;
       const orgCount = orgEmployees.length;
       const actualMatchRows = monthlyReportRows.filter((row) => row.type === "detail");
-      const fixedRows = monthlyReportRows.filter((row) => row.type === "detail" && hasMonthlyFixedCurrent(row));
-      const fixedConfigured = fixedRows.reduce((sum, row) => sum + Number(row.fixedCurrent || 0), 0);
       const reportEmployeeIds = new Set();
       const reportAssignments = new Map();
       actualMatchRows.forEach((row) => {
@@ -8922,15 +8946,6 @@
           reportEmployeeIds.add(id);
           if (!reportAssignments.has(id)) reportAssignments.set(id, []);
           reportAssignments.get(id).push(monthlyReportRowTitle(row));
-        });
-      });
-      fixedRows.forEach((row) => {
-        fixedRowAccountedEmployees(row, range).forEach((employee) => {
-          const alreadyAssigned = reportEmployeeIds.has(employee.id);
-          reportEmployeeIds.add(employee.id);
-          if (alreadyAssigned) return;
-          if (!reportAssignments.has(employee.id)) reportAssignments.set(employee.id, []);
-          reportAssignments.get(employee.id).push(`${monthlyReportRowTitle(row)} 고정값 반영`);
         });
       });
       const basisExcludedEmployees = orgEmployees.filter((employee) => !isCurrentForMonthlyReport(employee, range));
@@ -8950,7 +8965,7 @@
       const diff = orgCount - reportCount;
       const signedSourceDiff = sourceDiff > 0 ? `+${sourceDiff}` : String(sourceDiff);
       const signedDiff = diff > 0 ? `+${diff}` : String(diff);
-      elements.monthlyReportReconcileSummary.textContent = `원본데이터 퇴직 제외 ${reportBasisEmployees.length}명 - 월간보고 실제 매칭 ${actualMatchedCount}명 = ${signedSourceDiff}명 · 조직도 ${orgCount}명 - 월간업무보고 ${reportCount}명 = ${signedDiff}명 · 고정값 ${fixedConfigured}명 · 중복 기준 ${duplicateRows.length}명 합계 제외`;
+      elements.monthlyReportReconcileSummary.textContent = `원본데이터 퇴직 제외 ${reportBasisEmployees.length}명 - 월간보고 실제 매칭 ${actualMatchedCount}명 = ${signedSourceDiff}명 · 조직도 ${orgCount}명 - 월간업무보고 ${reportCount}명 = ${signedDiff}명 · 중복 기준 ${duplicateRows.length}명 합계 제외`;
 
       const rows = [
         ...unmatchedEmployees.map((employee) => ({
@@ -8982,7 +8997,6 @@
         unmatchedEmployees,
         reportOnlyEmployees,
         duplicateRows,
-        fixedConfigured,
         actualMatchedCount,
         rows
       });
@@ -9002,11 +9016,11 @@
       }, "차이 항목이 없습니다.", "원본데이터 퇴직 제외 인원과 월간업무보고 실제 매칭 인원이 일치합니다.");
     }
 
-    function renderMonthlyReportGapSummary({ orgCount, reportCount, diff, sourceBasisCount, sourceDiff, basisExcludedEmployees, unmatchedEmployees, reportOnlyEmployees = [], duplicateRows, fixedConfigured, actualMatchedCount, rows }) {
+    function renderMonthlyReportGapSummary({ orgCount, reportCount, diff, sourceBasisCount, sourceDiff, basisExcludedEmployees, unmatchedEmployees, reportOnlyEmployees = [], duplicateRows, actualMatchedCount, rows }) {
       if (!elements.monthlyReportGapSummary || !elements.monthlyReportGapList) return;
       const signedDiff = diff > 0 ? `+${diff}` : String(diff);
       const signedSourceDiff = sourceDiff > 0 ? `+${sourceDiff}` : String(sourceDiff);
-      elements.monthlyReportGapSummary.textContent = `원본데이터 퇴직 제외 ${sourceBasisCount}명 / 월간보고 실제 매칭 ${actualMatchedCount}명 / 미반영 ${unmatchedEmployees.length}명 / 차이 ${signedSourceDiff}명 · 중복 기준 ${duplicateRows.length}명 합계 제외 · 고정값 ${fixedConfigured}명`;
+      elements.monthlyReportGapSummary.textContent = `원본데이터 퇴직 제외 ${sourceBasisCount}명 / 월간보고 실제 매칭 ${actualMatchedCount}명 / 미반영 ${unmatchedEmployees.length}명 / 차이 ${signedSourceDiff}명 · 중복 기준 ${duplicateRows.length}명 합계 제외`;
       const items = rows.map((row) => {
         if (row.employee) {
           return {
@@ -9022,37 +9036,10 @@
       if ((diff !== 0 || sourceDiff !== 0) && !items.length) {
         items.push({
           title: "차이 원인 추가 확인 필요",
-          body: `기준일 제외 ${basisExcludedEmployees.length}명, 원본데이터 미반영 ${unmatchedEmployees.length}명, 월간보고만 포함 ${reportOnlyEmployees.length}명, 중복포함 ${duplicateRows.length}명, 고정값 ${fixedConfigured}명으로는 차이가 완전히 설명되지 않습니다.`
+          body: `기준일 제외 ${basisExcludedEmployees.length}명, 원본데이터 미반영 ${unmatchedEmployees.length}명, 월간보고만 포함 ${reportOnlyEmployees.length}명, 중복포함 ${duplicateRows.length}명으로는 차이가 완전히 설명되지 않습니다.`
         });
       }
       renderInsightItems(elements.monthlyReportGapList, items, "차이 없음", "원본데이터 퇴직 제외 인원과 월간업무보고 실제 매칭 인원이 일치합니다.");
-    }
-
-    function fixedRowAccountedEmployees(row, range) {
-      const criteria = Array.isArray(row.accountedCriteria) ? row.accountedCriteria : [];
-      if (!criteria.length) return [];
-      return state.employees.filter((employee) => {
-        if (!isCurrentForMonthlyReport(employee, range)) return false;
-        return criteria.some((criterion) => employeeMatchesMonthlyAccountedCriterion(employee, parseMonthlyCriterion(criterion)));
-      });
-    }
-
-    function employeeMatchesMonthlyAccountedCriterion(employee, parsed) {
-      if (parsed.exclusions.some((label) => employeeMatchesMonthlyAccountedSimple(employee, label))) return false;
-      return employeeMatchesMonthlyAccountedSimple(employee, parsed.include);
-    }
-
-    function employeeMatchesMonthlyAccountedSimple(employee, label) {
-      const normalized = normalizeMonthlyLabel(label);
-      const position = text(employee.position, "");
-      return monthlyEmployeePersonLabels(employee)
-        .concat([
-          `${employee.employeeNo || ""}`,
-          `${employee.name || ""} ${position}`,
-          `${employee.name || ""}${position}`
-        ])
-        .map(normalizeMonthlyLabel)
-        .includes(normalized);
     }
 
     function monthlyReportRowTitle(row) {
@@ -9060,15 +9047,6 @@
     }
 
     function monthlyReportMatchInfo(row) {
-      if (hasMonthlyFixedCurrent(row)) {
-        return {
-          row,
-          status: "fixed",
-          label: "고정값",
-          variant: "success",
-          detail: `${Number(row.fixedCurrent)}명 고정 · ${text(row.fixedNote, "고정값")}`
-        };
-      }
       const criteria = monthlyReportCriteriaForRow(row);
       if (!criteria.length) {
         return { row, status: "missing", label: "미매칭", variant: "danger", detail: "매칭 기준 없음" };
@@ -9173,7 +9151,7 @@
         directMonthlyOrgNodesForLabel(label).forEach(addDescendants);
       });
       monthlyReportRows
-        .filter((row) => row !== currentRow && row.type === "detail" && !hasMonthlyFixedCurrent(row))
+        .filter((row) => row !== currentRow && row.type === "detail")
         .forEach((row) => {
           monthlyReportCriteriaForRow(row).forEach((criterion) => {
             const other = parseMonthlyCriterion(criterion);
@@ -9259,6 +9237,19 @@
         `${legalName} ${position}`,
         `${legalName}${position}`
       ];
+    }
+
+    function employeeMatchesMonthlyPersonCriterion(employee, label) {
+      const normalized = normalizeMonthlyLabel(label);
+      const position = text(employee.position, "");
+      return monthlyEmployeePersonLabels(employee)
+        .concat([
+          `${employee.employeeNo || ""}`,
+          `${employee.name || ""} ${position}`,
+          `${employee.name || ""}${position}`
+        ])
+        .map(normalizeMonthlyLabel)
+        .includes(normalized);
     }
 
     function assignmentRecordMatchesMonthlyCriteria(record, criteria = []) {
@@ -10768,10 +10759,7 @@
       { header: "본부", key: "group" },
       { header: "부서", key: "label", aliases: ["항목", "표시명"] },
       { header: "매칭기준", key: "criteria", aliases: ["기준"] },
-      { header: "별칭", key: "aliases", aliases: ["추가매칭", "보조기준"] },
-      { header: "고정 현재인원", key: "fixedCurrent", aliases: ["고정값", "고정인원"] },
-      { header: "고정 비고", key: "fixedNote", aliases: ["비고"] },
-      { header: "고정값 원본매칭", key: "accountedCriteria", aliases: ["원본매칭", "차이제외매칭"] }
+      { header: "별칭", key: "aliases", aliases: ["추가매칭", "보조기준"] }
     ];
 
     function monthlyMappingTypeLabel(type) {
@@ -10803,10 +10791,7 @@
         row.group || "",
         row.label || "",
         mappingCellFromList(row.criteria),
-        mappingCellFromList(row.aliases),
-        hasMonthlyFixedCurrent(row) ? Number(row.fixedCurrent) : "",
-        row.fixedNote || "",
-        mappingCellFromList(row.accountedCriteria)
+        mappingCellFromList(row.aliases)
       ]);
       const sheet = window.XLSX.utils.aoa_to_sheet([headers, ...rows]);
       sheet["!cols"] = [
@@ -10815,10 +10800,7 @@
         { wch: 18 },
         { wch: 24 },
         { wch: 38 },
-        { wch: 38 },
-        { wch: 14 },
-        { wch: 28 },
-        { wch: 32 }
+        { wch: 38 }
       ];
       window.XLSX.utils.book_append_sheet(workbook, sheet, "월간보고매핑");
       const guideRows = [
@@ -10826,8 +10808,7 @@
         ["행유형", "상세, 소계, 전체합계 중 하나로 입력하세요. 소계/전체합계 행은 화면 표 구분용입니다."],
         ["매칭기준/별칭", "여러 기준은 줄바꿈, 쉼표, 세미콜론 중 하나로 구분하세요."],
         ["제외 조건", "예: 구매자재팀(원료제조파트 제외)처럼 괄호 안에 '제외'를 넣으면 해당 조직은 제외됩니다."],
-        ["고정 현재인원", "대표이사, 기타비상근처럼 화면 합계에 고정 숫자를 표시해야 할 때만 입력하세요."],
-        ["고정값 원본매칭", "고정값 행에 이미 원본 사원이 포함돼 차이에서 제외해야 할 경우 이름 또는 사번을 입력하세요. 조직명은 넣지 않는 것을 권장합니다."],
+        ["집계 기준", "현재 조직도에 실제 등록된 재직 인원만 월간업무보고 현재 인원수에 반영됩니다."],
         ["업로드 방식", "월간보고매핑 시트의 1행은 제목으로 유지하고 2행부터 수정하세요. 업로드하면 운영 설정에 저장됩니다."]
       ];
       window.XLSX.utils.book_append_sheet(workbook, window.XLSX.utils.aoa_to_sheet(guideRows), "작성안내");
@@ -10840,7 +10821,6 @@
         .filter((row) => Object.values(row).some((value) => text(value, "").trim()))
         .map((row, index) => {
           const order = Number(monthlyMappingExcelValue(row, monthlyReportMappingColumns[0]));
-          const fixedRaw = monthlyMappingExcelValue(row, monthlyReportMappingColumns[6]);
           return {
             order: Number.isFinite(order) ? order : index + 1,
             rowNumber: index + 2,
@@ -10848,10 +10828,7 @@
             group: text(monthlyMappingExcelValue(row, monthlyReportMappingColumns[2]), ""),
             label: text(monthlyMappingExcelValue(row, monthlyReportMappingColumns[3]), ""),
             criteria: listFromMappingCell(monthlyMappingExcelValue(row, monthlyReportMappingColumns[4])),
-            aliases: listFromMappingCell(monthlyMappingExcelValue(row, monthlyReportMappingColumns[5])),
-            fixedCurrent: text(fixedRaw, "") === "" ? "" : Number(fixedRaw),
-            fixedNote: text(monthlyMappingExcelValue(row, monthlyReportMappingColumns[7]), ""),
-            accountedCriteria: listFromMappingCell(monthlyMappingExcelValue(row, monthlyReportMappingColumns[8]))
+            aliases: listFromMappingCell(monthlyMappingExcelValue(row, monthlyReportMappingColumns[5]))
           };
         })
         .sort((a, b) => a.order - b.order);
@@ -10861,12 +10838,10 @@
     function validateMonthlyReportMappingRows(rows) {
       const errors = [];
       rows.forEach((row) => {
-        const hasFixed = hasMonthlyFixedCurrent(row);
         if (row.type === "detail" && !row.label) errors.push(`${row.rowNumber}행: 상세 행은 부서/항목명을 입력하세요.`);
-        if (row.type === "detail" && !row.criteria.length && !row.aliases.length && !hasFixed) {
-          errors.push(`${row.rowNumber}행: 상세 행은 매칭기준, 별칭, 고정 현재인원 중 하나가 필요합니다.`);
+        if (row.type === "detail" && !row.criteria.length && !row.aliases.length) {
+          errors.push(`${row.rowNumber}행: 상세 행은 매칭기준 또는 별칭이 필요합니다.`);
         }
-        if (text(row.fixedCurrent, "") !== "" && !hasFixed) errors.push(`${row.rowNumber}행: 고정 현재인원은 숫자로 입력하세요.`);
       });
       if (!rows.some((row) => row.type === "detail")) errors.push("상세 행이 최소 1개 필요합니다.");
       return errors;
