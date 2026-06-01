@@ -668,20 +668,39 @@
       height: 18px;
     }
 
-    .analytics-command {
-      border: 1px solid var(--line);
+    .analytics-hero {
+      border: 1px solid rgba(15, 118, 110, 0.18);
       border-radius: var(--radius);
-      background: #ffffff;
-      box-shadow: var(--shadow);
-      padding: 18px;
+      background:
+        linear-gradient(135deg, rgba(15, 118, 110, 0.14), rgba(255, 255, 255, 0.96) 48%),
+        linear-gradient(155deg, #ffffff, #f2f8fb 58%, #fff8e8);
+      box-shadow: 0 22px 54px rgba(22, 43, 46, 0.1);
+      padding: 24px;
       display: grid;
-      gap: 16px;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 0.62fr);
+      gap: 22px;
+      align-items: stretch;
     }
 
-    .analytics-filter-bar {
+    .analytics-hero h2 {
+      margin: 6px 0 10px;
+      font-size: clamp(1.65rem, 2.8vw, 2.35rem);
+      line-height: 1.14;
+      letter-spacing: 0;
+    }
+
+    .analytics-hero p {
+      margin: 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .analytics-hero-side {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
+      align-content: stretch;
     }
 
     .filter-token {
@@ -705,6 +724,12 @@
     .filter-token strong {
       font-size: 0.95rem;
       line-height: 1.25;
+    }
+
+    .analytics-hero .filter-token {
+      min-height: 86px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 10px 28px rgba(21, 46, 52, 0.07);
     }
 
     .analytics-tabs {
@@ -735,16 +760,8 @@
       border-color: var(--primary);
     }
 
-    .analytics-grid-main {
-      display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(340px, 0.9fr);
-      gap: 16px;
-      align-items: start;
-    }
-
-    .analytics-stack {
-      display: grid;
-      gap: 16px;
+    .analytics-hero .analytics-tabs {
+      margin-top: 18px;
     }
 
     .analytics-card-head {
@@ -803,6 +820,45 @@
     .analytics-section-title {
       margin: 4px 0 -4px;
       font-size: 1.05rem;
+    }
+
+    .analytics-kpi-grid .metric-card {
+      border-color: transparent;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 252, 251, 0.98));
+      box-shadow: 0 16px 36px rgba(20, 38, 42, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .analytics-kpi-grid .metric-card::after {
+      content: "";
+      position: absolute;
+      right: -22px;
+      top: -22px;
+      width: 82px;
+      height: 82px;
+      border-radius: 50%;
+      background: rgba(15, 118, 110, 0.08);
+      pointer-events: none;
+    }
+
+    .analytics-kpi-grid .metric-card:nth-child(2n)::after {
+      background: rgba(189, 123, 24, 0.09);
+    }
+
+    .analytics-kpi-grid .metric-card:nth-child(3n)::after {
+      background: rgba(47, 125, 79, 0.09);
+    }
+
+    #statistics .panel,
+    #statistics .stat-card {
+      box-shadow: 0 14px 34px rgba(20, 38, 42, 0.07);
+    }
+
+    .analytics-government-panel {
+      background:
+        linear-gradient(180deg, #ffffff, #f8fbfb);
     }
 
     .button {
@@ -2649,7 +2705,7 @@
       .org-workbench,
       .blueprint-hero,
       .dashboard-hero,
-      .analytics-grid-main,
+      .analytics-hero,
       .dashboard-grid,
       .ia-tree {
         grid-template-columns: 1fr;
@@ -2699,12 +2755,15 @@
       .workflow-grid,
       .readiness-grid,
       .readiness-grid.wide,
-      .analytics-filter-bar,
       .form-grid {
         grid-template-columns: 1fr;
       }
 
       .blueprint-hero-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .analytics-hero-side {
         grid-template-columns: 1fr;
       }
 
@@ -2764,9 +2823,9 @@
       .metric-card,
       .stat-card,
       .dashboard-hero,
+      .analytics-hero,
       .role-panel,
-      .workflow-card,
-      .analytics-command {
+      .workflow-card {
         padding: 14px;
       }
 
@@ -3030,7 +3089,7 @@
           <div class="dashboard-hero">
             <div>
               <p class="page-kicker">PeopleOps Command Center</p>
-              <h2 id="dashboard-title">인력 데이터, 조직 리스크, 실행 업무를 한 화면에서 관리합니다.</h2>
+              <h2 id="dashboard-title">인력 데이터와 실행 업무를 한 화면에서 관리합니다.</h2>
               <p>좌측 메뉴는 핵심 운영 메뉴만 남기고, 반복 업무는 아래 워크플로우 카드로 이동했습니다. 경영진·인사담당자·부서장이 같은 데이터를 각자 필요한 관점으로 해석할 수 있게 설계했습니다.</p>
               <div class="hero-actions">
                 <button class="button primary" type="button" data-open-employee>
@@ -3061,8 +3120,8 @@
               </div>
               <div class="command-panel-row">
                 <i data-lucide="radar"></i>
-                <div><strong>조직 리스크</strong><span>입퇴사, 계약 종료, 교육 미이수 흐름 추적</span></div>
-                <em class="signal-badge">분석</em>
+                <div><strong>운영 이슈</strong><span>입퇴사, 계약 종료, 교육 미이수 흐름 추적</span></div>
+                <em class="signal-badge">관리</em>
               </div>
             </aside>
           </div>
@@ -3458,7 +3517,7 @@
                 <ul>
                   <li>통계센터</li>
                   <li>정부 대응 통계</li>
-                  <li>조직 리스크 분석</li>
+                  <li>조직 운영 분석</li>
                   <li>월간업무보고</li>
                 </ul>
               </li>
@@ -3522,7 +3581,7 @@
                 <summary>통계 / People Analytics</summary>
                 <div class="spec-body">
                   <dl class="spec-list">
-                    <dt>목적</dt><dd>인력 구성, 입퇴사 흐름, 정부 대응 통계, 조직 리스크 지표를 통합 제공합니다.</dd>
+                    <dt>목적</dt><dd>인력 구성, 입퇴사 흐름, 정부 대응 통계, 조직 운영 지표를 통합 제공합니다.</dd>
                     <dt>주요 기능</dt><dd>KPI, 차트, 교차표, 필터, 다운로드, 산식 설명, 법정 제출 대응 통계 카탈로그, 월간보고 매핑</dd>
                     <dt>화면 구성</dt><dd>요약 KPI, 구성 차트, 라이프사이클 추이, 정부 대응 탭, 조직별 드릴다운, 다운로드 패널</dd>
                     <dt>주요 데이터</dt><dd>고용형태, 성별, 연령, 근속, 입사일, 퇴직일, 조직, 직급, 직책, 사업장, 장애·보훈·외국인 여부, 휴직·휴가 이력</dd>
@@ -4512,28 +4571,21 @@
         </section>
 
         <section class="view" id="statistics" aria-labelledby="statistics-title">
-          <div class="section-head">
+          <div class="analytics-hero">
             <div>
-              <h2 id="statistics-title">People Analytics 통계센터</h2>
-              <p>재직자 기준 인력 구성, 입퇴사 흐름, 정부 대응 가능 통계, 조직 리스크 지표를 통합 관리합니다.</p>
-            </div>
-          </div>
-
-          <div class="notice">
-            <i data-lucide="shield-alert"></i>
-            <span>
-              법정 제출 여부와 서식은 사업장 규모, 업종, 관할 기관, 최신 법령에 따라 달라질 수 있습니다. 아래 통계는 제출 전 검토용 운영 지표이며, 실제 신고·제출은 추가 확인이 필요합니다.
-            </span>
-          </div>
-
-          <section class="analytics-command" aria-labelledby="analytics-command-title">
-            <div class="section-head">
-              <div>
-                <h2 id="analytics-command-title">통계 운영 기준</h2>
-                <p>통계 산출 기준과 분석 범위를 고정해 월간 보고, 경영 보고, 정부 대응 검토에 동일하게 사용합니다.</p>
+              <p class="page-kicker">People Analytics</p>
+              <h2 id="statistics-title">통계센터</h2>
+              <p>재직자 기준 인력 구성, 입퇴사 흐름, 정부 대응 가능 통계를 한 화면에서 확인합니다. 설계표가 아니라 운영자가 바로 해석할 수 있는 KPI와 차트 중심으로 구성했습니다.</p>
+              <div class="analytics-tabs" aria-label="통계 영역 바로가기">
+                <a href="#analytics-kpi">KPI</a>
+                <a href="#analytics-composition">인력 구성</a>
+                <a href="#analytics-lifecycle">입퇴사 추이</a>
+                <a href="#analytics-government">정부 대응</a>
+                <a href="#analytics-organization">조직별 현황</a>
+                <a href="#analytics-detail">상세 명부</a>
               </div>
             </div>
-            <div class="analytics-filter-bar" aria-label="통계 필터 기준">
+            <div class="analytics-hero-side" aria-label="통계 운영 기준">
               <div class="filter-token">
                 <span>기준일</span>
                 <strong id="analyticsAsOfDate">오늘</strong>
@@ -4551,19 +4603,18 @@
                 <strong>사원관리 · 조직도 · 업무기록</strong>
               </div>
             </div>
-            <div class="analytics-tabs" aria-label="통계 영역 바로가기">
-              <a href="#analytics-kpi">KPI</a>
-              <a href="#analytics-composition">인력 구성</a>
-              <a href="#analytics-lifecycle">입퇴사 추이</a>
-              <a href="#analytics-government">정부 대응</a>
-              <a href="#analytics-organization">조직별 현황</a>
-              <a href="#analytics-detail">상세 명부</a>
-            </div>
-          </section>
+          </div>
+
+          <div class="notice">
+            <i data-lucide="shield-alert"></i>
+            <span>
+              법정 제출 여부와 서식은 사업장 규모, 업종, 관할 기관, 최신 법령에 따라 달라질 수 있습니다. 아래 통계는 제출 전 검토용 운영 지표이며, 실제 신고·제출은 추가 확인이 필요합니다.
+            </span>
+          </div>
 
           <h2 class="analytics-section-title" id="analytics-kpi">핵심 KPI</h2>
 
-          <div class="grid kpi-grid" aria-label="상세 인사 운영 지표">
+          <div class="grid kpi-grid analytics-kpi-grid" aria-label="상세 인사 운영 지표">
             <article class="metric-card">
               <div class="metric-top">
                 <span class="metric-label">재직/휴직 인원</span>
@@ -4630,29 +4681,16 @@
             </article>
           </div>
 
-          <div class="analytics-grid-main">
-            <section class="panel" aria-labelledby="analytics-risk-title">
-              <div class="analytics-card-head">
-                <div>
-                  <h3 id="analytics-risk-title">조직 리스크 신호</h3>
-                  <span>계약, 수습, 개인정보, 데이터 품질 기준</span>
-                </div>
-                <span class="signal-badge">Action</span>
+          <section class="panel analytics-government-panel" id="analytics-government" aria-labelledby="analytics-government-title">
+            <div class="analytics-card-head">
+              <div>
+                <h3 id="analytics-government-title">정부 대응 현황</h3>
+                <span>제출 검토용 데이터 준비 상태</span>
               </div>
-              <ul class="insight-list" id="riskList"></ul>
-            </section>
-
-            <section class="panel" id="analytics-government" aria-labelledby="analytics-government-title">
-              <div class="analytics-card-head">
-                <div>
-                  <h3 id="analytics-government-title">정부 대응 현황</h3>
-                  <span>제출 검토용 데이터 준비 상태</span>
-                </div>
-                <span class="signal-badge">Review</span>
-              </div>
-              <div class="readiness-grid" id="governmentReadinessGrid"></div>
-            </section>
-          </div>
+              <span class="signal-badge">Review</span>
+            </div>
+            <div class="readiness-grid wide" id="governmentReadinessGrid"></div>
+          </section>
 
           <h2 class="analytics-section-title" id="analytics-composition">인력 구성 분석</h2>
 
@@ -6625,7 +6663,6 @@
       hireMonthBars: document.querySelector("#hireMonthBars"),
       activeMonthBars: document.querySelector("#activeMonthBars"),
       yearlyLifecycleBars: document.querySelector("#yearlyLifecycleBars"),
-      riskList: document.querySelector("#riskList"),
       positionGenderTable: document.querySelector("#positionGenderTable"),
       jobGroupGenderTable: document.querySelector("#jobGroupGenderTable"),
       departmentAnalyticsTable: document.querySelector("#departmentAnalyticsTable"),
@@ -11057,7 +11094,6 @@
         }).format(new Date());
       }
       renderStatsKpis();
-      renderRiskList();
       renderGovernmentReadiness();
       renderEmploymentDonut(total);
       renderTenureBars();
@@ -11143,54 +11179,6 @@
       ];
       const rows = ordered.map((label) => [labelFormatter(label), counts[label] || 0]);
       renderBars(container, rows, employees.length, emptyMessage);
-    }
-
-    function renderRiskList() {
-      const active = activeEmployees();
-      const contractDue = active.filter((employee) => isDateWithinDays(employee.contractEndDate, 90));
-      const probationDue = active.filter((employee) => isDateWithinDays(employee.probationEndDate, 30));
-      const missingEmergency = active.filter((employee) => !text(employee.emergencyPhone, ""));
-      const lowCompleteness = active.filter((employee) => profileCompleteness(employee) < 70);
-      const privacyMissing = active.filter((employee) => !text(employee.privacyConsentDate, ""));
-
-      const risks = [
-        {
-          title: `계약 종료 90일 내 ${contractDue.length}명`,
-          body: contractDue.length ? contractDue.map((employee) => `${employee.name}(${formatDate(employee.contractEndDate)})`).join(", ") : "현재 점검 대상이 없습니다."
-        },
-        {
-          title: `수습 종료 30일 내 ${probationDue.length}명`,
-          body: probationDue.length ? probationDue.map((employee) => `${employee.name}(${formatDate(employee.probationEndDate)})`).join(", ") : "현재 점검 대상이 없습니다."
-        },
-        {
-          title: `비상연락처 미입력 ${missingEmergency.length}명`,
-          body: missingEmergency.length ? missingEmergency.map((employee) => employee.name).join(", ") : "필수 비상연락 정보가 입력되어 있습니다."
-        },
-        {
-          title: `정보 완성도 70% 미만 ${lowCompleteness.length}명`,
-          body: lowCompleteness.length ? lowCompleteness.map((employee) => `${employee.name}(${profileCompleteness(employee)}%)`).join(", ") : "상세 인적사항 완성도가 양호합니다."
-        },
-        {
-          title: `개인정보 동의일 미입력 ${privacyMissing.length}명`,
-          body: privacyMissing.length ? privacyMissing.map((employee) => employee.name).join(", ") : "동의일 기준 정보가 입력되어 있습니다."
-        }
-      ];
-
-      elements.riskList.replaceChildren();
-      risks.forEach((risk) => {
-        const li = document.createElement("li");
-        li.className = "insight-item";
-        const dot = document.createElement("span");
-        dot.className = "activity-dot";
-        const wrap = document.createElement("div");
-        const title = document.createElement("strong");
-        title.textContent = risk.title;
-        const body = document.createElement("span");
-        body.textContent = risk.body;
-        wrap.append(title, body);
-        li.append(dot, wrap);
-        elements.riskList.append(li);
-      });
     }
 
     function renderGovernmentReadiness() {
