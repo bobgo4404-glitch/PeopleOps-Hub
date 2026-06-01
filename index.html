@@ -6002,6 +6002,10 @@
       "Quality": "품질직군"
     };
 
+    const departmentAnalyticsMergeMap = {
+      "경영지원부문": "경영지원본부"
+    };
+
     const sampleEmployees = [
       {
         id: "emp-001",
@@ -11384,14 +11388,22 @@
       return `${(valid.reduce((sum, value) => sum + value, 0) / valid.length).toFixed(1)}${suffix}`;
     }
 
+    function departmentAnalyticsGroupName(employee) {
+      const department = text(employee.department, "미입력");
+      return departmentAnalyticsMergeMap[department] || department;
+    }
+
     function renderDepartmentAnalyticsTable() {
       const source = activeEmployees();
-      const departments = [...new Set(source.map((employee) => text(employee.department, "미입력")))]
-        .sort((a, b) => a.localeCompare(b, "ko"));
-      const rows = departments.map((department) => {
-        const employees = source.filter((employee) => text(employee.department, "미입력") === department);
-        return { department, employees };
-      });
+      const groups = source.reduce((acc, employee) => {
+        const department = departmentAnalyticsGroupName(employee);
+        if (!acc.has(department)) acc.set(department, []);
+        acc.get(department).push(employee);
+        return acc;
+      }, new Map());
+      const rows = [...groups.entries()]
+        .map(([department, employees]) => ({ department, employees }))
+        .sort((a, b) => a.department.localeCompare(b.department, "ko"));
 
       renderTableRows(elements.departmentAnalyticsTable, rows, 6, ({ department, employees }) => {
         const active = employees.filter((employee) => employee.status === "재직").length;
