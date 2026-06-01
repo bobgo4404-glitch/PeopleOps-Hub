@@ -8511,6 +8511,7 @@
       monthlyReportRows
         .filter((row) => row.type === "detail")
         .forEach((row) => detailStats.set(row, monthlyReportStatsForRow(row, range)));
+      dedupeMonthlyCurrentAssignments(detailStats);
 
       const subtotalStats = new Map();
       [...new Set(monthlyReportRows.filter((row) => row.type === "subtotal").map((row) => row.group))].forEach((group) => {
@@ -8523,6 +8524,21 @@
       renderMonthlyReportTable(detailStats, subtotalStats, totalStats, range, matchRows);
       renderMonthlyReportMatchTable(matchRows);
       renderMonthlyReportReconciliation(detailStats, totalStats, range);
+    }
+
+    function dedupeMonthlyCurrentAssignments(detailStats) {
+      const assignedIds = new Set();
+      monthlyReportRows
+        .filter((row) => row.type === "detail")
+        .forEach((row) => {
+          const stats = detailStats.get(row);
+          if (!stats) return;
+          stats.currentIds = new Set([...stats.currentIds].filter((id) => {
+            if (assignedIds.has(id)) return false;
+            assignedIds.add(id);
+            return true;
+          }));
+        });
     }
 
     function refreshMonthlyReportMonthOptions() {
