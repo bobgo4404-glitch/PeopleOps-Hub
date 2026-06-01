@@ -4925,11 +4925,11 @@
 
     const monthlyReportRows = [
       { type: "detail", group: "", label: "대표이사", criteria: ["대표이사"], fixedCurrent: 2, fixedNote: "홍성훈+1인" },
-      { type: "detail", group: "생산본부", label: "본부장", criteria: ["김종규 본부장"] },
+      { type: "detail", group: "생산본부", label: "본부장", criteria: ["김종규 본부장", "생산본부 본부장"] },
       { type: "detail", group: "생산본부", label: "생산관리팀", criteria: ["생산관리팀"] },
       { type: "detail", group: "생산본부", label: "제조팀", criteria: ["원료제조파트"] },
       { type: "detail", group: "생산본부", label: "품질보증팀", criteria: ["품질보증팀"] },
-      { type: "detail", group: "생산본부", label: "구매자재팀", criteria: ["구매자재팀(원료제조파트 제외)"] },
+      { type: "detail", group: "생산본부", label: "구매자재팀", criteria: ["구매자재팀(원료제조파트 제외)"], aliases: ["공급관리팀(원료제조파트 제외)"] },
       { type: "subtotal", group: "생산본부", label: "소계" },
       { type: "detail", group: "영업본부", label: "국내영업팀", criteria: ["국내영업부문"], aliases: ["국내영업팀"] },
       { type: "detail", group: "영업본부", label: "해외영업팀", criteria: ["해외영업부문"], aliases: ["해외영업팀"] },
@@ -4938,16 +4938,16 @@
       { type: "detail", group: "마케팅본부", label: "본부장", criteria: ["마케팅본부 본부장"] },
       { type: "detail", group: "마케팅본부", label: "기획팀", criteria: ["상품기획팀", "디자인파트"], aliases: ["기획팀"] },
       { type: "subtotal", group: "마케팅본부", label: "소계" },
-      { type: "detail", group: "연구소", label: "연구소장", criteria: ["허선행 본부장"] },
-      { type: "detail", group: "연구소", label: "연구 부소장", criteria: ["김한용부장"] },
+      { type: "detail", group: "연구소", label: "연구소장", criteria: ["허선행 본부장", "연구소 본부장", "연구소장"] },
+      { type: "detail", group: "연구소", label: "연구 부소장", criteria: ["김한용부장", "김한용 부장", "연구 부소장", "연구소 부소장"] },
       { type: "detail", group: "연구소", label: "연구1팀", criteria: ["연구1팀"] },
       { type: "detail", group: "연구소", label: "연구2팀", criteria: ["연구2팀"] },
       { type: "detail", group: "연구소", label: "연구3팀", criteria: ["연구3팀"] },
       { type: "detail", group: "연구소", label: "제도협력팀", criteria: ["제도협력팀"] },
       { type: "detail", group: "연구소", label: "중국법인 연구소", criteria: ["중국법인 연구소"], aliases: ["중국법인_연구소"] },
       { type: "subtotal", group: "연구소", label: "소계" },
-      { type: "detail", group: "경영지원본부", label: "본부장", criteria: ["강준석 본부장"] },
-      { type: "detail", group: "경영지원본부", label: "경영지원팀", criteria: ["경영지원팀", "재무기획팀"] },
+      { type: "detail", group: "경영지원본부", label: "본부장", criteria: ["강준석 본부장", "경영지원본부 본부장"] },
+      { type: "detail", group: "경영지원본부", label: "경영지원팀", criteria: ["경영지원본부(본부장/IT팀/기타비상근 제외)", "경영지원팀", "재무기획팀"] },
       { type: "detail", group: "경영지원본부", label: "IT팀", criteria: ["IT팀"] },
       { type: "detail", group: "경영지원본부", label: "기타비상근", criteria: ["기타비상근"], fixedCurrent: 5, fixedNote: "기타비상근 5명 고정" },
       { type: "subtotal", group: "경영지원본부", label: "소계" },
@@ -8622,7 +8622,6 @@
       if (Number.isFinite(Number(row.fixedCurrent))) {
         stats.fixedCurrent = Number(row.fixedCurrent);
         stats.fixedNote = text(row.fixedNote, "고정값");
-        return stats;
       }
       state.employees.forEach((employee) => {
         if (!employeeMatchesMonthlyReportRow(employee, row)) return;
@@ -8655,9 +8654,9 @@
 
     function monthlyStatsCounts(stats) {
       if (stats.countOverrides) return { ...stats.countOverrides };
-      const fixedCurrent = Number.isFinite(stats.fixedCurrent) ? stats.fixedCurrent : 0;
+      const hasFixedCurrent = Number.isFinite(stats.fixedCurrent);
       return {
-        current: stats.currentIds.size + fixedCurrent,
+        current: hasFixedCurrent ? stats.fixedCurrent : stats.currentIds.size,
         hires: stats.hireIds.size,
         retirements: stats.retirementIds.size,
         other: stats.otherIds.size
@@ -8800,12 +8799,12 @@
       const orgEmployees = employeesForOrgNodeByFilter(ROOT_ORG_ID, true, (employee) => isWorkingAsOf(employee));
       const reportCount = monthlyStatsCounts(totalStats).current;
       const orgCount = orgEmployees.length;
-      const nonFixedRows = monthlyReportRows.filter((row) => row.type === "detail" && !Number.isFinite(Number(row.fixedCurrent)));
+      const actualMatchRows = monthlyReportRows.filter((row) => row.type === "detail");
       const fixedRows = monthlyReportRows.filter((row) => row.type === "detail" && Number.isFinite(Number(row.fixedCurrent)));
       const fixedConfigured = fixedRows.reduce((sum, row) => sum + Number(row.fixedCurrent || 0), 0);
       const reportEmployeeIds = new Set();
       const reportAssignments = new Map();
-      nonFixedRows.forEach((row) => {
+      actualMatchRows.forEach((row) => {
         const stats = detailStats.get(row);
         stats?.currentIds.forEach((id) => {
           reportEmployeeIds.add(id);
@@ -8860,7 +8859,7 @@
         rows.push({
           type: "고정값 반영",
           employee: null,
-          note: `대표이사 2명, 기타비상근 5명은 특정 사원명과 연결하지 않고 총 ${fixedConfigured}명으로 별도 반영`
+          note: `대표이사, 기타비상근 등 고정값 행은 화면 합계에 총 ${fixedConfigured}명으로 반영하되, 원본 사원과 매칭되는 인원은 차이 대상에서 제외`
         });
       }
 
@@ -9056,6 +9055,7 @@
     }
 
     function employeeMatchesMonthlyReportCriterion(employee, parsed, row) {
+      if (parsed.exclusions.some((label) => employeeMatchesMonthlySimple(employee, label))) return false;
       const allowedNames = monthlyReportOrgNamesForCriterion(parsed, row);
       if (allowedNames.length) {
         const allowed = allowedNames.map(normalizeMonthlyLabel);
@@ -9065,7 +9065,6 @@
         const orgValues = [employee.department, employee.team, employee.part].map(normalizeMonthlyLabel).filter(Boolean);
         return orgValues.some((value) => allowed.includes(value));
       }
-      if (parsed.exclusions.some((label) => employeeMatchesMonthlySimple(employee, label))) return false;
       return employeeMatchesMonthlySimple(employee, parsed.include);
     }
 
@@ -9095,6 +9094,11 @@
         employee.team,
         employee.part,
         employee.position,
+        employee.employmentType,
+        employee.workType,
+        employee.jobGroup,
+        employee.gradeLevel,
+        employee.location,
         employee.manager,
         `${employee.department || ""} ${position}`,
         `${employee.department || ""}${position}`,
