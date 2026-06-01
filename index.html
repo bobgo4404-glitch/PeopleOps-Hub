@@ -1148,6 +1148,13 @@
       font-weight: 760;
     }
 
+    .monthly-report-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
     .monthly-report-wrap {
       border-color: #9aa8bf;
     }
@@ -3594,10 +3601,21 @@
               <h2 id="monthly-report-title">월간업무보고</h2>
               <p>조직도 매칭 기준으로 선택 월의 현재 인원수, 입사, 퇴사, 기타 변동을 확인합니다.</p>
             </div>
-            <label class="field month-select-field" for="monthlyReportMonth">
-              <span>해당월</span>
-              <select id="monthlyReportMonth" aria-label="월간업무보고 해당월"></select>
-            </label>
+            <div class="monthly-report-actions">
+              <button class="button ghost" type="button" id="downloadMonthlyReportMapping">
+                <i data-lucide="file-spreadsheet"></i>
+                매핑 엑셀 다운로드
+              </button>
+              <button class="button ghost" type="button" id="uploadMonthlyReportMapping">
+                <i data-lucide="upload"></i>
+                매핑 엑셀 업로드
+              </button>
+              <input id="monthlyReportMappingInput" type="file" accept=".xlsx,.xls" hidden />
+              <label class="field month-select-field" for="monthlyReportMonth">
+                <span>해당월</span>
+                <select id="monthlyReportMonth" aria-label="월간업무보고 해당월"></select>
+              </label>
+            </div>
           </div>
 
           <div class="grid kpi-grid" id="monthlyReportSummary" aria-label="월간업무보고 요약"></div>
@@ -4923,7 +4941,7 @@
       settings: ["Administration", "운영 설정"]
     };
 
-    const monthlyReportRows = [
+    const defaultMonthlyReportRows = [
       { type: "detail", group: "", label: "대표이사", criteria: ["대표이사"], fixedCurrent: 2, fixedNote: "홍성훈+1인", accountedCriteria: ["홍성훈"] },
       { type: "detail", group: "생산본부", label: "본부장", criteria: ["김종규 본부장", "생산본부 본부장"] },
       { type: "detail", group: "생산본부", label: "생산관리팀", criteria: ["생산관리팀"], aliases: ["생산관리부", "생산관리부문", "생산관리파트", "생산관리"] },
@@ -4953,6 +4971,8 @@
       { type: "subtotal", group: "경영지원본부", label: "소계" },
       { type: "total", group: "", label: "전체합계" }
     ];
+    let monthlyReportRows = defaultMonthlyReportRows.map(cloneMonthlyReportRow);
+    defaultSettings.monthlyReportRows = defaultMonthlyReportRows.map(cloneMonthlyReportRow);
 
     const roleDefinitions = {
       owner: {
@@ -5220,6 +5240,9 @@
       retirementPageButtons: document.querySelector("#retirementPageButtons"),
       monthlyReportMonth: document.querySelector("#monthlyReportMonth"),
       monthlyReportSummary: document.querySelector("#monthlyReportSummary"),
+      downloadMonthlyReportMapping: document.querySelector("#downloadMonthlyReportMapping"),
+      uploadMonthlyReportMapping: document.querySelector("#uploadMonthlyReportMapping"),
+      monthlyReportMappingInput: document.querySelector("#monthlyReportMappingInput"),
       monthlyReportPeriodLabel: document.querySelector("#monthlyReportPeriodLabel"),
       monthlyReportHeadcountHeader: document.querySelector("#monthlyReportHeadcountHeader"),
       monthlyReportTable: document.querySelector("#monthlyReportTable"),
@@ -5361,6 +5384,45 @@
       return settings;
     }
 
+    function listFromMappingCell(value) {
+      return [...new Set(text(value, "")
+        .split(/[\n,;]+/)
+        .map((item) => item.trim())
+        .filter(Boolean))];
+    }
+
+    function mappingCellFromList(values = []) {
+      return Array.isArray(values) ? values.map((value) => text(value, "")).filter(Boolean).join("\n") : "";
+    }
+
+    function hasMonthlyFixedCurrent(row = {}) {
+      return text(row.fixedCurrent, "") !== "" && Number.isFinite(Number(row.fixedCurrent));
+    }
+
+    function cloneMonthlyReportRow(row = {}) {
+      const cloned = {
+        type: ["detail", "subtotal", "total"].includes(row.type) ? row.type : "detail",
+        group: text(row.group, ""),
+        label: text(row.label, ""),
+        criteria: Array.isArray(row.criteria) ? row.criteria.map((value) => text(value, "")).filter(Boolean) : listFromMappingCell(row.criteria),
+        aliases: Array.isArray(row.aliases) ? row.aliases.map((value) => text(value, "")).filter(Boolean) : listFromMappingCell(row.aliases),
+        fixedCurrent: hasMonthlyFixedCurrent(row) ? Number(row.fixedCurrent) : "",
+        fixedNote: text(row.fixedNote, ""),
+        accountedCriteria: Array.isArray(row.accountedCriteria) ? row.accountedCriteria.map((value) => text(value, "")).filter(Boolean) : listFromMappingCell(row.accountedCriteria)
+      };
+      if (!hasMonthlyFixedCurrent(cloned)) cloned.fixedCurrent = "";
+      return cloned;
+    }
+
+    function normalizeMonthlyReportRows(rows = []) {
+      const source = Array.isArray(rows) && rows.length ? rows : defaultMonthlyReportRows;
+      const normalized = source
+        .map(cloneMonthlyReportRow)
+        .filter((row) => row.type !== "detail" || row.label || row.criteria.length || row.aliases.length || hasMonthlyFixedCurrent(row));
+      if (!normalized.some((row) => row.type === "total")) normalized.push(cloneMonthlyReportRow({ type: "total", label: "전체합계" }));
+      return normalized;
+    }
+
     function normalizeSettings(settings = {}) {
       const merged = { ...defaultSettings, ...settings };
       merged.employeeNoUseDeptCode = "false";
@@ -5370,6 +5432,8 @@
       merged.teams = translateList(merged.teams, legacyTeamLabels);
       merged.jobGroups = translateList(merged.jobGroups, legacyJobGroupLabels);
       merged.organizationNodes = normalizeOrganizationNodes(merged.organizationNodes, text(merged.companyName, defaultSettings.companyName));
+      merged.monthlyReportRows = normalizeMonthlyReportRows(merged.monthlyReportRows);
+      monthlyReportRows = merged.monthlyReportRows;
       return syncOrganizationCodeLists(merged);
     }
 
@@ -8539,7 +8603,7 @@
           stats.retirementIds = new Set(rawStats.retirementIds);
           stats.otherIds = new Set(rawStats.otherIds);
           stats.otherLabels = [...rawStats.otherLabels];
-          const currentIds = Number.isFinite(Number(row.fixedCurrent))
+          const currentIds = hasMonthlyFixedCurrent(row)
             ? fixedRowAccountedEmployees(row, range).map((employee) => employee.id)
             : [...rawStats.currentIds];
           currentIds.forEach((id) => {
@@ -8666,7 +8730,7 @@
 
     function monthlyReportStatsForRow(row, range) {
       const stats = emptyMonthlyStats();
-      if (Number.isFinite(Number(row.fixedCurrent))) {
+      if (hasMonthlyFixedCurrent(row)) {
         stats.fixedCurrent = Number(row.fixedCurrent);
         stats.fixedNote = text(row.fixedNote, "고정값");
         return stats;
@@ -8848,7 +8912,7 @@
       const reportCount = monthlyStatsCounts(totalStats).current;
       const orgCount = orgEmployees.length;
       const actualMatchRows = monthlyReportRows.filter((row) => row.type === "detail");
-      const fixedRows = monthlyReportRows.filter((row) => row.type === "detail" && Number.isFinite(Number(row.fixedCurrent)));
+      const fixedRows = monthlyReportRows.filter((row) => row.type === "detail" && hasMonthlyFixedCurrent(row));
       const fixedConfigured = fixedRows.reduce((sum, row) => sum + Number(row.fixedCurrent || 0), 0);
       const reportEmployeeIds = new Set();
       const reportAssignments = new Map();
@@ -8996,7 +9060,7 @@
     }
 
     function monthlyReportMatchInfo(row) {
-      if (Number.isFinite(Number(row.fixedCurrent))) {
+      if (hasMonthlyFixedCurrent(row)) {
         return {
           row,
           status: "fixed",
@@ -9109,7 +9173,7 @@
         directMonthlyOrgNodesForLabel(label).forEach(addDescendants);
       });
       monthlyReportRows
-        .filter((row) => row !== currentRow && row.type === "detail" && !Number.isFinite(Number(row.fixedCurrent)))
+        .filter((row) => row !== currentRow && row.type === "detail" && !hasMonthlyFixedCurrent(row))
         .forEach((row) => {
           monthlyReportCriteriaForRow(row).forEach((criterion) => {
             const other = parseMonthlyCriterion(criterion);
@@ -10698,6 +10762,145 @@
       return false;
     }
 
+    const monthlyReportMappingColumns = [
+      { header: "순서", key: "order" },
+      { header: "행유형", key: "type", aliases: ["유형"] },
+      { header: "본부", key: "group" },
+      { header: "부서", key: "label", aliases: ["항목", "표시명"] },
+      { header: "매칭기준", key: "criteria", aliases: ["기준"] },
+      { header: "별칭", key: "aliases", aliases: ["추가매칭", "보조기준"] },
+      { header: "고정 현재인원", key: "fixedCurrent", aliases: ["고정값", "고정인원"] },
+      { header: "고정 비고", key: "fixedNote", aliases: ["비고"] },
+      { header: "고정값 원본매칭", key: "accountedCriteria", aliases: ["원본매칭", "차이제외매칭"] }
+    ];
+
+    function monthlyMappingTypeLabel(type) {
+      if (type === "subtotal") return "소계";
+      if (type === "total") return "전체합계";
+      return "상세";
+    }
+
+    function monthlyMappingTypeValue(value) {
+      const normalized = normalizeMonthlyLabel(value);
+      if (["subtotal", "소계"].includes(normalized)) return "subtotal";
+      if (["total", "전체합계", "합계"].includes(normalized)) return "total";
+      return "detail";
+    }
+
+    function monthlyMappingExcelValue(row, column) {
+      const targets = [column.header, ...(column.aliases || [])].map(normalizeExcelHeader);
+      const key = Object.keys(row).find((header) => targets.includes(normalizeExcelHeader(header)));
+      return key ? row[key] : "";
+    }
+
+    function downloadMonthlyReportMappingExcel() {
+      if (!xlsxReady()) return;
+      const workbook = window.XLSX.utils.book_new();
+      const headers = monthlyReportMappingColumns.map((column) => column.header);
+      const rows = monthlyReportRows.map((row, index) => [
+        index + 1,
+        monthlyMappingTypeLabel(row.type),
+        row.group || "",
+        row.label || "",
+        mappingCellFromList(row.criteria),
+        mappingCellFromList(row.aliases),
+        hasMonthlyFixedCurrent(row) ? Number(row.fixedCurrent) : "",
+        row.fixedNote || "",
+        mappingCellFromList(row.accountedCriteria)
+      ]);
+      const sheet = window.XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      sheet["!cols"] = [
+        { wch: 8 },
+        { wch: 12 },
+        { wch: 18 },
+        { wch: 24 },
+        { wch: 38 },
+        { wch: 38 },
+        { wch: 14 },
+        { wch: 28 },
+        { wch: 32 }
+      ];
+      window.XLSX.utils.book_append_sheet(workbook, sheet, "월간보고매핑");
+      const guideRows = [
+        ["작성 안내"],
+        ["행유형", "상세, 소계, 전체합계 중 하나로 입력하세요. 소계/전체합계 행은 화면 표 구분용입니다."],
+        ["매칭기준/별칭", "여러 기준은 줄바꿈, 쉼표, 세미콜론 중 하나로 구분하세요."],
+        ["제외 조건", "예: 구매자재팀(원료제조파트 제외)처럼 괄호 안에 '제외'를 넣으면 해당 조직은 제외됩니다."],
+        ["고정 현재인원", "대표이사, 기타비상근처럼 화면 합계에 고정 숫자를 표시해야 할 때만 입력하세요."],
+        ["고정값 원본매칭", "고정값 행에 이미 원본 사원이 포함돼 차이에서 제외해야 할 경우 이름 또는 사번을 입력하세요. 조직명은 넣지 않는 것을 권장합니다."],
+        ["업로드 방식", "월간보고매핑 시트의 1행은 제목으로 유지하고 2행부터 수정하세요. 업로드하면 운영 설정에 저장됩니다."]
+      ];
+      window.XLSX.utils.book_append_sheet(workbook, window.XLSX.utils.aoa_to_sheet(guideRows), "작성안내");
+      window.XLSX.writeFile(workbook, `peopleops-monthly-report-mapping-${new Date().toISOString().slice(0, 10)}.xlsx`);
+      showToast("월간업무보고 매핑 엑셀을 생성했습니다.");
+    }
+
+    function parseMonthlyReportMappingRows(rows) {
+      const parsedRows = rows
+        .filter((row) => Object.values(row).some((value) => text(value, "").trim()))
+        .map((row, index) => {
+          const order = Number(monthlyMappingExcelValue(row, monthlyReportMappingColumns[0]));
+          const fixedRaw = monthlyMappingExcelValue(row, monthlyReportMappingColumns[6]);
+          return {
+            order: Number.isFinite(order) ? order : index + 1,
+            rowNumber: index + 2,
+            type: monthlyMappingTypeValue(monthlyMappingExcelValue(row, monthlyReportMappingColumns[1])),
+            group: text(monthlyMappingExcelValue(row, monthlyReportMappingColumns[2]), ""),
+            label: text(monthlyMappingExcelValue(row, monthlyReportMappingColumns[3]), ""),
+            criteria: listFromMappingCell(monthlyMappingExcelValue(row, monthlyReportMappingColumns[4])),
+            aliases: listFromMappingCell(monthlyMappingExcelValue(row, monthlyReportMappingColumns[5])),
+            fixedCurrent: text(fixedRaw, "") === "" ? "" : Number(fixedRaw),
+            fixedNote: text(monthlyMappingExcelValue(row, monthlyReportMappingColumns[7]), ""),
+            accountedCriteria: listFromMappingCell(monthlyMappingExcelValue(row, monthlyReportMappingColumns[8]))
+          };
+        })
+        .sort((a, b) => a.order - b.order);
+      return parsedRows;
+    }
+
+    function validateMonthlyReportMappingRows(rows) {
+      const errors = [];
+      rows.forEach((row) => {
+        const hasFixed = hasMonthlyFixedCurrent(row);
+        if (row.type === "detail" && !row.label) errors.push(`${row.rowNumber}행: 상세 행은 부서/항목명을 입력하세요.`);
+        if (row.type === "detail" && !row.criteria.length && !row.aliases.length && !hasFixed) {
+          errors.push(`${row.rowNumber}행: 상세 행은 매칭기준, 별칭, 고정 현재인원 중 하나가 필요합니다.`);
+        }
+        if (text(row.fixedCurrent, "") !== "" && !hasFixed) errors.push(`${row.rowNumber}행: 고정 현재인원은 숫자로 입력하세요.`);
+      });
+      if (!rows.some((row) => row.type === "detail")) errors.push("상세 행이 최소 1개 필요합니다.");
+      return errors;
+    }
+
+    async function importMonthlyReportMappingExcel(event) {
+      if (!requireWritePermission()) return;
+      if (!xlsxReady()) return;
+      const file = event.target.files?.[0];
+      event.target.value = "";
+      if (!file) return;
+
+      try {
+        const workbook = window.XLSX.read(await file.arrayBuffer(), { type: "array", cellDates: true });
+        const sheet = workbook.Sheets["월간보고매핑"] || workbook.Sheets[workbook.SheetNames[0]];
+        const rows = window.XLSX.utils.sheet_to_json(sheet, { defval: "", raw: true });
+        const parsedRows = parseMonthlyReportMappingRows(rows);
+        const errors = validateMonthlyReportMappingRows(parsedRows);
+        if (errors.length) {
+          window.alert(["월간업무보고 매핑 업로드를 중단했습니다.", ...errors.slice(0, 12), errors.length > 12 ? `외 ${errors.length - 12}건` : ""].filter(Boolean).join("\n"));
+          return;
+        }
+        state.settings.monthlyReportRows = normalizeMonthlyReportRows(parsedRows);
+        monthlyReportRows = state.settings.monthlyReportRows;
+        saveSettings();
+        renderMonthlyReport();
+        if (window.lucide) window.lucide.createIcons();
+        showToast(`${monthlyReportRows.length}개 월간업무보고 매핑 행을 저장했습니다.`);
+      } catch (error) {
+        console.error("monthly report mapping import failed", error);
+        showToast("월간업무보고 매핑 엑셀을 읽지 못했습니다. 양식을 확인하세요.");
+      }
+    }
+
     function downloadEmployeeExcelTemplate() {
       if (!xlsxReady()) return;
       const workbook = window.XLSX.utils.book_new();
@@ -11167,6 +11370,11 @@
         if (requireWritePermission()) elements.employeeExcelInput?.click();
       });
       on(elements.employeeExcelInput, "change", importEmployeesFromExcel);
+      on(elements.downloadMonthlyReportMapping, "click", downloadMonthlyReportMappingExcel);
+      on(elements.uploadMonthlyReportMapping, "click", () => {
+        if (requireWritePermission()) elements.monthlyReportMappingInput?.click();
+      });
+      on(elements.monthlyReportMappingInput, "change", importMonthlyReportMappingExcel);
       on(elements.clearEmployees, "click", clearEmployeeDataOnly);
       [elements.exportCsv, elements.exportSettings].forEach((button) => {
         on(button, "click", exportCsvFile);
