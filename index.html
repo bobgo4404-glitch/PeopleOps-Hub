@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PeopleOps Hub - 인적관리 시스템</title>
+  <title>PeopleOps Hub - PeopleOps 플랫폼</title>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
@@ -1822,6 +1822,340 @@
       margin-top: 1px;
     }
 
+    .blueprint-hero {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #f2f7f8;
+      padding: 22px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.58fr);
+      gap: 18px;
+      align-items: stretch;
+      box-shadow: var(--shadow);
+    }
+
+    .blueprint-hero h2 {
+      margin: 6px 0 8px;
+      font-size: 1.45rem;
+      letter-spacing: 0;
+      line-height: 1.25;
+    }
+
+    .blueprint-hero p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 920px;
+    }
+
+    .blueprint-hero-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      align-content: stretch;
+    }
+
+    .blueprint-hero-meta span {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #ffffff;
+      padding: 11px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 760;
+    }
+
+    .blueprint-hero-meta strong {
+      display: block;
+      margin-top: 4px;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .blueprint-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .blueprint-nav a {
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 0 11px;
+      color: var(--primary-strong);
+      background: #ffffff;
+      text-decoration: none;
+      font-size: 0.83rem;
+      font-weight: 820;
+    }
+
+    .strategy-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .strategy-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #ffffff;
+      padding: 15px;
+      display: grid;
+      gap: 9px;
+      min-height: 172px;
+    }
+
+    .strategy-card h3,
+    .feature-card h3,
+    .dashboard-card h3 {
+      margin: 0;
+      font-size: 0.98rem;
+      line-height: 1.35;
+    }
+
+    .strategy-card p,
+    .feature-card p,
+    .dashboard-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .tag-list,
+    .compact-list,
+    .ia-tree,
+    .dashboard-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .tag-list li {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-muted);
+      color: var(--text);
+      padding: 4px 9px;
+      font-size: 0.78rem;
+      font-weight: 780;
+    }
+
+    .compact-list {
+      display: grid;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .compact-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .compact-list li::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--primary);
+      flex: 0 0 auto;
+      margin-top: 0.6em;
+    }
+
+    .ia-tree {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .ia-tree > li {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfcfc;
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .ia-tree strong {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+
+    .ia-tree ul {
+      margin: 0;
+      padding: 0 0 0 18px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.75;
+    }
+
+    .spec-accordion {
+      display: grid;
+      gap: 10px;
+    }
+
+    .spec-accordion details {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #ffffff;
+      overflow: hidden;
+    }
+
+    .spec-accordion summary {
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      cursor: pointer;
+      font-weight: 840;
+    }
+
+    .spec-accordion summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .spec-accordion summary::after {
+      content: "+";
+      margin-left: auto;
+      color: var(--primary-strong);
+      font-weight: 900;
+    }
+
+    .spec-accordion details[open] summary::after {
+      content: "-";
+    }
+
+    .spec-body {
+      border-top: 1px solid var(--line);
+      padding: 14px;
+    }
+
+    .spec-list {
+      margin: 0;
+      display: grid;
+      grid-template-columns: 128px minmax(0, 1fr);
+      gap: 9px 14px;
+      font-size: 0.88rem;
+    }
+
+    .spec-list dt {
+      color: var(--muted);
+      font-weight: 820;
+    }
+
+    .spec-list dd {
+      margin: 0;
+      color: var(--text);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .dashboard-card,
+    .feature-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #ffffff;
+      padding: 16px;
+      display: grid;
+      gap: 11px;
+    }
+
+    .dashboard-list {
+      display: grid;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .dashboard-list strong {
+      color: var(--text);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .priority-pill {
+      width: fit-content;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 0.76rem;
+      font-weight: 850;
+      background: var(--primary-soft);
+      color: var(--primary-strong);
+    }
+
+    .priority-pill.high {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+
+    .priority-pill.medium {
+      background: var(--warning-soft);
+      color: var(--warning);
+    }
+
+    .priority-pill.low {
+      background: var(--surface-muted);
+      color: var(--muted);
+    }
+
+    .matrix-table {
+      min-width: 980px;
+    }
+
+    .matrix-table th,
+    .matrix-table td {
+      vertical-align: top;
+    }
+
+    .matrix-table td {
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .matrix-table td:first-child {
+      color: var(--text);
+      font-weight: 820;
+      white-space: nowrap;
+    }
+
+    .source-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .source-links a {
+      color: var(--primary-strong);
+      font-size: 0.84rem;
+      font-weight: 780;
+    }
+
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -1918,12 +2252,17 @@
 
     @media (max-width: 1120px) {
       .kpi-grid,
-      .three-column {
+      .three-column,
+      .strategy-grid,
+      .feature-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .two-column,
-      .org-workbench {
+      .org-workbench,
+      .blueprint-hero,
+      .dashboard-grid,
+      .ia-tree {
         grid-template-columns: 1fr;
       }
     }
@@ -1965,7 +2304,17 @@
 
       .kpi-grid,
       .three-column,
+      .strategy-grid,
+      .feature-grid,
       .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .blueprint-hero-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .spec-list {
         grid-template-columns: 1fr;
       }
 
@@ -2202,7 +2551,7 @@
         </div>
         <div>
           <strong>PeopleOps Hub</strong>
-          <span id="brandCompany">인적정보 관리 콘솔</span>
+          <span id="brandCompany">PeopleOps 운영 콘솔</span>
         </div>
       </div>
 
@@ -2210,6 +2559,10 @@
         <button class="nav-button is-active" type="button" data-view-target="dashboard">
           <i data-lucide="layout-dashboard"></i>
           <span>대시보드</span>
+        </button>
+        <button class="nav-button" type="button" data-view-target="blueprint">
+          <i data-lucide="map"></i>
+          <span>플랫폼 설계</span>
         </button>
         <button class="nav-button" type="button" data-view-target="employees">
           <i data-lucide="id-card"></i>
@@ -2245,7 +2598,7 @@
         </button>
         <button class="nav-button" type="button" data-view-target="statistics">
           <i data-lucide="chart-no-axes-combined"></i>
-          <span>통계</span>
+          <span>People Analytics</span>
         </button>
         <button class="nav-button" type="button" data-view-target="monthly-report">
           <i data-lucide="calendar-range"></i>
@@ -2278,7 +2631,7 @@
         </button>
         <div>
           <div class="page-kicker" id="pageKicker">Overview</div>
-          <h1 id="pageTitle">전사 인적관리 대시보드</h1>
+          <h1 id="pageTitle">전사 PeopleOps 대시보드</h1>
         </div>
       </header>
 
@@ -2287,7 +2640,7 @@
           <div class="section-head">
             <div>
               <h2 id="dashboard-title">대시보드</h2>
-              <p>전체 인원 현황, 최근 입사자, 관리 필요 항목을 한 화면에서 확인합니다.</p>
+              <p>전체 인원 현황, 최근 입사자, 데이터 품질, PeopleOps 액션을 한 화면에서 확인합니다.</p>
             </div>
             <button class="button primary" type="button" data-open-employee>
               <i data-lucide="user-plus"></i>
@@ -2372,6 +2725,455 @@
                   </tr>
                 </thead>
                 <tbody id="recentTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="blueprint" aria-labelledby="blueprint-title">
+          <div class="blueprint-hero">
+            <div>
+              <p class="page-kicker">PeopleOps Platform Blueprint</p>
+              <h2 id="blueprint-title">인사관리 시스템을 데이터 기반 PeopleOps 플랫폼으로 고도화</h2>
+              <p>
+                기존 핵심 메뉴는 유지하되, 사원 원장 중심의 관리 도구를 조직 운영, 인력 리스크, 정부 대응 통계, 경영 의사결정까지 연결하는 실무형 HR Tech SaaS 구조로 재설계합니다.
+              </p>
+            </div>
+            <div class="blueprint-hero-meta" aria-label="설계 전제">
+              <span>가정<strong>한국 기준, 중소·중견기업 PeopleOps 운영</strong></span>
+              <span>범위<strong>IA, 화면, 통계, 대시보드, 권한</strong></span>
+              <span>유지 메뉴<strong>사원관리, 조직도, 증명서, 통계, 설정</strong></span>
+              <span>주의<strong>법정 제출은 사업장별 추가 확인 필요</strong></span>
+            </div>
+          </div>
+
+          <nav class="blueprint-nav" aria-label="플랫폼 설계서 바로가기">
+            <a href="#brand-blueprint">1. 리브랜딩</a>
+            <a href="#ux-blueprint">2. UI/UX</a>
+            <a href="#ia-blueprint">3. IA</a>
+            <a href="#menu-blueprint">4. 메뉴 기능</a>
+            <a href="#analytics-blueprint">5. 통계센터</a>
+            <a href="#dashboard-blueprint">6. 대시보드</a>
+            <a href="#extension-blueprint">7. 추가 기능</a>
+            <a href="#recommend-blueprint">8. 권장안</a>
+          </nav>
+
+          <section class="panel" id="brand-blueprint" aria-labelledby="brand-blueprint-title">
+            <div class="section-head">
+              <div>
+                <h2 id="brand-blueprint-title">1. 서비스 리브랜딩 방향</h2>
+                <p>사원정보 관리에서 인력 의사결정 플랫폼으로 포지션을 전환합니다.</p>
+              </div>
+            </div>
+            <div class="strategy-grid">
+              <article class="strategy-card">
+                <h3>서비스 컨셉</h3>
+                <p>PeopleOps Hub는 인사 원장, 조직도, 문서, 발령, 교육, 통계를 연결해 조직 운영의 현재 상태와 다음 액션을 제안하는 HR 운영 콘솔입니다.</p>
+                <ul class="tag-list">
+                  <li>Single Source of Truth</li>
+                  <li>People Analytics</li>
+                  <li>Actionable HR</li>
+                </ul>
+              </article>
+              <article class="strategy-card">
+                <h3>핵심 가치</h3>
+                <ul class="compact-list">
+                  <li>데이터 누락과 문서 누락을 조기에 발견합니다.</li>
+                  <li>경영진이 인력 구조와 성장·이탈 흐름을 즉시 파악합니다.</li>
+                  <li>정부 대응 통계와 내부 보고 지표를 같은 데이터 모델에서 산출합니다.</li>
+                  <li>권한과 감사 로그를 통해 개인정보 접근 리스크를 낮춥니다.</li>
+                </ul>
+              </article>
+              <article class="strategy-card">
+                <h3>타깃 사용자</h3>
+                <ul class="compact-list">
+                  <li>경영진: 인력 규모, 비용 영향, 조직 성장성 확인</li>
+                  <li>인사담당자: 입퇴사, 발령, 증명서, 통계 실무 처리</li>
+                  <li>부서장: 팀 인원, 계약 종료, 교육, 성과 리스크 확인</li>
+                  <li>운영자: 권한, 기준값, 조직 마스터, 로그 관리</li>
+                </ul>
+              </article>
+              <article class="strategy-card">
+                <h3>차별화 포인트</h3>
+                <ul class="compact-list">
+                  <li>사원정보 변경이 조직도, 통계, 월간보고에 즉시 반영됩니다.</li>
+                  <li>법정·정부 대응 가능 통계를 별도 카탈로그로 관리합니다.</li>
+                  <li>직무·역량·교육·성과까지 확장 가능한 People Graph를 지향합니다.</li>
+                  <li>운영 체크리스트와 액션 버튼을 대시보드에 배치합니다.</li>
+                </ul>
+              </article>
+            </div>
+          </section>
+
+          <section class="panel" id="ux-blueprint" aria-labelledby="ux-blueprint-title">
+            <div class="section-head">
+              <div>
+                <h2 id="ux-blueprint-title">2. 최신 SaaS 스타일 UI/UX 방향</h2>
+                <p>2025년형 Enterprise SaaS 기준으로 밀도, 탐색성, 데이터 해석성을 우선합니다.</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="matrix-table">
+                <caption class="sr-only">UI UX 방향 정의</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">구분</th>
+                    <th scope="col">방향</th>
+                    <th scope="col">실행 기준</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>디자인 컨셉</td>
+                    <td>조용하고 밀도 있는 운영형 SaaS. 과도한 장식보다 명확한 정보 계층, 상태 배지, 액션 중심 UI를 우선합니다.</td>
+                    <td>화이트·뉴트럴 배경, 8px 이하 라운드, 명확한 구분선, 색상은 상태와 우선순위 표현에 제한적으로 사용</td>
+                  </tr>
+                  <tr>
+                    <td>레이아웃 구조</td>
+                    <td>좌측 사이드바, 상단 컨텍스트 바, 중앙 작업영역, 테이블·차트·상세 패널 조합을 기본으로 둡니다.</td>
+                    <td>운영 화면은 검색·필터·테이블·상세/모달 구조, 분석 화면은 KPI·차트·드릴다운 테이블 구조</td>
+                  </tr>
+                  <tr>
+                    <td>사이드바 전략</td>
+                    <td>기능 메뉴보다 업무 흐름 중심으로 묶습니다. 대시보드, 인사정보, 조직관리, 문서, 라이프사이클, Analytics, 설정 순으로 확장합니다.</td>
+                    <td>핵심 1차 메뉴 8~10개 유지, 세부 기능은 탭·필터·상세 패널로 흡수</td>
+                  </tr>
+                  <tr>
+                    <td>대시보드 구성</td>
+                    <td>역할별 뷰를 분리합니다. 경영진은 KPI와 추세, 인사담당자는 처리 대기, 부서장은 팀 리스크와 액션을 봅니다.</td>
+                    <td>동일 데이터셋을 권한·역할에 따라 카드, 알림, 차트 우선순위만 다르게 노출</td>
+                  </tr>
+                  <tr>
+                    <td>카드형 UI</td>
+                    <td>KPI 카드는 짧은 값과 해석 문장까지 제공합니다. 카드 클릭 시 해당 필터가 적용된 상세 목록으로 이동합니다.</td>
+                    <td>값, 전월 대비, 기준일, 데이터 품질 상태를 함께 표시</td>
+                  </tr>
+                  <tr>
+                    <td>데이터 시각화</td>
+                    <td>인력 구성은 도넛·100% 누적 막대, 흐름은 라인·막대 혼합, 조직 비교는 정렬 가능한 막대와 피벗 테이블을 사용합니다.</td>
+                    <td>다운로드, 필터 저장, 기준일 고정, 산식 설명 툴팁 제공</td>
+                  </tr>
+                  <tr>
+                    <td>모바일 대응</td>
+                    <td>조회·승인·알림 확인 중심으로 축소합니다. 대량 입력, 엑셀 업로드, 설정은 데스크톱 우선으로 둡니다.</td>
+                    <td>모바일에서는 KPI 1열, 테이블은 카드형 요약, 상세 액션은 하단 고정 버튼</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel" id="ia-blueprint" aria-labelledby="ia-blueprint-title">
+            <div class="section-head">
+              <div>
+                <h2 id="ia-blueprint-title">3. 신규 메뉴 구조(IA)</h2>
+                <p>기존 핵심 메뉴를 유지하면서 PeopleOps 확장 메뉴를 업무 흐름별로 배치합니다.</p>
+              </div>
+            </div>
+            <ul class="ia-tree">
+              <li>
+                <strong><i data-lucide="layout-dashboard"></i>대시보드</strong>
+                <ul>
+                  <li>경영진 대시보드</li>
+                  <li>인사담당자 대시보드</li>
+                  <li>부서장 대시보드</li>
+                  <li>알림·액션센터</li>
+                </ul>
+              </li>
+              <li>
+                <strong><i data-lucide="id-card"></i>인사정보</strong>
+                <ul>
+                  <li>사원관리</li>
+                  <li>인재 프로파일</li>
+                  <li>계약·발령 이력</li>
+                  <li>개인정보 동의·보관</li>
+                </ul>
+              </li>
+              <li>
+                <strong><i data-lucide="network"></i>조직관리</strong>
+                <ul>
+                  <li>조직도</li>
+                  <li>부서·팀·파트 관리</li>
+                  <li>정원·현원 관리</li>
+                  <li>조직 변경 시뮬레이션</li>
+                </ul>
+              </li>
+              <li>
+                <strong><i data-lucide="file-text"></i>문서·증명서</strong>
+                <ul>
+                  <li>증명서 발급</li>
+                  <li>근로계약·동의서 현황</li>
+                  <li>발급 이력·감사 로그</li>
+                  <li>템플릿·직인 관리</li>
+                </ul>
+              </li>
+              <li>
+                <strong><i data-lucide="user-plus"></i>People Lifecycle</strong>
+                <ul>
+                  <li>온보딩</li>
+                  <li>수습·계약 종료 관리</li>
+                  <li>퇴사·오프보딩</li>
+                  <li>휴직·복직</li>
+                </ul>
+              </li>
+              <li>
+                <strong><i data-lucide="calendar-days"></i>근태·휴가</strong>
+                <ul>
+                  <li>연차 산정 기준</li>
+                  <li>휴직·출산휴가·육아휴직</li>
+                  <li>근무형태 현황</li>
+                  <li>휴가 통계</li>
+                </ul>
+              </li>
+              <li>
+                <strong><i data-lucide="graduation-cap"></i>성장·성과</strong>
+                <ul>
+                  <li>교육/자격 관리</li>
+                  <li>평가/보상</li>
+                  <li>승진 현황</li>
+                  <li>핵심인재·승계계획</li>
+                </ul>
+              </li>
+              <li>
+                <strong><i data-lucide="chart-no-axes-combined"></i>People Analytics</strong>
+                <ul>
+                  <li>통계센터</li>
+                  <li>정부 대응 통계</li>
+                  <li>조직 리스크 분석</li>
+                  <li>월간업무보고</li>
+                </ul>
+              </li>
+              <li>
+                <strong><i data-lucide="settings"></i>운영관리</strong>
+                <ul>
+                  <li>운영설정</li>
+                  <li>운영자관리</li>
+                  <li>권한·역할 정책</li>
+                  <li>감사 로그·데이터 품질</li>
+                </ul>
+              </li>
+            </ul>
+          </section>
+
+          <section class="panel" id="menu-blueprint" aria-labelledby="menu-blueprint-title">
+            <div class="section-head">
+              <div>
+                <h2 id="menu-blueprint-title">4. 메뉴별 상세 기능 정의</h2>
+                <p>필수 메뉴와 신규 제안 메뉴를 목적, 기능, 화면, 데이터, 권한 기준으로 정의합니다.</p>
+              </div>
+            </div>
+            <div class="spec-accordion">
+              <details open>
+                <summary>사원관리</summary>
+                <div class="spec-body">
+                  <dl class="spec-list">
+                    <dt>목적</dt><dd>사원 원장을 PeopleOps 플랫폼의 기준 데이터로 관리합니다.</dd>
+                    <dt>주요 기능</dt><dd>등록·수정·검색·필터, 엑셀 업로드, CSV 다운로드, 정보완성도 점검, 개인정보 동의일 관리</dd>
+                    <dt>화면 구성</dt><dd>검색/필터 툴바, 사원 테이블, 등록 모달, 상세 프로파일 탭, 데이터 품질 알림</dd>
+                    <dt>주요 데이터</dt><dd>사번, 성명, 성별, 생년월일, 국적, 부서, 팀, 직책, 직급, 고용형태, 입사일, 계약종료일, 퇴직일, 교육·자격 요약</dd>
+                    <dt>권한 체계</dt><dd>소유자·관리자 전체 수정, 인사담당 수정, 부서장 소속 조회, 조회전용 다운로드 제한 옵션</dd>
+                  </dl>
+                </div>
+              </details>
+              <details>
+                <summary>조직도</summary>
+                <div class="spec-body">
+                  <dl class="spec-list">
+                    <dt>목적</dt><dd>조직 계층과 현원을 연결해 조직별 인력 구조를 실시간으로 확인합니다.</dd>
+                    <dt>주요 기능</dt><dd>본부·부서·팀·파트 트리, 조직 추가·이동·삭제, 조직별 인원 집계, 정원 대비 현원, 조직 변경 이력</dd>
+                    <dt>화면 구성</dt><dd>좌측 조직 트리, 우측 조직 속성 편집, 하단 조직원 목록, 조직도 검색</dd>
+                    <dt>주요 데이터</dt><dd>조직 ID, 조직명, 상위 조직, 조직 유형, 조직 메모, 소속 인원, 조직장, 코스트센터</dd>
+                    <dt>권한 체계</dt><dd>조직 마스터 수정은 관리자 이상, 부서장은 소속 조직 조회, 변경 이력은 소유자·관리자 열람</dd>
+                  </dl>
+                </div>
+              </details>
+              <details>
+                <summary>증명서 발급</summary>
+                <div class="spec-body">
+                  <dl class="spec-list">
+                    <dt>목적</dt><dd>재직·경력·퇴직 증명서를 표준 템플릿으로 발급하고 이력을 남깁니다.</dd>
+                    <dt>주요 기능</dt><dd>대상자 검색, 증명서 유형 선택, 용도·제출처 입력, 직인 이미지 반영, 출력, 발급 이력 저장</dd>
+                    <dt>화면 구성</dt><dd>발급 입력 폼, 출력 미리보기, 발급 이력 테이블, 템플릿 설정 연결</dd>
+                    <dt>주요 데이터</dt><dd>발급번호, 사원정보, 증명서 유형, 발급일, 용도, 제출처, 발급자, 출력 여부</dd>
+                    <dt>권한 체계</dt><dd>발급은 인사담당 이상, 부서장은 요청 조회만, 모든 발급은 감사 로그 기록</dd>
+                  </dl>
+                </div>
+              </details>
+              <details>
+                <summary>통계 / People Analytics</summary>
+                <div class="spec-body">
+                  <dl class="spec-list">
+                    <dt>목적</dt><dd>인력 구성, 입퇴사 흐름, 정부 대응 통계, 조직 리스크 지표를 통합 제공합니다.</dd>
+                    <dt>주요 기능</dt><dd>KPI, 차트, 교차표, 필터, 다운로드, 산식 설명, 법정 제출 대응 통계 카탈로그, 월간보고 매핑</dd>
+                    <dt>화면 구성</dt><dd>요약 KPI, 구성 차트, 라이프사이클 추이, 정부 대응 탭, 조직별 드릴다운, 다운로드 패널</dd>
+                    <dt>주요 데이터</dt><dd>고용형태, 성별, 연령, 근속, 입사일, 퇴직일, 조직, 직급, 직책, 사업장, 장애·보훈·외국인 여부, 휴직·휴가 이력</dd>
+                    <dt>권한 체계</dt><dd>집계 통계는 관리자·인사담당·경영진, 민감 항목 원천 데이터는 소유자·관리자 제한</dd>
+                  </dl>
+                </div>
+              </details>
+              <details>
+                <summary>운영설정</summary>
+                <div class="spec-body">
+                  <dl class="spec-list">
+                    <dt>목적</dt><dd>회사 기준값, 사번 규칙, 조직 기준, 직인, 통계 기준을 중앙 관리합니다.</dd>
+                    <dt>주요 기능</dt><dd>회사정보, 사번 생성 규칙, 기준 코드, 조직 기본값, 개인정보 보관 기준, 월간보고 매핑</dd>
+                    <dt>화면 구성</dt><dd>회사 설정, 사번 규칙, 코드 목록, 증명서 직인, 데이터 초기화, 백업 안내</dd>
+                    <dt>주요 데이터</dt><dd>회사명, 대표자, 사업자번호, 주소, HR 담당자, 직책·직급·고용형태·근무지 코드, 직인 이미지</dd>
+                    <dt>권한 체계</dt><dd>소유자·관리자만 수정, 인사담당 일부 코드 조회, 초기화는 소유자 확인 절차 필요</dd>
+                  </dl>
+                </div>
+              </details>
+              <details>
+                <summary>운영자관리</summary>
+                <div class="spec-body">
+                  <dl class="spec-list">
+                    <dt>목적</dt><dd>개인정보 접근 권한을 최소 권한 원칙으로 통제합니다.</dd>
+                    <dt>주요 기능</dt><dd>접근 요청 승인·반려, 역할 부여, 계정 중지, 운영 로그 조회, 권한 정책 설명</dd>
+                    <dt>화면 구성</dt><dd>운영자 KPI, 접근 요청 목록, 계정 테이블, 감사 로그, 역할 정책 패널</dd>
+                    <dt>주요 데이터</dt><dd>UID, 이메일, 표시명, 역할, 상태, 승인일, 마지막 수정일, 액션 로그</dd>
+                    <dt>권한 체계</dt><dd>소유자 전용. 관리자·인사담당은 본인 세션 정보만 조회</dd>
+                  </dl>
+                </div>
+              </details>
+              <details>
+                <summary>추가 제안 메뉴</summary>
+                <div class="spec-body">
+                  <dl class="spec-list">
+                    <dt>인재 프로파일</dt><dd>스킬, 경력, 자격, 교육, 평가, 승진 이력을 사람 단위로 통합합니다.</dd>
+                    <dt>인재풀 관리</dt><dd>채용 후보자와 내부 전환 후보자를 관리하고 채용 성과와 연결합니다.</dd>
+                    <dt>승계계획</dt><dd>핵심 직책별 후보군, 준비도, 공백 리스크를 관리합니다.</dd>
+                    <dt>조직 건강도</dt><dd>이직률, 휴직, 교육 이수, 평가 분포, 인력 성장률을 결합해 조직 안정성을 봅니다.</dd>
+                    <dt>AI 분석</dt><dd>추세 요약, 이상치 탐지, 이직 위험 신호, 교육 추천을 보조합니다. 최종 판단은 담당자가 수행합니다.</dd>
+                  </dl>
+                </div>
+              </details>
+            </div>
+          </section>
+
+          <section class="panel" id="analytics-blueprint" aria-labelledby="analytics-blueprint-title">
+            <div class="section-head">
+              <div>
+                <h2 id="analytics-blueprint-title">5. People Analytics 통계센터 설계</h2>
+                <p>실제 통계 표준은 아래 People Analytics 메뉴의 상세 매트릭스와 동일하게 운영합니다.</p>
+              </div>
+            </div>
+            <div class="notice">
+              <i data-lucide="alert-triangle"></i>
+              <span>법정·정부 제출 항목은 사업장 규모, 업종, 고용형태, 관할 기관 해석에 따라 달라질 수 있습니다. 이 화면은 대응 가능한 데이터 체계 제안이며, 실제 제출 전에는 최신 법령·고용노동부 안내·전문가 검토가 필요합니다.</span>
+            </div>
+            <div class="table-wrap">
+              <table class="matrix-table">
+                <caption class="sr-only">People Analytics 핵심 통계 설계 요약</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">통계</th>
+                    <th scope="col">차트 유형</th>
+                    <th scope="col">데이터 소스</th>
+                    <th scope="col">필터 조건</th>
+                    <th scope="col">다운로드</th>
+                    <th scope="col">활용 목적</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>고용형태 분포</td><td>도넛, 100% 누적 막대</td><td>사원관리 고용형태</td><td>기준일, 조직, 사업장, 상태</td><td>CSV, XLSX, PNG</td><td>정규직·계약직·파견직 등 인력 구성 점검</td></tr>
+                  <tr><td>입퇴사 추이</td><td>월별 막대, 연도별 라인</td><td>입사일, 퇴직일</td><td>기간, 조직, 직군, 고용형태</td><td>CSV, XLSX</td><td>채용 수요, 이탈 흐름, 조직 성장률 분석</td></tr>
+                  <tr><td>조직/직급/사업장 현황</td><td>정렬 막대, 피벗 테이블</td><td>조직도, 직급, 사업장 코드</td><td>조직, 직급, 직책, 사업장</td><td>CSV, XLSX</td><td>정원·현원, 배치 불균형, 보고자료 작성</td></tr>
+                  <tr><td>정부 대응 통계</td><td>카탈로그, 기준 충족표</td><td>장애 여부, 생년월일, 성별, 휴직·휴가, 고용형태, 국적</td><td>기준일, 법인, 사업장, 재직상태</td><td>XLSX, 제출 검토용 CSV</td><td>장애인·고령자·고용형태 등 법정 제출 가능 데이터 준비</td></tr>
+                  <tr><td>조직 안정성 지수</td><td>스코어 카드, 추세선</td><td>퇴사율, 유지율, 평균 근속, 결원, 교육 이수</td><td>조직, 기간, 직군, 관리자</td><td>PDF, XLSX</td><td>경영진 보고와 우선 개입 조직 선정</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel" id="dashboard-blueprint" aria-labelledby="dashboard-blueprint-title">
+            <div class="section-head">
+              <div>
+                <h2 id="dashboard-blueprint-title">6. 대시보드 설계</h2>
+                <p>동일 데이터를 역할별 의사결정 방식에 맞춰 다르게 노출합니다.</p>
+              </div>
+            </div>
+            <div class="dashboard-grid">
+              <article class="dashboard-card">
+                <h3>경영진용</h3>
+                <ul class="dashboard-list">
+                  <li><strong>KPI</strong> 총 재직, 전월 대비 증감, 이직률, 평균 근속, 정규직 비율, 조직 성장률</li>
+                  <li><strong>주요 카드</strong> 인력 규모, 핵심인재, 고위험 조직, 채용 진행, 법정 대응 현황</li>
+                  <li><strong>알림</strong> 퇴사율 급증, 계약 종료 집중, 데이터 누락, 제출 일정</li>
+                  <li><strong>차트</strong> 연도별 입퇴사, 조직별 현원, 고용형태, 사업장별 인력</li>
+                  <li><strong>액션</strong> 경영 보고 다운로드, 조직 드릴다운, 인력 계획 검토</li>
+                </ul>
+              </article>
+              <article class="dashboard-card">
+                <h3>인사담당자용</h3>
+                <ul class="dashboard-list">
+                  <li><strong>KPI</strong> 처리 대기 증명서, 누락 필수정보, 계약 종료 예정, 휴직·복직 예정, 교육 미이수</li>
+                  <li><strong>주요 카드</strong> 온보딩 체크, 오프보딩 체크, 발령 반영, 문서 보완, 데이터 품질</li>
+                  <li><strong>알림</strong> 개인정보 동의 미입력, 계약 만료 30일 전, 직인·템플릿 누락</li>
+                  <li><strong>차트</strong> 월별 입사, 월별 퇴사, 정보완성도, 처리 SLA</li>
+                  <li><strong>액션</strong> 사원 등록, 엑셀 업로드, 증명서 발급, CSV/XLSX 다운로드</li>
+                </ul>
+              </article>
+              <article class="dashboard-card">
+                <h3>부서장용</h3>
+                <ul class="dashboard-list">
+                  <li><strong>KPI</strong> 소속 인원, 신규 입사, 퇴사 예정, 평균 근속, 교육 이수율, 공석</li>
+                  <li><strong>주요 카드</strong> 팀 구성, 계약 종료자, 수습 평가 대상, 승진 후보, 교육 필요자</li>
+                  <li><strong>알림</strong> 수습 종료, 교육 미이수, 퇴사 예정, 핵심 역할 공백</li>
+                  <li><strong>차트</strong> 팀 직급 분포, 근속 분포, 월별 인원, 교육·자격 현황</li>
+                  <li><strong>액션</strong> 소속 목록 보기, 면담 기록 요청, 교육 추천, 인력 요청</li>
+                </ul>
+              </article>
+            </div>
+          </section>
+
+          <section class="panel" id="extension-blueprint" aria-labelledby="extension-blueprint-title">
+            <div class="section-head">
+              <div>
+                <h2 id="extension-blueprint-title">7. 경쟁력 강화를 위한 추가 기능 제안</h2>
+                <p>PeopleOps 고도화는 데이터 품질, 분석, 예측 순서로 단계화합니다.</p>
+              </div>
+            </div>
+            <div class="feature-grid">
+              <article class="feature-card"><span class="priority-pill high">P1</span><h3>인재 프로파일</h3><p>사원 원장에 스킬, 경력, 자격, 교육, 평가 요약을 연결합니다. 모든 고도화 기능의 기반입니다.</p></article>
+              <article class="feature-card"><span class="priority-pill high">P1</span><h3>데이터 품질 센터</h3><p>필수값 누락, 중복 사번, 조직 미매칭, 계약 종료일 누락을 자동 점검합니다.</p></article>
+              <article class="feature-card"><span class="priority-pill high">P1</span><h3>정부 대응 통계 카탈로그</h3><p>장애인, 고령자, 고용형태, 휴직·휴가 등 제출 검토용 통계를 기준일별로 저장합니다.</p></article>
+              <article class="feature-card"><span class="priority-pill medium">P2</span><h3>이직 위험도 분석</h3><p>근속, 조직 변동, 계약, 평가, 교육 데이터를 결합해 위험 신호를 보조 지표로 표시합니다.</p></article>
+              <article class="feature-card"><span class="priority-pill medium">P2</span><h3>인재 매트릭스</h3><p>성과와 잠재력을 9-box 형태로 보되 평가 편향과 개인정보 노출을 통제합니다.</p></article>
+              <article class="feature-card"><span class="priority-pill medium">P2</span><h3>승계계획</h3><p>핵심 직책별 후보자, 준비도, 대체 가능 시점, 공석 리스크를 관리합니다.</p></article>
+              <article class="feature-card"><span class="priority-pill medium">P2</span><h3>성과 연계 분석</h3><p>조직별 평가, 승진, 교육, 이직 흐름을 연결해 보상·육성 의사결정을 지원합니다.</p></article>
+              <article class="feature-card"><span class="priority-pill low">P3</span><h3>AI 분석</h3><p>월간 인력 리포트 요약, 이상치 탐지, 질문형 분석을 지원합니다. 법적 판단과 인사 결정은 사람이 확정합니다.</p></article>
+              <article class="feature-card"><span class="priority-pill low">P3</span><h3>인력 예측</h3><p>입퇴사 추세와 채용 계획을 기반으로 월별 재직 인원을 예측합니다. 충분한 이력 데이터가 선행되어야 합니다.</p></article>
+            </div>
+          </section>
+
+          <section class="panel" id="recommend-blueprint" aria-labelledby="recommend-blueprint-title">
+            <div class="section-head">
+              <div>
+                <h2 id="recommend-blueprint-title">8. 최종 권장안</h2>
+                <p>현실적인 개발 난이도와 운영 효과를 기준으로 우선순위를 정리합니다.</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="matrix-table">
+                <caption class="sr-only">최종 권장안</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">구분</th>
+                    <th scope="col">도입 권장도</th>
+                    <th scope="col">기대효과</th>
+                    <th scope="col">개발난이도</th>
+                    <th scope="col">우선순위</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>데이터 품질 센터</td><td>매우 높음</td><td>통계 신뢰도, 정부 대응, 운영 누락 방지</td><td>낮음</td><td>P1</td></tr>
+                  <tr><td>People Analytics 통계센터</td><td>매우 높음</td><td>경영 보고와 HR 실무 통계를 한 화면에서 처리</td><td>보통</td><td>P1</td></tr>
+                  <tr><td>정부 대응 통계 카탈로그</td><td>높음</td><td>장애인·고령자·고용형태 등 제출 검토 시간 절감</td><td>보통</td><td>P1</td></tr>
+                  <tr><td>역할별 대시보드</td><td>높음</td><td>경영진, HR, 부서장별 의사결정 속도 개선</td><td>보통</td><td>P1</td></tr>
+                  <tr><td>인재 프로파일</td><td>높음</td><td>교육, 평가, 승진, 핵심인재 관리 기반 확보</td><td>보통</td><td>P2</td></tr>
+                  <tr><td>승계계획·핵심인재</td><td>중간</td><td>핵심 직책 공백 리스크 관리</td><td>높음</td><td>P2</td></tr>
+                  <tr><td>AI 분석·이직 위험도</td><td>중간</td><td>이상 신호 탐지와 리포트 자동화</td><td>높음</td><td>P3</td></tr>
+                </tbody>
               </table>
             </div>
           </section>
@@ -3193,10 +3995,136 @@
         <section class="view" id="statistics" aria-labelledby="statistics-title">
           <div class="section-head">
             <div>
-              <h2 id="statistics-title">통계</h2>
-              <p>재직자 기준 인력 구성과 퇴직 현황을 한눈에 확인합니다.</p>
+              <h2 id="statistics-title">People Analytics 통계센터</h2>
+              <p>재직자 기준 인력 구성, 입퇴사 흐름, 정부 대응 가능 통계, 조직 리스크 지표를 통합 관리합니다.</p>
             </div>
           </div>
+
+          <div class="notice">
+            <i data-lucide="shield-alert"></i>
+            <span>
+              가정: 한국 사업장 기준의 HR 운영 통계 설계입니다. 법정 제출 여부와 서식은 사업장 규모, 업종, 관할 기관, 최신 법령에 따라 달라질 수 있으므로 실제 제출 전 추가 확인이 필요합니다.
+            </span>
+          </div>
+
+          <section class="panel" aria-labelledby="analytics-core-title">
+            <div class="section-head">
+              <div>
+                <h2 id="analytics-core-title">인력 구성·라이프사이클 통계 설계</h2>
+                <p>인사 원장과 조직도를 기준으로 경영 보고와 월간 보고에 필요한 핵심 통계를 산출합니다.</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="matrix-table">
+                <caption class="sr-only">인력 구성 및 라이프사이클 통계 설계표</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">통계</th>
+                    <th scope="col">차트 유형</th>
+                    <th scope="col">데이터 소스</th>
+                    <th scope="col">필터 조건</th>
+                    <th scope="col">다운로드 형식</th>
+                    <th scope="col">활용 목적</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>고용형태 분포</td><td>도넛, 100% 누적 막대</td><td>사원관리: 고용형태, 재직상태</td><td>기준일, 조직, 사업장, 직군, 재직상태</td><td>CSV, XLSX, PNG</td><td>정규직·계약직·파견/외주·인턴 구성 점검</td></tr>
+                  <tr><td>정규직/계약직/파견직 현황</td><td>누적 막대, 교차표</td><td>사원관리: 고용형태, 계약 종료일</td><td>조직, 직급, 사업장, 계약 종료 기간</td><td>CSV, XLSX</td><td>비정규·외부 인력 비중과 계약 리스크 관리</td></tr>
+                  <tr><td>성별 분포</td><td>막대, 피벗 테이블</td><td>사원관리: 성별</td><td>조직, 직급, 직책, 직군, 사업장</td><td>CSV, XLSX, PNG</td><td>조직 다양성, 여성 인력 현황, 직급별 구성 검토</td></tr>
+                  <tr><td>연령대 분포</td><td>히스토그램, 막대</td><td>사원관리: 생년월일</td><td>기준일, 조직, 직급, 고용형태</td><td>CSV, XLSX, PNG</td><td>고령자 고용, 세대 구성, 승계 리스크 파악</td></tr>
+                  <tr><td>근속연수 분포</td><td>구간 막대, 박스 플롯</td><td>사원관리: 입사일, 퇴직일</td><td>기준일, 조직, 직군, 직급</td><td>CSV, XLSX</td><td>조직 안정성, 신규·장기근속 비중, 이탈 위험 탐색</td></tr>
+                  <tr><td>입사연도별 현황</td><td>연도별 막대</td><td>사원관리: 입사일</td><td>입사연도, 조직, 고용형태</td><td>CSV, XLSX</td><td>채용 규모 변화와 입사 cohort 분석</td></tr>
+                  <tr><td>월별 입사 현황</td><td>월별 막대</td><td>사원관리: 입사일</td><td>연도, 월, 조직, 직군</td><td>CSV, XLSX, PNG</td><td>채용 집중 시기와 온보딩 업무량 예측</td></tr>
+                  <tr><td>월별 퇴사 현황</td><td>월별 막대</td><td>사원관리: 퇴직일, 퇴직상태</td><td>연도, 월, 조직, 고용형태</td><td>CSV, XLSX, PNG</td><td>이탈 피크와 조직별 퇴사 리스크 확인</td></tr>
+                  <tr><td>연도별 입퇴사 추이</td><td>복합 막대, 라인</td><td>입사일, 퇴직일</td><td>연도 범위, 조직, 직군</td><td>CSV, XLSX, PNG</td><td>조직 성장률과 채용·이탈 균형 분석</td></tr>
+                  <tr><td>월별 재직인원</td><td>라인, 스텝 차트</td><td>입사일, 퇴직일, 상태</td><td>연도, 월, 조직, 사업장</td><td>CSV, XLSX</td><td>월말 기준 인원 보고와 인력 예측 기초값</td></tr>
+                  <tr><td>조직별 인원현황</td><td>정렬 막대, 피벗 테이블</td><td>조직도, 사원 소속</td><td>기준일, 상위조직, 재직상태</td><td>CSV, XLSX</td><td>조직별 현원, 조직 비대칭, 관리 범위 파악</td></tr>
+                  <tr><td>직급별 인원현황</td><td>막대, 피라미드</td><td>사원관리: 직급/레벨</td><td>조직, 직군, 사업장</td><td>CSV, XLSX, PNG</td><td>직급 구조, 승진 병목, 인력 레벨 믹스 분석</td></tr>
+                  <tr><td>직책별 인원현황</td><td>막대, 교차표</td><td>사원관리: 직책</td><td>조직, 직급, 직군</td><td>CSV, XLSX</td><td>관리자 수, 직책 공백, 책임 구조 점검</td></tr>
+                  <tr><td>부서별 인원현황</td><td>정렬 막대, 테이블</td><td>사원관리: 부서, 팀, 파트</td><td>부서, 팀, 재직상태, 고용형태</td><td>CSV, XLSX</td><td>월간업무보고와 부서별 인원 현황 작성</td></tr>
+                  <tr><td>사업장별 인원현황</td><td>지도형 요약, 막대</td><td>사원관리: 근무지/사업장</td><td>사업장, 법인, 고용형태, 상태</td><td>CSV, XLSX</td><td>사업장별 법정 기준 검토와 현장 인력 배치 확인</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel" aria-labelledby="government-stat-title">
+            <div class="section-head">
+              <div>
+                <h2 id="government-stat-title">정부 대응 통계 설계</h2>
+                <p>제출 의무 자체는 확정하지 않고, 제출 대응이 가능한 원천 데이터와 집계 구조를 준비합니다.</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="matrix-table">
+                <caption class="sr-only">정부 대응 통계 설계표</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">통계</th>
+                    <th scope="col">차트 유형</th>
+                    <th scope="col">데이터 소스</th>
+                    <th scope="col">필터 조건</th>
+                    <th scope="col">다운로드 형식</th>
+                    <th scope="col">활용 목적</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>장애인 고용 현황</td><td>기준 충족표, 월별 추이</td><td>사원관리: 장애 여부, 재직상태, 사업장</td><td>기준일, 사업장, 고용형태, 상시근로자 기준</td><td>XLSX, CSV</td><td>장애인 고용계획·실시상황 등 대응 가능 데이터 준비. 적용 여부 추가 확인 필요</td></tr>
+                  <tr><td>고령자 고용 현황</td><td>연령대 막대, 기준표</td><td>생년월일, 입사일, 재직상태</td><td>기준일, 사업장, 직군, 고용형태</td><td>XLSX, CSV</td><td>고령자 고용현황·정년제도 관련 내부 점검. 제출 대상 추가 확인 필요</td></tr>
+                  <tr><td>여성 인력 현황</td><td>성별 막대, 직급별 교차표</td><td>성별, 조직, 직급, 직책</td><td>기준일, 조직, 직급, 관리자 여부</td><td>XLSX, CSV, PNG</td><td>여성 인력·여성 관리자 비중, 다양성 지표 검토</td></tr>
+                  <tr><td>육아휴직 현황</td><td>월별 추이, 대상자 목록</td><td>휴직·복직 기록, 상태, 기간</td><td>기간, 성별, 조직, 사업장</td><td>XLSX, CSV</td><td>일·가정 양립 관련 운영 현황 관리. 세부 법정 서식은 추가 확인 필요</td></tr>
+                  <tr><td>출산휴가 현황</td><td>월별 추이, 캘린더</td><td>휴가 기록, 시작일, 종료일</td><td>기간, 조직, 사업장, 상태</td><td>XLSX, CSV</td><td>출산전후휴가 운영 현황과 복귀 예정 관리</td></tr>
+                  <tr><td>근로형태별 현황</td><td>100% 누적 막대, 표</td><td>고용형태, 근무형태, 단시간 여부</td><td>기준일, 사업장, 조직, 직군</td><td>XLSX, CSV</td><td>고용형태 공시·내부 인력 구성 검토. 공시 대상 여부 추가 확인 필요</td></tr>
+                  <tr><td>기간제 근로자 현황</td><td>계약 만료 타임라인, 표</td><td>고용형태, 계약 시작·종료일</td><td>만료 기간, 조직, 사업장, 직무</td><td>XLSX, CSV</td><td>기간제 인력 규모, 계약 갱신·전환 검토, 차별 리스크 점검</td></tr>
+                  <tr><td>외국인 근로자 현황</td><td>국적별 막대, 만료표</td><td>국적, 체류·근로 가능 정보, 계약정보</td><td>국적, 사업장, 만료 기간, 고용형태</td><td>XLSX, CSV</td><td>외국인 근로자 고용관리와 체류·계약 만료 점검. 민감정보 최소 수집 필요</td></tr>
+                  <tr><td>법정 제출 대응 가능 통계 목록</td><td>체크리스트, 상태 배지</td><td>통계 카탈로그, 기준일 스냅샷, 원천 데이터 품질</td><td>제출명, 기준일, 담당자, 사업장</td><td>XLSX, PDF</td><td>제출 가능/보완 필요/전문가 검토 필요 상태를 관리</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="source-links" aria-label="제도 확인용 공식자료">
+              <a href="https://www.law.go.kr/법령/장애인고용촉진및직업재활법" target="_blank" rel="noreferrer">장애인고용촉진 및 직업재활법</a>
+              <a href="https://www.law.go.kr/법령/고용상연령차별금지및고령자고용촉진에관한법률" target="_blank" rel="noreferrer">고령자고용촉진 관련 법령</a>
+              <a href="https://www.law.go.kr/법령/고용정책기본법" target="_blank" rel="noreferrer">고용정책 기본법</a>
+              <a href="https://www.law.go.kr/법령/남녀고용평등과일ㆍ가정양립지원에관한법률" target="_blank" rel="noreferrer">남녀고용평등·일가정양립법</a>
+            </div>
+          </section>
+
+          <section class="panel" aria-labelledby="advanced-analytics-title">
+            <div class="section-head">
+              <div>
+                <h2 id="advanced-analytics-title">고도화 People Analytics 지표</h2>
+                <p>운영 통계를 넘어 조직 리스크와 인재 전략을 판단하는 지표입니다.</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="matrix-table">
+                <caption class="sr-only">고도화 People Analytics 지표 설계표</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">통계</th>
+                    <th scope="col">차트 유형</th>
+                    <th scope="col">데이터 소스</th>
+                    <th scope="col">필터 조건</th>
+                    <th scope="col">다운로드 형식</th>
+                    <th scope="col">활용 목적</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>이직률</td><td>라인, 조직별 막대</td><td>퇴직일, 월별 평균 재직인원</td><td>기간, 조직, 직군, 고용형태</td><td>CSV, XLSX, PNG</td><td>조직별 이탈 리스크와 관리 개입 우선순위 판단</td></tr>
+                  <tr><td>퇴사율</td><td>라인, 월별 막대</td><td>퇴직자, 재직자 기준 모수</td><td>기간, 조직, 퇴직유형</td><td>CSV, XLSX</td><td>월별 퇴사 흐름과 원인 분석 기초</td></tr>
+                  <tr><td>유지율</td><td>코호트 히트맵</td><td>입사일, 퇴직일</td><td>입사연도, 조직, 직군</td><td>CSV, XLSX, PNG</td><td>채용 cohort별 잔존율과 온보딩 품질 평가</td></tr>
+                  <tr><td>조직 성장률</td><td>라인, 증감 카드</td><td>월별 재직인원, 입퇴사</td><td>기간, 조직, 사업장</td><td>CSV, XLSX</td><td>인력 확장·축소 추세와 계획 대비 실적 관리</td></tr>
+                  <tr><td>평균 근속연수</td><td>KPI, 분포 막대</td><td>입사일, 퇴직일, 기준일</td><td>조직, 직군, 직급, 고용형태</td><td>CSV, XLSX</td><td>조직 안정성, 세대 교체, 지식 축적 수준 확인</td></tr>
+                  <tr><td>신규 채용 성과</td><td>퍼널, 코호트</td><td>입사일, 수습 평가, 유지율, 채용경로</td><td>기간, 채용경로, 조직, 직무</td><td>CSV, XLSX</td><td>채용 품질, 수습 통과율, 6개월 유지율 분석</td></tr>
+                  <tr><td>조직 안정성 지수</td><td>스코어 카드, 레이더</td><td>이직률, 근속, 공석, 교육 이수, 계약 만료</td><td>조직, 기간, 직군</td><td>PDF, XLSX</td><td>고위험 조직 조기 탐지와 경영진 보고</td></tr>
+                  <tr><td>핵심인재 현황</td><td>매트릭스, 목록</td><td>평가, 직책, 역량, 교육, 승계 후보</td><td>조직, 직군, 직급, 후보 상태</td><td>XLSX</td><td>핵심 역할 유지와 승계계획 수립. 평가 기준 명확화 필요</td></tr>
+                  <tr><td>승진 현황</td><td>연도별 막대, 직급 이동표</td><td>발령 이력, 직급 변경일</td><td>기간, 조직, 성별, 직군</td><td>CSV, XLSX</td><td>승진 속도, 직급 병목, 형평성 검토</td></tr>
+                  <tr><td>교육 이수 현황</td><td>이수율 카드, 미이수 목록</td><td>교육 기록, 이수 상태, 기한</td><td>교육명, 조직, 직급, 기간</td><td>CSV, XLSX</td><td>법정의무교육·직무교육 이수 관리와 알림</td></tr>
+                  <tr><td>자격증 보유 현황</td><td>분류 막대, 만료 목록</td><td>자격/면허 기록, 갱신일</td><td>자격명, 조직, 직무, 만료 기간</td><td>CSV, XLSX</td><td>직무 적합성, 필수 자격 만료 리스크 관리</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
 
           <div class="grid kpi-grid" aria-label="상세 인사 운영 지표">
             <article class="metric-card">
@@ -4926,7 +5854,8 @@
     const certificateSealImageCache = new Map();
 
     const titles = {
-      dashboard: ["Overview", "전사 인적관리 대시보드"],
+      dashboard: ["Overview", "전사 PeopleOps 대시보드"],
+      blueprint: ["Blueprint", "PeopleOps 플랫폼 설계"],
       employees: ["People Directory", "사원 정보 관리"],
       organization: ["Organization", "조직도"],
       certificates: ["Certificates", "증명서 발급"],
@@ -4935,7 +5864,7 @@
       assignments: ["Contracts", "계약/발령 관리"],
       training: ["Learning", "교육/자격 관리"],
       reviews: ["Review", "평가/보상"],
-      statistics: ["Analytics", "인사 통계"],
+      statistics: ["People Analytics", "통계센터"],
       "monthly-report": ["Monthly Report", "월간업무보고"],
       administration: ["Administration", "운영자 관리"],
       settings: ["Administration", "운영 설정"]
@@ -10457,7 +11386,7 @@
           ? "직인 이미지가 증명서에 표시됩니다."
           : "직인 이미지가 없으면 기본 직인 표시로 출력됩니다.";
       }
-      elements.brandCompany.textContent = state.settings.companyName || "인적정보 관리 콘솔";
+      elements.brandCompany.textContent = state.settings.companyName || "PeopleOps 운영 콘솔";
       elements.employeeNoPreview.textContent = generateEmployeeNo();
       elements.settingDeptCount.textContent = String((state.settings.departments || []).length);
       elements.settingJobGroupCount.textContent = String((state.settings.jobGroups || []).length);
