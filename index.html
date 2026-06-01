@@ -5888,6 +5888,15 @@
       return state.employees.filter((employee) => employee.status === "퇴직" || text(employee.retirementDate, ""));
     }
 
+    function isRetiredAsOf(employee, asOf = new Date()) {
+      const retirementDate = parseLocalDate(employee.retirementDate);
+      return employee.status === "퇴직" || Boolean(retirementDate && retirementDate <= asOf);
+    }
+
+    function isWorkingAsOf(employee, asOf = new Date()) {
+      return !isRetiredAsOf(employee, asOf);
+    }
+
     function hiredEmployees() {
       return state.employees.filter((employee) => text(employee.joinDate, ""));
     }
@@ -6393,7 +6402,7 @@
     }
 
     function filteredEmployeesForOrg() {
-      return state.employees.filter((employee) => state.filters.orgStatus === "all" || employee.status !== "퇴직");
+      return state.employees.filter((employee) => state.filters.orgStatus === "all" || isWorkingAsOf(employee));
     }
 
     function employeeBelongsToOrgNode(employee, node) {
@@ -8591,7 +8600,7 @@
     }
 
     function isCurrentForMonthlyReport(employee, range) {
-      if (range.isCurrentMonth) return employee.status !== "퇴직";
+      if (range.isCurrentMonth) return isWorkingAsOf(employee);
       return isCurrentAtMonthEnd(employee, range.end);
     }
 
@@ -8788,7 +8797,7 @@
 
     function renderMonthlyReportReconciliation(detailStats, totalStats, range) {
       if (!elements.monthlyReportReconcileSummary || !elements.monthlyReportReconcileTable) return;
-      const orgEmployees = employeesForOrgNodeByFilter(ROOT_ORG_ID, true, (employee) => employee.status !== "퇴직");
+      const orgEmployees = employeesForOrgNodeByFilter(ROOT_ORG_ID, true, (employee) => isWorkingAsOf(employee));
       const reportCount = monthlyStatsCounts(totalStats).current;
       const orgCount = orgEmployees.length;
       const nonFixedRows = monthlyReportRows.filter((row) => row.type === "detail" && !Number.isFinite(Number(row.fixedCurrent)));
