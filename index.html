@@ -4924,7 +4924,7 @@
     };
 
     const monthlyReportRows = [
-      { type: "detail", group: "", label: "대표이사", criteria: ["대표이사"], fixedCurrent: 2, fixedNote: "홍성훈+1인" },
+      { type: "detail", group: "", label: "대표이사", criteria: ["대표이사"], fixedCurrent: 2, fixedNote: "홍성훈+1인", accountedCriteria: ["홍성훈", "대표이사"] },
       { type: "detail", group: "생산본부", label: "본부장", criteria: ["김종규 본부장", "생산본부 본부장"] },
       { type: "detail", group: "생산본부", label: "생산관리팀", criteria: ["생산관리팀"], aliases: ["생산관리부", "생산관리부문", "생산관리파트", "생산관리"] },
       { type: "detail", group: "생산본부", label: "제조팀", criteria: ["원료제조파트"] },
@@ -8511,7 +8511,6 @@
       monthlyReportRows
         .filter((row) => row.type === "detail")
         .forEach((row) => detailStats.set(row, monthlyReportStatsForRow(row, range)));
-      dedupeMonthlyCurrentAssignments(detailStats);
 
       const subtotalStats = new Map();
       [...new Set(monthlyReportRows.filter((row) => row.type === "subtotal").map((row) => row.group))].forEach((group) => {
@@ -8524,21 +8523,6 @@
       renderMonthlyReportTable(detailStats, subtotalStats, totalStats, range, matchRows);
       renderMonthlyReportMatchTable(matchRows);
       renderMonthlyReportReconciliation(detailStats, totalStats, range);
-    }
-
-    function dedupeMonthlyCurrentAssignments(detailStats) {
-      const assignedIds = new Set();
-      monthlyReportRows
-        .filter((row) => row.type === "detail")
-        .forEach((row) => {
-          const stats = detailStats.get(row);
-          if (!stats) return;
-          stats.currentIds = new Set([...stats.currentIds].filter((id) => {
-            if (assignedIds.has(id)) return false;
-            assignedIds.add(id);
-            return true;
-          }));
-        });
     }
 
     function refreshMonthlyReportMonthOptions() {
@@ -8638,6 +8622,7 @@
       if (Number.isFinite(Number(row.fixedCurrent))) {
         stats.fixedCurrent = Number(row.fixedCurrent);
         stats.fixedNote = text(row.fixedNote, "고정값");
+        return stats;
       }
       state.employees.forEach((employee) => {
         if (!employeeMatchesMonthlyReportRow(employee, row)) return;
@@ -8828,6 +8813,15 @@
           reportAssignments.get(id).push(monthlyReportRowTitle(row));
         });
       });
+      fixedRows.forEach((row) => {
+        fixedRowAccountedEmployees(row, range).forEach((employee) => {
+          const alreadyAssigned = reportEmployeeIds.has(employee.id);
+          reportEmployeeIds.add(employee.id);
+          if (alreadyAssigned) return;
+          if (!reportAssignments.has(employee.id)) reportAssignments.set(employee.id, []);
+          reportAssignments.get(employee.id).push(`${monthlyReportRowTitle(row)} 고정값 반영`);
+        });
+      });
       const basisExcludedEmployees = orgEmployees.filter((employee) => !isCurrentForMonthlyReport(employee, range));
       const reportBasisEmployees = orgEmployees.filter((employee) => isCurrentForMonthlyReport(employee, range));
       const unmatchedEmployees = reportBasisEmployees.filter((employee) => !reportEmployeeIds.has(employee.id));
@@ -8933,6 +8927,15 @@
         });
       }
       renderInsightItems(elements.monthlyReportGapList, items, "차이 없음", "원본데이터 퇴직 제외 인원과 월간업무보고 실제 매칭 인원이 일치합니다.");
+    }
+
+    function fixedRowAccountedEmployees(row, range) {
+      const criteria = Array.isArray(row.accountedCriteria) ? row.accountedCriteria : [];
+      if (!criteria.length) return [];
+      return state.employees.filter((employee) => {
+        if (!isCurrentForMonthlyReport(employee, range)) return false;
+        return criteria.some((criterion) => employeeMatchesMonthlyCriterion(employee, parseMonthlyCriterion(criterion)));
+      });
     }
 
     function monthlyReportRowTitle(row) {
