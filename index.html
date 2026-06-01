@@ -4924,7 +4924,7 @@
     };
 
     const monthlyReportRows = [
-      { type: "detail", group: "", label: "대표이사", criteria: ["대표이사"], fixedCurrent: 2, fixedNote: "홍성훈+1인", accountedCriteria: ["홍성훈", "대표이사"] },
+      { type: "detail", group: "", label: "대표이사", criteria: ["대표이사"], fixedCurrent: 2, fixedNote: "홍성훈+1인", accountedCriteria: ["홍성훈"] },
       { type: "detail", group: "생산본부", label: "본부장", criteria: ["김종규 본부장", "생산본부 본부장"] },
       { type: "detail", group: "생산본부", label: "생산관리팀", criteria: ["생산관리팀"], aliases: ["생산관리부", "생산관리부문", "생산관리파트", "생산관리"] },
       { type: "detail", group: "생산본부", label: "제조팀", criteria: ["원료제조파트"] },
@@ -8969,8 +8969,26 @@
       if (!criteria.length) return [];
       return state.employees.filter((employee) => {
         if (!isCurrentForMonthlyReport(employee, range)) return false;
-        return criteria.some((criterion) => employeeMatchesMonthlyCriterion(employee, parseMonthlyCriterion(criterion)));
+        return criteria.some((criterion) => employeeMatchesMonthlyAccountedCriterion(employee, parseMonthlyCriterion(criterion)));
       });
+    }
+
+    function employeeMatchesMonthlyAccountedCriterion(employee, parsed) {
+      if (parsed.exclusions.some((label) => employeeMatchesMonthlyAccountedSimple(employee, label))) return false;
+      return employeeMatchesMonthlyAccountedSimple(employee, parsed.include);
+    }
+
+    function employeeMatchesMonthlyAccountedSimple(employee, label) {
+      const normalized = normalizeMonthlyLabel(label);
+      const position = text(employee.position, "");
+      return monthlyEmployeePersonLabels(employee)
+        .concat([
+          `${employee.employeeNo || ""}`,
+          `${employee.name || ""} ${position}`,
+          `${employee.name || ""}${position}`
+        ])
+        .map(normalizeMonthlyLabel)
+        .includes(normalized);
     }
 
     function monthlyReportRowTitle(row) {
