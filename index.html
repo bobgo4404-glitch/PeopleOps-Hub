@@ -4670,6 +4670,7 @@
                 <a href="#analytics-composition">인력 구성</a>
                 <a href="#analytics-lifecycle">입퇴사 추이</a>
                 <a href="#analytics-government">정부 대응</a>
+                <a href="#analytics-disability">장애인 통계</a>
                 <a href="#analytics-organization">조직별 현황</a>
                 <a href="#analytics-detail">상세 명부</a>
               </div>
@@ -4779,6 +4780,49 @@
               <span class="signal-badge">Review</span>
             </div>
             <div class="readiness-grid wide" id="governmentReadinessGrid"></div>
+          </section>
+
+          <section class="panel" id="analytics-disability" aria-labelledby="analytics-disability-title">
+            <div class="section-head">
+              <div>
+                <h2 id="analytics-disability-title">장애인 통계</h2>
+                <p>재직·휴직 인원 중 장애 대상자의 중증, 경증, 미분류 현황을 확인합니다.</p>
+              </div>
+            </div>
+            <div class="grid kpi-grid analytics-kpi-grid" aria-label="장애인 통계 지표">
+              <article class="metric-card">
+                <div class="metric-top">
+                  <span class="metric-label">장애 대상자수</span>
+                  <span class="metric-icon"><i data-lucide="accessibility"></i></span>
+                </div>
+                <p class="metric-value" id="statDisabilityTarget">0</p>
+                <span class="metric-note">장애 여부 대상</span>
+              </article>
+              <article class="metric-card">
+                <div class="metric-top">
+                  <span class="metric-label">중증 수</span>
+                  <span class="metric-icon"><i data-lucide="badge-alert"></i></span>
+                </div>
+                <p class="metric-value" id="statDisabilitySevere">0</p>
+                <span class="metric-note">장애 정도 중증</span>
+              </article>
+              <article class="metric-card">
+                <div class="metric-top">
+                  <span class="metric-label">경증 수</span>
+                  <span class="metric-icon"><i data-lucide="badge-check"></i></span>
+                </div>
+                <p class="metric-value" id="statDisabilityMild">0</p>
+                <span class="metric-note">장애 정도 경증</span>
+              </article>
+              <article class="metric-card">
+                <div class="metric-top">
+                  <span class="metric-label">미분류 수</span>
+                  <span class="metric-icon"><i data-lucide="circle-help"></i></span>
+                </div>
+                <p class="metric-value" id="statDisabilityUnclassified">0</p>
+                <span class="metric-note">대상이나 정도 미입력</span>
+              </article>
+            </div>
           </section>
 
           <h2 class="analytics-section-title" id="analytics-composition">인력 구성 분석</h2>
@@ -5836,6 +5880,14 @@
                   <option value="대상">대상</option>
                 </select>
               </div>
+              <div class="field" id="disabilitySeverityField" hidden>
+                <label for="disabilitySeverity">장애 정도</label>
+                <select id="disabilitySeverity" name="disabilitySeverity">
+                  <option value="">미분류</option>
+                  <option value="중증">중증</option>
+                  <option value="경증">경증</option>
+                </select>
+              </div>
               <div class="field full">
                 <label for="certifications">자격/면허</label>
                 <textarea id="certifications" name="certifications" placeholder="보유 자격, 면허, 인증 등을 입력하세요."></textarea>
@@ -5975,6 +6027,7 @@
       militaryStatus: "",
       veteranStatus: "",
       disabilityStatus: "",
+      disabilitySeverity: "",
       certifications: "",
       languages: ""
     };
@@ -6636,6 +6689,8 @@
       militaryStatus: document.querySelector("#militaryStatus"),
       veteranStatus: document.querySelector("#veteranStatus"),
       disabilityStatus: document.querySelector("#disabilityStatus"),
+      disabilitySeverityField: document.querySelector("#disabilitySeverityField"),
+      disabilitySeverity: document.querySelector("#disabilitySeverity"),
       certifications: document.querySelector("#certifications"),
       languages: document.querySelector("#languages"),
       memo: document.querySelector("#memo"),
@@ -6748,6 +6803,10 @@
       statDataQuality: document.querySelector("#statDataQuality"),
       statHiredThisYear: document.querySelector("#statHiredThisYear"),
       statRecentHires: document.querySelector("#statRecentHires"),
+      statDisabilityTarget: document.querySelector("#statDisabilityTarget"),
+      statDisabilitySevere: document.querySelector("#statDisabilitySevere"),
+      statDisabilityMild: document.querySelector("#statDisabilityMild"),
+      statDisabilityUnclassified: document.querySelector("#statDisabilityUnclassified"),
       genderBars: document.querySelector("#genderBars"),
       locationBars: document.querySelector("#locationBars"),
       jobGroupBars: document.querySelector("#jobGroupBars"),
@@ -6840,11 +6899,19 @@
         ...(sampleEmployeeProfiles[employee.id] || {}),
         ...employee
       };
+      const normalizedDisabilitySeverity = normalizeDisabilitySeverity(merged.disabilitySeverity);
+      const disabilityStatus = !text(merged.disabilityStatus, "") && ["중증", "경증"].includes(normalizedDisabilitySeverity)
+        ? "대상"
+        : merged.disabilityStatus;
       return {
         ...merged,
+        disabilityStatus,
         employeeNo: migrateEmployeeNo(merged.employeeNo),
         team: translateKnownValue(merged.team, legacyTeamLabels),
-        jobGroup: translateKnownValue(merged.jobGroup, legacyJobGroupLabels)
+        jobGroup: translateKnownValue(merged.jobGroup, legacyJobGroupLabels),
+        disabilitySeverity: isDisabilityTargetValue(disabilityStatus)
+          ? normalizedDisabilitySeverity
+          : ""
       };
     }
 
@@ -7302,6 +7369,33 @@
       return trimmed || fallback;
     }
 
+    function isDisabilityTargetValue(value) {
+      const normalized = text(value, "").replace(/\s+/g, "").toLowerCase();
+      if (!normalized) return false;
+      return !["비대상", "해당없음", "없음", "미입력", "n", "no", "false", "0"].includes(normalized);
+    }
+
+    function isDisabilityTarget(employee) {
+      return isDisabilityTargetValue(employee?.disabilityStatus ?? employee);
+    }
+
+    function normalizeDisabilitySeverity(value) {
+      const raw = text(value, "");
+      const normalized = raw.replace(/\s+/g, "");
+      if (!normalized) return "";
+      if (normalized.includes("중증")) return "중증";
+      if (normalized.includes("경증")) return "경증";
+      return raw;
+    }
+
+    function disabilitySeverityStatValue(employee) {
+      if (!isDisabilityTarget(employee)) return "";
+      const explicitSeverity = normalizeDisabilitySeverity(employee.disabilitySeverity);
+      const statusSeverity = normalizeDisabilitySeverity(employee.disabilityStatus);
+      const severity = explicitSeverity || (["중증", "경증"].includes(statusSeverity) ? statusSeverity : "");
+      return ["중증", "경증"].includes(severity) ? severity : "미분류";
+    }
+
     function initials(name) {
       const cleaned = text(name, "?").replace(/\s+/g, "");
       return cleaned.slice(-2);
@@ -7713,7 +7807,9 @@
           employee.phone,
           employee.location,
           employee.address,
-          employee.emergencyPhone
+          employee.emergencyPhone,
+          employee.disabilityStatus,
+          disabilitySeverityStatValue(employee)
         ].map((value) => text(value, "").toLowerCase()).join(" ");
         const matchesQuery = !query || searchable.includes(query);
         const matchesDepartment = state.filters.department === "all" || employee.department === state.filters.department;
@@ -8952,6 +9048,7 @@
         [["최종학력", employee.educationLevel], ["전공", employee.major]],
         [["입사 전 경력", personnelRecordCareerYears(employee.careerYears)], ["병역", employee.militaryStatus]],
         [["보훈 여부", employee.veteranStatus], ["장애 여부", employee.disabilityStatus]],
+        [["장애 정도", disabilitySeverityStatValue(employee)]],
         [["개인정보 동의일", formatDate(employee.privacyConsentDate)]],
         [["자격/면허", employee.certifications]],
         [["언어 역량", employee.languages]],
@@ -11221,6 +11318,7 @@
       }
       renderStatsKpis();
       renderGovernmentReadiness();
+      renderDisabilityStatistics();
       renderEmploymentDonut(total);
       renderTenureBars();
       renderAgeBars();
@@ -11281,6 +11379,18 @@
       if (elements.statDataQuality) elements.statDataQuality.textContent = `${dataQuality}%`;
     }
 
+    function renderDisabilityStatistics() {
+      const targetEmployees = activeEmployees().filter(isDisabilityTarget);
+      const severe = targetEmployees.filter((employee) => disabilitySeverityStatValue(employee) === "중증").length;
+      const mild = targetEmployees.filter((employee) => disabilitySeverityStatValue(employee) === "경증").length;
+      const unclassified = targetEmployees.filter((employee) => disabilitySeverityStatValue(employee) === "미분류").length;
+
+      if (elements.statDisabilityTarget) elements.statDisabilityTarget.textContent = String(targetEmployees.length);
+      if (elements.statDisabilitySevere) elements.statDisabilitySevere.textContent = String(severe);
+      if (elements.statDisabilityMild) elements.statDisabilityMild.textContent = String(mild);
+      if (elements.statDisabilityUnclassified) elements.statDisabilityUnclassified.textContent = String(unclassified);
+    }
+
     function isDateWithinDays(dateString, days) {
       if (!dateString) return false;
       const target = new Date(`${dateString}T00:00:00`);
@@ -11331,11 +11441,7 @@
         const age = getAge(employee.birthDate);
         return age !== null && age >= 55;
       }).length;
-      const disabled = active.filter((employee) => {
-        const value = text(employee.disabilityStatus, "");
-        if (!value) return false;
-        return !["비대상", "해당없음", "없음", "미입력"].includes(value);
-      }).length;
+      const disabled = active.filter(isDisabilityTarget).length;
       const nonFullTime = active.filter((employee) => {
         const value = text(employee.workType, "");
         return value && value !== "전일제";
@@ -12130,6 +12236,14 @@
       reader.readAsDataURL(file);
     }
 
+    function syncDisabilitySeverityField() {
+      if (!elements.disabilitySeverityField || !elements.disabilitySeverity || !elements.disabilityStatus) return;
+      const isTarget = isDisabilityTargetValue(elements.disabilityStatus.value);
+      elements.disabilitySeverityField.hidden = !isTarget;
+      elements.disabilitySeverity.disabled = !isTarget;
+      if (!isTarget) elements.disabilitySeverity.value = "";
+    }
+
     function openEmployeeModal(id = null) {
       if (!requireWritePermission()) return;
       state.editingId = id;
@@ -12176,6 +12290,7 @@
         elements.militaryStatus.value = employee.militaryStatus || "";
         elements.veteranStatus.value = employee.veteranStatus || "";
         elements.disabilityStatus.value = employee.disabilityStatus || "";
+        elements.disabilitySeverity.value = normalizeDisabilitySeverity(employee.disabilitySeverity) || "";
         elements.certifications.value = employee.certifications || "";
         elements.languages.value = employee.languages || "";
         elements.memo.value = employee.memo || "";
@@ -12189,6 +12304,7 @@
         elements.joinDate.value = new Date().toISOString().slice(0, 10);
       }
 
+      syncDisabilitySeverityField();
       elements.modal.classList.add("is-open");
       document.body.style.overflow = "hidden";
       window.setTimeout(() => elements.employeeNo.focus(), 40);
@@ -12243,6 +12359,7 @@
         militaryStatus: elements.militaryStatus.value,
         veteranStatus: elements.veteranStatus.value,
         disabilityStatus: elements.disabilityStatus.value,
+        disabilitySeverity: isDisabilityTargetValue(elements.disabilityStatus.value) ? elements.disabilitySeverity.value : "",
         certifications: elements.certifications.value.trim(),
         languages: elements.languages.value.trim(),
         memo: elements.memo.value.trim()
@@ -12359,6 +12476,7 @@
       { header: "병역", key: "militaryStatus" },
       { header: "보훈 여부", key: "veteranStatus" },
       { header: "장애 여부", key: "disabilityStatus" },
+      { header: "장애 정도", key: "disabilitySeverity", aliases: ["장애정도", "장애 중증도", "장애중증도", "장애 구분", "장애구분"] },
       { header: "개인정보 동의일", key: "privacyConsentDate", type: "date" },
       { header: "자격/면허", key: "certifications" },
       { header: "언어 역량", key: "languages" },
@@ -12522,7 +12640,9 @@
         ["근무지", ...(state.settings.locations || [])],
         ["직군", ...(state.settings.jobGroups || [])],
         ["직급/레벨", ...gradeLevelOptions(state.settings.gradeLevels || [])],
-        ["상태", "재직", "휴직", "퇴직"]
+        ["상태", "재직", "휴직", "퇴직"],
+        ["장애 여부", "비대상", "대상"],
+        ["장애 정도", "중증", "경증"]
       ];
       window.XLSX.utils.book_append_sheet(workbook, window.XLSX.utils.aoa_to_sheet(optionRows), "선택값");
       window.XLSX.writeFile(workbook, `peopleops-employee-template-${new Date().toISOString().slice(0, 10)}.xlsx`);
@@ -12693,7 +12813,7 @@
       }
     }
     function exportCsvFile() {
-      const headers = ["사번", "이름", "성별", "국적", "혼인상태", "부서", "팀", "파트", "직책", "직군", "직급/레벨", "고용형태", "근무형태", "상태", "입사일", "수습 종료일", "계약 종료일", "퇴직일", "생년월일", "이메일", "연락처", "주소", "비상연락 이름", "비상연락 관계", "비상연락 번호", "근무지", "코스트센터", "상위 관리자", "최종학력", "전공", "입사 전 경력연수", "병역", "보훈 여부", "장애 여부", "개인정보 동의일", "자격/면허", "언어 역량", "정보완성도", "메모"];
+      const headers = ["사번", "이름", "성별", "국적", "혼인상태", "부서", "팀", "파트", "직책", "직군", "직급/레벨", "고용형태", "근무형태", "상태", "입사일", "수습 종료일", "계약 종료일", "퇴직일", "생년월일", "이메일", "연락처", "주소", "비상연락 이름", "비상연락 관계", "비상연락 번호", "근무지", "코스트센터", "상위 관리자", "최종학력", "전공", "입사 전 경력연수", "병역", "보훈 여부", "장애 여부", "장애 정도", "개인정보 동의일", "자격/면허", "언어 역량", "정보완성도", "메모"];
       const rows = state.employees.map((employee) => [
         employee.employeeNo,
         employee.name,
@@ -12729,6 +12849,7 @@
         employee.militaryStatus,
         employee.veteranStatus,
         employee.disabilityStatus,
+        disabilitySeverityStatValue(employee),
         employee.privacyConsentDate,
         employee.certifications,
         employee.languages,
@@ -12852,6 +12973,7 @@
       }, true);
 
       on(elements.employeeForm, "submit", upsertEmployee);
+      on(elements.disabilityStatus, "change", syncDisabilitySeverityField);
       on(elements.generateEmployeeNo, "click", () => {
         elements.employeeNo.value = generateEmployeeNo();
         showToast("설정된 규칙으로 사번을 생성했습니다.");
