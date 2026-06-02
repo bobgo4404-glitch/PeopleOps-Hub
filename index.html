@@ -435,6 +435,19 @@
       gap: 12px;
     }
 
+    .metric-card[role="button"] {
+      cursor: pointer;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+
+    .metric-card[role="button"]:hover,
+    .metric-card[role="button"]:focus-visible {
+      border-color: var(--primary);
+      box-shadow: 0 18px 36px rgba(37, 99, 235, 0.16);
+      outline: none;
+      transform: translateY(-1px);
+    }
+
     .metric-top {
       display: flex;
       align-items: center;
@@ -1585,6 +1598,17 @@
 
     tbody tr:hover {
       background: #fbfcfc;
+    }
+
+    tbody tr.clickable-row {
+      cursor: pointer;
+    }
+
+    tbody tr.clickable-row:hover,
+    tbody tr.clickable-row:focus-visible {
+      background: #eef7f4;
+      outline: 2px solid rgba(13, 148, 136, 0.24);
+      outline-offset: -2px;
     }
 
     tbody tr:last-child td {
@@ -4791,7 +4815,7 @@
               </div>
             </div>
             <div class="grid kpi-grid analytics-kpi-grid" aria-label="장애인 통계 지표">
-              <article class="metric-card">
+              <article class="metric-card" role="button" tabindex="0" data-foreign-detail-filter="all" aria-controls="foreign-worker-detail-panel" aria-label="외국인 근로자 전체 대상 명부 보기">
                 <div class="metric-top">
                   <span class="metric-label">장애 대상자수</span>
                   <span class="metric-icon"><i data-lucide="accessibility"></i></span>
@@ -4842,31 +4866,31 @@
                   <span class="metric-icon"><i data-lucide="globe"></i></span>
                 </div>
                 <p class="metric-value" id="statForeignWorkerTotal">0</p>
-                  <span class="metric-note">명시 입력된 국적 기준</span>
+                <span class="metric-note">클릭 시 대상 명부 표시</span>
               </article>
-              <article class="metric-card">
+              <article class="metric-card" role="button" tabindex="0" data-foreign-detail-filter="all" aria-controls="foreign-worker-detail-panel" aria-label="외국인 근로자 전체 대상 명부 보기">
                 <div class="metric-top">
                   <span class="metric-label">전체 대비 비율</span>
                   <span class="metric-icon"><i data-lucide="percent"></i></span>
                 </div>
                 <p class="metric-value" id="statForeignWorkerRate">0%</p>
-                <span class="metric-note">재직·휴직 인원 대비</span>
+                <span class="metric-note">클릭 시 전체 명부 표시</span>
               </article>
-              <article class="metric-card">
+              <article class="metric-card" role="button" tabindex="0" data-foreign-detail-filter="all" aria-controls="foreign-worker-detail-panel" aria-label="외국인 근로자 전체 대상 명부 보기">
                 <div class="metric-top">
                   <span class="metric-label">국적 수</span>
                   <span class="metric-icon"><i data-lucide="flag"></i></span>
                 </div>
                 <p class="metric-value" id="statForeignNationalityCount">0</p>
-                <span class="metric-note">대한민국 제외 국적</span>
+                <span class="metric-note">클릭 시 전체 명부 표시</span>
               </article>
-              <article class="metric-card">
+              <article class="metric-card" role="button" tabindex="0" data-foreign-detail-filter="contractDue" aria-controls="foreign-worker-detail-panel" aria-label="계약종료 90일 이내 외국인 근로자 명부 보기">
                 <div class="metric-top">
                   <span class="metric-label">계약종료 90일</span>
                   <span class="metric-icon"><i data-lucide="calendar-clock"></i></span>
                 </div>
                 <p class="metric-value" id="statForeignContractDue">0</p>
-                <span class="metric-note">계약 종료일 기준</span>
+                <span class="metric-note">클릭 시 예정자 명부 표시</span>
               </article>
             </div>
           </section>
@@ -4908,6 +4932,35 @@
               </div>
             </section>
           </div>
+
+          <section class="panel" id="foreign-worker-detail-panel" aria-labelledby="foreign-worker-detail-title">
+            <div class="section-head">
+              <div>
+                <h2 id="foreign-worker-detail-title">외국인 근로자 대상 명부</h2>
+                <p id="foreignWorkerDetailSummary">외국인 근로자수 또는 국적별 현황을 클릭하면 해당 대상자를 확인할 수 있습니다.</p>
+              </div>
+              <button class="button ghost" type="button" id="foreignWorkerDetailReset">
+                전체 보기
+              </button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">외국인 근로자 대상 명부</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">사원</th>
+                    <th scope="col">국적</th>
+                    <th scope="col">소속</th>
+                    <th scope="col">직책</th>
+                    <th scope="col">고용형태</th>
+                    <th scope="col">상태</th>
+                    <th scope="col">계약종료일</th>
+                  </tr>
+                </thead>
+                <tbody id="foreignWorkerDetailTable"></tbody>
+              </table>
+            </div>
+          </section>
 
           <h2 class="analytics-section-title" id="analytics-composition">인력 구성 분석</h2>
 
@@ -6897,6 +6950,10 @@
       statForeignContractDue: document.querySelector("#statForeignContractDue"),
       foreignNationalityBars: document.querySelector("#foreignNationalityBars"),
       foreignNationalityTable: document.querySelector("#foreignNationalityTable"),
+      foreignWorkerDetailPanel: document.querySelector("#foreign-worker-detail-panel"),
+      foreignWorkerDetailSummary: document.querySelector("#foreignWorkerDetailSummary"),
+      foreignWorkerDetailTable: document.querySelector("#foreignWorkerDetailTable"),
+      foreignWorkerDetailReset: document.querySelector("#foreignWorkerDetailReset"),
       genderBars: document.querySelector("#genderBars"),
       locationBars: document.querySelector("#locationBars"),
       jobGroupBars: document.querySelector("#jobGroupBars"),
@@ -11538,6 +11595,53 @@
       return top ? `${top[0]} ${top[1]}명` : "-";
     }
 
+    function renderForeignWorkerDetailTable(filter = "all") {
+      if (!elements.foreignWorkerDetailTable) return;
+      const workers = foreignWorkers();
+      const rows = workers
+        .filter((employee) => {
+          if (filter === "all") return true;
+          if (filter === "contractDue") return isContractDueWithin(employee, 90);
+          return nationalityStatValue(employee) === filter;
+        })
+        .sort((a, b) => {
+          const nationalityCompare = nationalityStatValue(a).localeCompare(nationalityStatValue(b), "ko");
+          if (nationalityCompare) return nationalityCompare;
+          return text(a.name, "").localeCompare(text(b.name, ""), "ko");
+        });
+      const filterLabel = filter === "all"
+        ? "전체 외국인 근로자"
+        : filter === "contractDue"
+          ? "계약종료 90일 이내 외국인 근로자"
+          : `${filter} 국적`;
+
+      elements.foreignWorkerDetailTable.dataset.nationalityFilter = filter;
+      if (elements.foreignWorkerDetailSummary) {
+        elements.foreignWorkerDetailSummary.textContent = `${filterLabel} ${rows.length}명을 표시합니다. 국적은 사원관리의 국적 입력값 기준입니다.`;
+      }
+
+      renderTableRows(elements.foreignWorkerDetailTable, rows, 7, (employee) => {
+        const tr = document.createElement("tr");
+        tr.append(
+          makePersonCell(employee),
+          makeCell(nationalityStatValue(employee)),
+          makeCell(orgPathLabel(employee)),
+          makeCell(text(employee.position)),
+          makeCell(text(employee.employmentType)),
+          makeBadgeCell(employee.status),
+          makeCell(employee.contractEndDate ? formatDate(employee.contractEndDate) : "-")
+        );
+        return tr;
+      }, "외국인 근로자 대상자가 없습니다.", "국적이 대한민국 외 값으로 명시 입력된 재직·휴직자가 있으면 표시됩니다.");
+    }
+
+    function showForeignWorkerDetails(filter = "all", shouldScroll = false) {
+      renderForeignWorkerDetailTable(filter);
+      if (shouldScroll && elements.foreignWorkerDetailPanel) {
+        elements.foreignWorkerDetailPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
     function renderForeignWorkerStatistics() {
       const active = activeEmployees();
       const workers = foreignWorkers();
@@ -11569,6 +11673,16 @@
           const leaveCount = employees.filter((employee) => employee.status === "휴직").length;
           const dueCount = employees.filter((employee) => isContractDueWithin(employee, 90)).length;
           const tr = document.createElement("tr");
+          tr.className = "clickable-row";
+          tr.tabIndex = 0;
+          tr.setAttribute("role", "button");
+          tr.setAttribute("aria-label", `${nationality} 국적 외국인 근로자 명부 보기`);
+          tr.addEventListener("click", () => showForeignWorkerDetails(nationality, true));
+          tr.addEventListener("keydown", (event) => {
+            if (!["Enter", " "].includes(event.key)) return;
+            event.preventDefault();
+            showForeignWorkerDetails(nationality, true);
+          });
           tr.append(
             makeCell(nationality),
             makeCell(`${employees.length}명`),
@@ -11581,6 +11695,7 @@
           return tr;
         }, "외국인 근로자 통계 데이터가 없습니다.", "국적이 대한민국 외 값으로 등록된 재직·휴직자가 있으면 표시됩니다.");
       }
+      renderForeignWorkerDetailTable(elements.foreignWorkerDetailTable?.dataset.nationalityFilter || "all");
     }
 
     function isDateWithinDays(dateString, days) {
@@ -13120,6 +13235,18 @@
       document.querySelectorAll("[data-view-shortcut]").forEach((button) => {
         button.addEventListener("click", () => switchView(button.dataset.viewShortcut));
       });
+
+      document.querySelectorAll("[data-foreign-detail-filter]").forEach((button) => {
+        const openForeignDetail = () => showForeignWorkerDetails(button.dataset.foreignDetailFilter || "all", true);
+        button.addEventListener("click", openForeignDetail);
+        button.addEventListener("keydown", (event) => {
+          if (!["Enter", " "].includes(event.key)) return;
+          event.preventDefault();
+          openForeignDetail();
+        });
+      });
+
+      on(elements.foreignWorkerDetailReset, "click", () => showForeignWorkerDetails("all", true));
 
       on(elements.monthlyReportMonth, "change", (event) => {
         state.monthlyReportMonth = event.target.value;
