@@ -4671,6 +4671,7 @@
                 <a href="#analytics-lifecycle">입퇴사 추이</a>
                 <a href="#analytics-government">정부 대응</a>
                 <a href="#analytics-disability">장애인 통계</a>
+                <a href="#analytics-foreign-workers">외국인 통계</a>
                 <a href="#analytics-organization">조직별 현황</a>
                 <a href="#analytics-detail">상세 명부</a>
               </div>
@@ -4824,6 +4825,89 @@
               </article>
             </div>
           </section>
+
+          <h2 class="analytics-section-title" id="analytics-foreign-workers">외국인 근로자 통계</h2>
+
+          <section class="panel" aria-labelledby="foreign-worker-summary-title">
+            <div class="section-head">
+              <div>
+                <h2 id="foreign-worker-summary-title">외국인 근로자 현황</h2>
+                <p>재직·휴직 인원 중 국적이 대한민국 계열 값이 아닌 인원을 운영 기준으로 집계합니다.</p>
+              </div>
+            </div>
+            <div class="grid kpi-grid analytics-kpi-grid" aria-label="외국인 근로자 통계 지표">
+              <article class="metric-card">
+                <div class="metric-top">
+                  <span class="metric-label">외국인 근로자수</span>
+                  <span class="metric-icon"><i data-lucide="globe"></i></span>
+                </div>
+                <p class="metric-value" id="statForeignWorkerTotal">0</p>
+                <span class="metric-note">국적 기준 운영 집계</span>
+              </article>
+              <article class="metric-card">
+                <div class="metric-top">
+                  <span class="metric-label">전체 대비 비율</span>
+                  <span class="metric-icon"><i data-lucide="percent"></i></span>
+                </div>
+                <p class="metric-value" id="statForeignWorkerRate">0%</p>
+                <span class="metric-note">재직·휴직 인원 대비</span>
+              </article>
+              <article class="metric-card">
+                <div class="metric-top">
+                  <span class="metric-label">국적 수</span>
+                  <span class="metric-icon"><i data-lucide="flag"></i></span>
+                </div>
+                <p class="metric-value" id="statForeignNationalityCount">0</p>
+                <span class="metric-note">대한민국 제외 국적</span>
+              </article>
+              <article class="metric-card">
+                <div class="metric-top">
+                  <span class="metric-label">계약종료 90일</span>
+                  <span class="metric-icon"><i data-lucide="calendar-clock"></i></span>
+                </div>
+                <p class="metric-value" id="statForeignContractDue">0</p>
+                <span class="metric-note">계약 종료일 기준</span>
+              </article>
+            </div>
+          </section>
+
+          <div class="grid two-column">
+            <section class="panel" aria-labelledby="foreign-nationality-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="foreign-nationality-title">국적별 분포</h2>
+                  <p>외국인 근로자의 국적별 인원 분포를 확인합니다.</p>
+                </div>
+              </div>
+              <div class="chart-grid" id="foreignNationalityBars"></div>
+            </section>
+
+            <section class="panel" aria-labelledby="foreign-nationality-table-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="foreign-nationality-table-title">국적별 현황표</h2>
+                  <p>국적별 재직·휴직, 주요 고용형태와 계약 종료 예정자를 확인합니다.</p>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <caption class="sr-only">외국인 근로자 국적별 현황 통계표</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">국적</th>
+                      <th scope="col">총원</th>
+                      <th scope="col">재직</th>
+                      <th scope="col">휴직</th>
+                      <th scope="col">주요 고용형태</th>
+                      <th scope="col">주요 조직</th>
+                      <th scope="col">계약종료 90일</th>
+                    </tr>
+                  </thead>
+                  <tbody id="foreignNationalityTable"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
 
           <h2 class="analytics-section-title" id="analytics-composition">인력 구성 분석</h2>
 
@@ -6807,6 +6891,12 @@
       statDisabilitySevere: document.querySelector("#statDisabilitySevere"),
       statDisabilityMild: document.querySelector("#statDisabilityMild"),
       statDisabilityUnclassified: document.querySelector("#statDisabilityUnclassified"),
+      statForeignWorkerTotal: document.querySelector("#statForeignWorkerTotal"),
+      statForeignWorkerRate: document.querySelector("#statForeignWorkerRate"),
+      statForeignNationalityCount: document.querySelector("#statForeignNationalityCount"),
+      statForeignContractDue: document.querySelector("#statForeignContractDue"),
+      foreignNationalityBars: document.querySelector("#foreignNationalityBars"),
+      foreignNationalityTable: document.querySelector("#foreignNationalityTable"),
       genderBars: document.querySelector("#genderBars"),
       locationBars: document.querySelector("#locationBars"),
       jobGroupBars: document.querySelector("#jobGroupBars"),
@@ -7394,6 +7484,37 @@
       const statusSeverity = normalizeDisabilitySeverity(employee.disabilityStatus);
       const severity = explicitSeverity || (["중증", "경증"].includes(statusSeverity) ? statusSeverity : "");
       return ["중증", "경증"].includes(severity) ? severity : "미분류";
+    }
+
+    function nationalityStatValue(employeeOrValue) {
+      const value = text(employeeOrValue?.nationality ?? employeeOrValue, "");
+      if (!value) return "미입력";
+      const normalized = value.replace(/[\s().,_/-]/g, "").toLowerCase();
+      const domesticValues = [
+        "대한민국",
+        "한국",
+        "한국인",
+        "대한민국한국",
+        "한국대한민국",
+        "korea",
+        "southkorea",
+        "southkorean",
+        "republicofkorea",
+        "korearepublicof",
+        "kor",
+        "kr",
+        "rok"
+      ];
+      return domesticValues.includes(normalized) ? "대한민국" : value;
+    }
+
+    function isForeignWorker(employee) {
+      const nationality = nationalityStatValue(employee);
+      return nationality !== "미입력" && nationality !== "대한민국";
+    }
+
+    function foreignWorkers() {
+      return activeEmployees().filter(isForeignWorker);
     }
 
     function initials(name) {
@@ -11319,6 +11440,7 @@
       renderStatsKpis();
       renderGovernmentReadiness();
       renderDisabilityStatistics();
+      renderForeignWorkerStatistics();
       renderEmploymentDonut(total);
       renderTenureBars();
       renderAgeBars();
@@ -11391,6 +11513,69 @@
       if (elements.statDisabilityUnclassified) elements.statDisabilityUnclassified.textContent = String(unclassified);
     }
 
+    function isContractDueWithin(employee, days) {
+      if (!text(employee.contractEndDate, "")) return false;
+      const remainDays = daysFromToday(employee.contractEndDate);
+      return remainDays >= 0 && remainDays <= days;
+    }
+
+    function topStatLabel(employees, valueGetter) {
+      const counts = employees.reduce((acc, employee) => {
+        const raw = typeof valueGetter === "function" ? valueGetter(employee) : employee[valueGetter];
+        const label = text(raw, "미입력");
+        acc[label] = (acc[label] || 0) + 1;
+        return acc;
+      }, {});
+      const top = Object.entries(counts)
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ko"))[0];
+      return top ? `${top[0]} ${top[1]}명` : "-";
+    }
+
+    function renderForeignWorkerStatistics() {
+      const active = activeEmployees();
+      const workers = foreignWorkers();
+      const nationalityRows = [...workers.reduce((acc, employee) => {
+        const nationality = nationalityStatValue(employee);
+        if (!acc.has(nationality)) acc.set(nationality, []);
+        acc.get(nationality).push(employee);
+        return acc;
+      }, new Map()).entries()]
+        .map(([nationality, employees]) => ({ nationality, employees }))
+        .sort((a, b) => b.employees.length - a.employees.length || a.nationality.localeCompare(b.nationality, "ko"));
+      const contractDue = workers.filter((employee) => isContractDueWithin(employee, 90)).length;
+
+      if (elements.statForeignWorkerTotal) elements.statForeignWorkerTotal.textContent = String(workers.length);
+      if (elements.statForeignWorkerRate) elements.statForeignWorkerRate.textContent = percentText(workers.length, active.length);
+      if (elements.statForeignNationalityCount) elements.statForeignNationalityCount.textContent = String(nationalityRows.length);
+      if (elements.statForeignContractDue) elements.statForeignContractDue.textContent = String(contractDue);
+      if (elements.foreignNationalityBars) {
+        renderBars(
+          elements.foreignNationalityBars,
+          nationalityRows.map((row) => [row.nationality, row.employees.length]),
+          workers.length,
+          "외국인 근로자 데이터가 없습니다."
+        );
+      }
+      if (elements.foreignNationalityTable) {
+        renderTableRows(elements.foreignNationalityTable, nationalityRows, 7, ({ nationality, employees }) => {
+          const activeCount = employees.filter((employee) => employee.status === "재직").length;
+          const leaveCount = employees.filter((employee) => employee.status === "휴직").length;
+          const dueCount = employees.filter((employee) => isContractDueWithin(employee, 90)).length;
+          const tr = document.createElement("tr");
+          tr.append(
+            makeCell(nationality),
+            makeCell(`${employees.length}명`),
+            makeCell(`${activeCount}명`),
+            makeCell(`${leaveCount}명`),
+            makeCell(topStatLabel(employees, "employmentType")),
+            makeCell(topStatLabel(employees, departmentAnalyticsGroupName)),
+            makeCell(`${dueCount}명`)
+          );
+          return tr;
+        }, "외국인 근로자 통계 데이터가 없습니다.", "국적이 대한민국 외 값으로 등록된 재직·휴직자가 있으면 표시됩니다.");
+      }
+    }
+
     function isDateWithinDays(dateString, days) {
       if (!dateString) return false;
       const target = new Date(`${dateString}T00:00:00`);
@@ -11447,11 +11632,7 @@
         return value && value !== "전일제";
       }).length;
       const fixedTerm = active.filter((employee) => employee.employmentType === "계약직" || text(employee.contractEndDate, "")).length;
-      const foreign = active.filter((employee) => {
-        const value = text(employee.nationality, "");
-        if (!value) return false;
-        return !["대한민국", "한국", "Korea", "Republic of Korea"].includes(value);
-      }).length;
+      const foreign = active.filter(isForeignWorker).length;
       const leave = active.filter((employee) => employee.status === "휴직").length;
       const maternitySourceReady = (state.operationRecords.documents || []).some((record) => /출산|육아|휴직|복직/.test(`${record.subject || ""} ${record.memo || ""}`));
 
