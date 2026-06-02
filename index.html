@@ -4832,7 +4832,7 @@
             <div class="section-head">
               <div>
                 <h2 id="foreign-worker-summary-title">외국인 근로자 현황</h2>
-                <p>재직·휴직 인원 중 국적이 대한민국 계열 값이 아닌 인원을 운영 기준으로 집계합니다.</p>
+                <p>재직·휴직 인원 중 국적이 명시적으로 대한민국 외 값으로 입력된 인원을 운영 기준으로 집계합니다.</p>
               </div>
             </div>
             <div class="grid kpi-grid analytics-kpi-grid" aria-label="외국인 근로자 통계 지표">
@@ -4842,7 +4842,7 @@
                   <span class="metric-icon"><i data-lucide="globe"></i></span>
                 </div>
                 <p class="metric-value" id="statForeignWorkerTotal">0</p>
-                <span class="metric-note">국적 기준 운영 집계</span>
+                  <span class="metric-note">명시 입력된 국적 기준</span>
               </article>
               <article class="metric-card">
                 <div class="metric-top">
@@ -7487,18 +7487,25 @@
     }
 
     function nationalityStatValue(employeeOrValue) {
-      const value = text(employeeOrValue?.nationality ?? employeeOrValue, "");
+      const rawValue = employeeOrValue && typeof employeeOrValue === "object" && !Array.isArray(employeeOrValue)
+        ? employeeOrValue.nationality
+        : employeeOrValue;
+      const value = text(rawValue, "");
       if (!value) return "미입력";
       const normalized = value.replace(/[\s().,_/-]/g, "").toLowerCase();
       const domesticValues = [
         "대한민국",
         "한국",
         "한국인",
+        "내국인",
+        "대한민국국적",
+        "한국국적",
         "대한민국한국",
         "한국대한민국",
         "korea",
         "southkorea",
         "southkorean",
+        "korean",
         "republicofkorea",
         "korearepublicof",
         "kor",
