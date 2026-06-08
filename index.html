@@ -7790,21 +7790,27 @@
       }, {});
     }
 
-    function activeEmployees() {
-      return state.employees.filter((employee) => employee.status !== "퇴직");
+    function activeEmployees(asOf = new Date()) {
+      return state.employees.filter((employee) => isWorkingAsOf(employee, asOf));
     }
 
-    function retiredEmployees() {
-      return state.employees.filter((employee) => employee.status === "퇴직" || text(employee.retirementDate, ""));
+    function retiredEmployees(asOf = new Date()) {
+      return state.employees.filter((employee) => isRetiredAsOf(employee, asOf));
     }
 
     function isRetiredAsOf(employee, asOf = new Date()) {
       const retirementDate = parseLocalDate(employee.retirementDate);
-      return employee.status === "퇴직" || Boolean(retirementDate && retirementDate <= asOf);
+      if (retirementDate) return retirementDate <= asOf;
+      return employee.status === "퇴직";
     }
 
     function isWorkingAsOf(employee, asOf = new Date()) {
       return !isRetiredAsOf(employee, asOf);
+    }
+
+    function employeeStatusAsOf(employee, asOf = new Date()) {
+      if (isRetiredAsOf(employee, asOf)) return "퇴직";
+      return employee.status === "휴직" ? "휴직" : "재직";
     }
 
     function hiredEmployees() {
@@ -12142,7 +12148,11 @@
     }
 
     function renderStatusBars(total) {
-      const counts = countBy(state.employees, "status");
+      const counts = state.employees.reduce((acc, employee) => {
+        const status = employeeStatusAsOf(employee);
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+      }, {});
       const rows = ["재직", "휴직", "퇴직"].map((label) => [label, counts[label] || 0]);
       renderBars(elements.statusBars, rows, total, "상태 데이터가 없습니다.");
     }
@@ -12173,9 +12183,7 @@
         const count = state.employees.filter((employee) => {
           const joinDate = parseLocalDate(employee.joinDate);
           if (!joinDate || joinDate > monthEnd) return false;
-          const retirementDate = parseLocalDate(employee.retirementDate);
-          if (retirementDate) return retirementDate >= monthEnd;
-          return employee.status !== "퇴직";
+          return isWorkingAsOf(employee, monthEnd);
         }).length;
         return [`${index + 1}월`, count];
       });
