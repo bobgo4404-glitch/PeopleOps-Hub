@@ -6833,7 +6833,7 @@
       { label: "구매자재", aliases: ["구매자재", "구매자재팀", "공급관리", "구매", "자재"] },
       { label: "국내영업", aliases: ["국내영업", "국내영업팀", "국내영업부문"] },
       { label: "해외영업", aliases: ["해외영업", "해외영업팀", "해외영업부문"] },
-      { label: "상품기획", aliases: ["상품기획", "상품기획팀", "기획팀", "디자인파트", "마케팅"] },
+      { label: "상품기획", aliases: ["상품기획", "상품기획팀", "디자인파트", "마케팅"], exactAliases: ["기획팀"] },
       { label: "연구소", aliases: ["연구소", "연구1팀", "연구2팀", "연구3팀", "제도협력팀", "연구"] },
       { label: "경영지원", aliases: ["경영지원", "경영지원팀", "경영지원본부", "재무기획", "재무", "인사", "IT팀"] }
     ];
@@ -12421,6 +12421,14 @@
         .some((alias) => tokens.some((token) => token.includes(alias)));
     }
 
+    function monthlyHeadcountHasExact(employee, aliases = []) {
+      const tokens = monthlyHeadcountEmployeeTokens(employee);
+      return aliases
+        .map(monthlyHeadcountNormalize)
+        .filter(Boolean)
+        .some((alias) => tokens.includes(alias));
+    }
+
     function monthlyHeadcountIsRepresentative(employee) {
       return monthlyHeadcountRoleTokens(employee).some((token) => {
         if (token.includes("부대표")) return false;
@@ -12469,11 +12477,26 @@
     }
 
     function monthlyHeadcountMatchesDepartment(employee, department) {
-      return monthlyHeadcountHasAny(employee, department.aliases);
+      return monthlyHeadcountHasAny(employee, department.aliases)
+        || monthlyHeadcountHasExact(employee, department.exactAliases);
     }
 
     function monthlyHeadcountMatchesPurchasing(employee) {
       return monthlyHeadcountHasAny(employee, ["구매자재", "구매자재팀", "구매", "자재", "공급관리"]);
+    }
+
+    function monthlyHeadcountCategory(employee) {
+      if (monthlyHeadcountIsRepresentative(employee)) return "대표이사";
+      if (monthlyHeadcountIsExecutive(employee)) return "임원(이사급이상)";
+      if (monthlyHeadcountIsProduction(employee)) {
+        return monthlyHeadcountMatchesPurchasing(employee) ? "생산직-구매자재" : "생산직-생산";
+      }
+      const department = monthlyHeadcountDepartments.find((item) => monthlyHeadcountMatchesDepartment(employee, item));
+      return department ? department.label : "";
+    }
+
+    function monthlyHeadcountMatchesCategory(employee, category) {
+      return monthlyHeadcountCategory(employee) === category;
     }
 
     function monthlyHeadcountGrade(employee) {
@@ -12586,13 +12609,8 @@
       managementSubtotalRows.push(executiveTotal);
 
       monthlyHeadcountDepartments.forEach((department) => {
-        const departmentMatcher = (employee) => (
-          monthlyHeadcountMatchesDepartment(employee, department)
-          && !monthlyHeadcountIsProduction(employee)
-          && !monthlyHeadcountIsRepresentative(employee)
-          && !monthlyHeadcountIsExecutive(employee)
-        );
-        const departmentTotal = monthlyHeadcountDetailRow("", department.label, "parent", departmentMatcher, refs, period, "부서·팀·파트명 기준");
+        const departmentMatcher = (employee) => monthlyHeadcountMatchesCategory(employee, department.label);
+        const departmentTotal = monthlyHeadcountDetailRow("", department.label, "parent", departmentMatcher, refs, period, "부서·팀·파트명 기준(직원 1명 1분류)");
         const gradeRows = monthlyHeadcountGrades.map((grade) => monthlyHeadcountDetailRow(
           "",
           grade,
@@ -12612,19 +12630,19 @@
         "생산직",
         "생산",
         "parent",
-        (employee) => monthlyHeadcountIsProduction(employee) && !monthlyHeadcountMatchesPurchasing(employee),
+        (employee) => monthlyHeadcountMatchesCategory(employee, "생산직-생산"),
         refs,
         period,
-        "직군·조직명 생산직/제조/원료제조 기준"
+        "직군·조직명 생산직/제조/원료제조 기준(직원 1명 1분류)"
       );
       const productionPurchasing = monthlyHeadcountDetailRow(
         "",
         "구매자재",
         "parent",
-        (employee) => monthlyHeadcountIsProduction(employee) && monthlyHeadcountMatchesPurchasing(employee),
+        (employee) => monthlyHeadcountMatchesCategory(employee, "생산직-구매자재"),
         refs,
         period,
-        "생산직 중 구매자재 기준"
+        "생산직 중 구매자재 기준(직원 1명 1분류)"
       );
       const productionSubtotal = monthlyHeadcountSumRow("", "소계", "subtotal", [productionMain, productionPurchasing], refs, period);
       rows.push(productionMain, productionPurchasing, productionSubtotal);
@@ -12635,13 +12653,7 @@
     }
 
     function monthlyHeadcountIncluded(employee) {
-      if (monthlyHeadcountIsRepresentative(employee) || monthlyHeadcountIsExecutive(employee)) return true;
-      if (monthlyHeadcountIsProduction(employee)) return true;
-      return monthlyHeadcountDepartments.some((department) => (
-        monthlyHeadcountMatchesDepartment(employee, department)
-        && !monthlyHeadcountIsRepresentative(employee)
-        && !monthlyHeadcountIsExecutive(employee)
-      ));
+      return Boolean(monthlyHeadcountCategory(employee));
     }
 
     function monthlyHeadcountUnmatchedReason(employee) {
