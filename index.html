@@ -8325,7 +8325,7 @@
           makeCell(employee.employmentType),
           makeCell(`${text(employee.email)}\n${text(employee.phone)}`),
           makeCell(formatDate(employee.joinDate)),
-            makeBadgeCell(employeeStatusAsOf(employee, period.end)),
+          makeBadgeCell(employee.status),
           makeCell(`${profileCompleteness(employee)}%`),
           makeActionCell(employee)
         );
@@ -12405,6 +12405,14 @@
       ].map(monthlyHeadcountNormalize).filter(Boolean);
     }
 
+    function monthlyHeadcountRoleTokens(employee) {
+      return [
+        employee.position,
+        employee.gradeLevel,
+        employee.jobGroup
+      ].map(monthlyHeadcountNormalize).filter(Boolean);
+    }
+
     function monthlyHeadcountHasAny(employee, aliases = []) {
       const tokens = monthlyHeadcountEmployeeTokens(employee);
       return aliases
@@ -12414,7 +12422,7 @@
     }
 
     function monthlyHeadcountIsRepresentative(employee) {
-      return monthlyHeadcountEmployeeTokens(employee).some((token) => {
+      return monthlyHeadcountRoleTokens(employee).some((token) => {
         if (token.includes("부대표")) return false;
         return token.includes("대표이사") || token === "대표" || token.includes("ceo");
       });
@@ -12422,7 +12430,7 @@
 
     function monthlyHeadcountExecutiveRank(employee, rank) {
       if (monthlyHeadcountIsRepresentative(employee)) return false;
-      const tokens = monthlyHeadcountEmployeeTokens(employee);
+      const tokens = monthlyHeadcountRoleTokens(employee);
       const hasHigherExecutiveRank = tokens.some((token) => token.includes("부대표") || token.includes("전무") || token.includes("상무"));
       if (rank === "이사") {
         return tokens.some((token) => token.includes("이사") && !token.includes("대표이사") && !token.includes("부대표") && !token.includes("전무") && !token.includes("상무"))
@@ -12432,7 +12440,7 @@
     }
 
     function monthlyHeadcountIsExecutiveGrade(employee) {
-      const tokens = monthlyHeadcountEmployeeTokens(employee);
+      const tokens = monthlyHeadcountRoleTokens(employee);
       return gradeAnalyticsValue(employee) === "임원"
         || tokens.some((token) => (
           token.includes("임원")
