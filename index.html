@@ -3322,7 +3322,7 @@
           <div class="grid kpi-grid" aria-label="핵심 인사 지표">
             <article class="metric-card">
               <div class="metric-top">
-                <span class="metric-label">전체 재직 인원</span>
+                <span class="metric-label">현재 재직 인원</span>
                 <span class="metric-icon"><i data-lucide="users"></i></span>
               </div>
               <p class="metric-value" id="kpiActive">0</p>
@@ -4821,7 +4821,7 @@
                 <span class="metric-icon"><i data-lucide="user-check"></i></span>
               </div>
               <p class="metric-value" id="statActiveTotal">0</p>
-              <span class="metric-note">퇴직자 제외 운영 대상</span>
+              <span class="metric-note">선택월 말 기준 퇴직자 제외</span>
             </article>
             <article class="metric-card">
               <div class="metric-top">
@@ -8037,7 +8037,7 @@
       const avgTenure = tenures.length ? tenures.reduce((sum, value) => sum + value, 0) / tenures.length : 0;
 
       elements.kpiActive.textContent = String(active.length);
-      elements.kpiTotalNote.textContent = `전체 등록 ${total}명`;
+      elements.kpiTotalNote.textContent = `오늘 기준 · 전체 등록 ${total}명`;
       elements.kpiDepartment.textContent = String(organizationCount);
       elements.kpiRegularRate.textContent = active.length ? `${Math.round((regularCount / active.length) * 100)}%` : "0%";
       elements.kpiTenure.textContent = `${avgTenure.toFixed(1)}년`;
