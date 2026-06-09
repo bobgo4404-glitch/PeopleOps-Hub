@@ -1018,6 +1018,20 @@
       font-weight: 850;
     }
 
+    .monthly-headcount-diff {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #e8eaed;
+    }
+
+    .monthly-headcount-diff p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
     .button {
       min-height: 40px;
       border-radius: 7px;
@@ -5151,6 +5165,24 @@
                 <tbody id="monthlyHeadcountTable"></tbody>
               </table>
             </div>
+            <div class="monthly-headcount-diff">
+              <p id="monthlyHeadcountDiffSummary">월별 재직 인원과 양식 합계의 차이를 확인합니다.</p>
+              <div class="table-wrap">
+                <table>
+                  <caption class="sr-only">월별인원현황 차이 분석표</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">월</th>
+                      <th scope="col">월별 재직 인원</th>
+                      <th scope="col">양식 합계</th>
+                      <th scope="col">차이</th>
+                    </tr>
+                  </thead>
+                  <tbody id="monthlyHeadcountDiffTable"></tbody>
+                </table>
+              </div>
+              <ul class="insight-list" id="monthlyHeadcountUnmatchedList"></ul>
+            </div>
           </section>
 
           <section class="panel" aria-labelledby="yearly-lifecycle-title">
@@ -7070,6 +7102,9 @@
       monthlyHeadcountSummary: document.querySelector("#monthlyHeadcountSummary"),
       monthlyHeadcountHead: document.querySelector("#monthlyHeadcountHead"),
       monthlyHeadcountTable: document.querySelector("#monthlyHeadcountTable"),
+      monthlyHeadcountDiffSummary: document.querySelector("#monthlyHeadcountDiffSummary"),
+      monthlyHeadcountDiffTable: document.querySelector("#monthlyHeadcountDiffTable"),
+      monthlyHeadcountUnmatchedList: document.querySelector("#monthlyHeadcountUnmatchedList"),
       downloadMonthlyHeadcountStats: document.querySelector("#downloadMonthlyHeadcountStats"),
       yearlyLifecycleBars: document.querySelector("#yearlyLifecycleBars"),
       positionGenderTable: document.querySelector("#positionGenderTable"),
@@ -12388,10 +12423,24 @@
     function monthlyHeadcountExecutiveRank(employee, rank) {
       if (monthlyHeadcountIsRepresentative(employee)) return false;
       const tokens = monthlyHeadcountEmployeeTokens(employee);
+      const hasHigherExecutiveRank = tokens.some((token) => token.includes("부대표") || token.includes("전무") || token.includes("상무"));
       if (rank === "이사") {
-        return tokens.some((token) => token.includes("이사") && !token.includes("대표이사") && !token.includes("부대표") && !token.includes("전무") && !token.includes("상무"));
+        return tokens.some((token) => token.includes("이사") && !token.includes("대표이사") && !token.includes("부대표") && !token.includes("전무") && !token.includes("상무"))
+          || (!hasHigherExecutiveRank && monthlyHeadcountIsExecutiveGrade(employee));
       }
       return tokens.some((token) => token.includes(monthlyHeadcountNormalize(rank)));
+    }
+
+    function monthlyHeadcountIsExecutiveGrade(employee) {
+      const tokens = monthlyHeadcountEmployeeTokens(employee);
+      return gradeAnalyticsValue(employee) === "임원"
+        || tokens.some((token) => (
+          token.includes("임원")
+          || token.includes("본부장")
+          || token.includes("연구소장")
+          || token.includes("부문장")
+          || token.includes("센터장")
+        ));
     }
 
     function monthlyHeadcountIsExecutive(employee) {
@@ -12443,10 +12492,18 @@
       ];
     }
 
+    function monthlyHeadcountChartEmployees(asOf) {
+      return state.employees.filter((employee) => {
+        const joinDate = parseLocalDate(employee.joinDate);
+        if (!joinDate || joinDate > asOf) return false;
+        return isWorkingAsOf(employee, asOf);
+      });
+    }
+
     function monthlyHeadcountValues(matcher, refs, period) {
       return refs.map((ref) => {
         if (ref.selectedYear && ref.monthIndex > period.end.getMonth()) return null;
-        return activeEmployeesForStatistics(ref.date).filter(matcher).length;
+        return monthlyHeadcountChartEmployees(ref.date).filter(matcher).length;
       });
     }
 
@@ -12516,7 +12573,7 @@
         refs,
         period
       ));
-      const executiveTotal = monthlyHeadcountSumRow("", "임원(이사급이상)", "parent", executiveChildren, refs, period, "부대표·전무·상무·이사 합계");
+      const executiveTotal = monthlyHeadcountSumRow("", "임원(이사급이상)", "parent", executiveChildren, refs, period, "부대표·전무·상무·이사 합계. 직급/레벨 임원·본부장·연구소장은 이사 행에 포함");
       rows.push(executiveTotal, ...executiveChildren);
       managementSubtotalRows.push(executiveTotal);
 
@@ -12567,6 +12624,41 @@
       const total = monthlyHeadcountSumRow("합계", "", "total", [managementSubtotal, productionSubtotal], refs, period);
       rows.push(total);
       return { refs, rows, year };
+    }
+
+    function monthlyHeadcountIncluded(employee) {
+      if (monthlyHeadcountIsRepresentative(employee) || monthlyHeadcountIsExecutive(employee)) return true;
+      if (monthlyHeadcountIsProduction(employee)) return true;
+      return monthlyHeadcountDepartments.some((department) => (
+        monthlyHeadcountMatchesDepartment(employee, department)
+        && !monthlyHeadcountIsRepresentative(employee)
+        && !monthlyHeadcountIsExecutive(employee)
+      ));
+    }
+
+    function monthlyHeadcountUnmatchedReason(employee) {
+      const orgLabel = orgPathLabel(employee);
+      if (!text(employee.department, "") && !text(employee.team, "") && !text(employee.part, "")) return "조직 미입력";
+      if (!text(employee.position, "") && !text(employee.gradeLevel, "")) return "직책/직급 미입력";
+      return `${orgLabel}이(가) 월별인원현황 양식 행에 매핑되지 않음`;
+    }
+
+    function monthlyHeadcountDiffRows(refs, rows, period) {
+      const totalRow = rows.find((row) => row.kind === "total");
+      if (!totalRow) return [];
+      return refs
+        .map((ref, index) => {
+          if (ref.selectedYear && ref.monthIndex > period.end.getMonth()) return null;
+          const activeCount = monthlyHeadcountChartEmployees(ref.date).length;
+          const formCount = Number(totalRow.values[index]) || 0;
+          return {
+            label: ref.label,
+            activeCount,
+            formCount,
+            diff: activeCount - formCount
+          };
+        })
+        .filter(Boolean);
     }
 
     function monthlyHeadcountDisplayValue(row, value) {
@@ -12621,6 +12713,55 @@
         );
         elements.monthlyHeadcountTable.append(tr);
       });
+      renderMonthlyHeadcountDiagnostics(refs, rows, period);
+    }
+
+    function renderMonthlyHeadcountDiagnostics(refs, rows, period) {
+      const diffRows = monthlyHeadcountDiffRows(refs, rows, period);
+      const currentLabel = `${period.end.getMonth() + 1}월`;
+      const currentDiff = diffRows.find((row) => row.label === currentLabel);
+      const unmatched = monthlyHeadcountChartEmployees(period.end)
+        .filter((employee) => !monthlyHeadcountIncluded(employee))
+        .sort((a, b) => orgPathLabel(a).localeCompare(orgPathLabel(b), "ko") || text(a.name).localeCompare(text(b.name), "ko"));
+
+      if (elements.monthlyHeadcountDiffSummary) {
+        const diffText = currentDiff
+          ? `${currentLabel} 기준 월별 재직 ${currentDiff.activeCount}명 - 양식 합계 ${currentDiff.formCount}명 = 차이 ${currentDiff.diff}명`
+          : "선택월 차이를 계산할 수 없습니다.";
+        elements.monthlyHeadcountDiffSummary.textContent = `${diffText}. 차이는 대체로 양식 행에 매핑되지 않은 조직/직급 인원에서 발생합니다.`;
+      }
+
+      if (elements.monthlyHeadcountDiffTable) {
+        renderTableRows(elements.monthlyHeadcountDiffTable, diffRows, 4, (row) => {
+          const tr = document.createElement("tr");
+          tr.append(
+            makeCell(row.label),
+            makeCell(`${row.activeCount}명`),
+            makeCell(`${row.formCount}명`),
+            makeCell(`${row.diff}명`)
+          );
+          return tr;
+        }, "월별 차이가 없습니다.", "월별 재직 인원과 월별인원현황 양식 합계가 일치합니다.");
+      }
+
+      if (elements.monthlyHeadcountUnmatchedList) {
+        const items = unmatched.slice(0, 20).map((employee) => ({
+          title: `${employeeLabel(employee)} 미분류`,
+          body: `${monthlyHeadcountUnmatchedReason(employee)} · 직책 ${text(employee.position)} · 직급/레벨 ${gradeLevelLabel(text(employee.gradeLevel, "")) || "-"}`
+        }));
+        if (unmatched.length > 20) {
+          items.push({
+            title: `외 ${unmatched.length - 20}명`,
+            body: "월별인원현황 양식의 부서/직급 매핑 기준을 추가하면 합계 차이를 줄일 수 있습니다."
+          });
+        }
+        renderInsightItems(
+          elements.monthlyHeadcountUnmatchedList,
+          items,
+          "선택월 미분류 인원이 없습니다.",
+          "선택월 기준 월별 재직 인원이 모두 월별인원현황 양식에 반영됩니다."
+        );
+      }
     }
 
     function monthlyHeadcountExportMatrix(period) {
