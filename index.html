@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PeopleOps Hub - PeopleOps 플랫폼</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin />
   <link rel="preconnect" href="https://securetoken.googleapis.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet" />
+  <!-- Pretendard Variable: 한 파일로 모든 굵기. 필요한 글자만 내려받는 동적 서브셋 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
 
   <!-- Firebase 모듈을 HTML 파싱과 동시에 내려받는다 -->
   <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js" />
@@ -24,47 +24,53 @@
     :root {
       color-scheme: light;
 
-      /* 종이 — 바탕 3종 (기존 회색 9종 통합) */
-      --bg: #f2f2f0;
+      /* 화이트 — 흰 카드가 떠 보이도록 바탕은 아주 옅은 회색 */
+      --bg: #f7f8fa;
       --surface: #ffffff;
-      --surface-muted: #eceae6;
+      --surface-muted: #f2f3f6;
 
-      /* 괘선 */
-      --line: #d8d6d1;
-      --line-strong: #b6b2aa;
+      /* 선 */
+      --line: #e6e8ec;
+      --line-strong: #cbd0d9;
 
-      /* 먹 */
-      --text: #1a1a18;
-      --muted: #66625c;
-      --subtle: #97928a;
+      /* 글자 */
+      --text: #16181d;
+      --muted: #5c626e;
+      --subtle: #949aa6;
 
-      /* 직인 — 주 강조색 */
-      --primary: #9e2b25;
-      --primary-strong: #7d211c;
-      --primary-soft: #f5eae9;
-      --seal: #9e2b25;
-      --ink-strong: #2b3540;
+      /* 레드 — 브랜드이자 주 동작. 아껴 쓸수록 눈에 들어온다 */
+      --primary: #d92d20;
+      --primary-strong: #b42318;
+      --primary-soft: #fef3f2;
+      --primary-line: #fbc9c4;
+      --seal: #d92d20;
+      --ink-strong: #16181d;
 
-      /* 상태 */
-      --accent: #8a6320;
-      --accent-soft: #f5efe4;
-      --success: #3d6b46;
-      --success-soft: #ecf1ed;
-      --warning: #8a6320;
-      --warning-soft: #f5efe4;
-      --danger: #9e2b25;
-      --danger-soft: #f5eae9;
+      /* 상태 — 레드의 의미를 지키려고 채도를 낮춰 둔다 */
+      --accent: #b54708;
+      --accent-soft: #fffaeb;
+      --success: #067647;
+      --success-soft: #ecfdf3;
+      --warning: #b54708;
+      --warning-soft: #fffaeb;
+      --danger: #d92d20;
+      --danger-soft: #fef3f2;
+      --neutral: #5c626e;
+      --neutral-soft: #f2f3f6;
 
-      --google-red: #9e2b25;
-      --google-yellow: #8a6320;
-      --google-green: #3d6b46;
+      --google-red: #d92d20;
+      --google-yellow: #b54708;
+      --google-green: #067647;
 
-      --shadow: none;
-      --radius: 3px;
+      --shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+      --shadow-lift: 0 4px 12px rgba(16, 24, 40, 0.07), 0 1px 3px rgba(16, 24, 40, 0.05);
+      --radius: 10px;
+      --radius-sm: 8px;
       --sidebar: 256px;
       --header: 68px;
-      --font-head: "Nanum Myeongjo", "Batang", "Apple SD Gothic Neo", serif;
-      font-family: "Noto Sans KR", "Apple SD Gothic Neo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-head: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", sans-serif;
+      letter-spacing: -0.005em;
     }
 
     * {
@@ -187,7 +193,7 @@
     .brand-mark {
       width: 38px;
       height: 38px;
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       display: grid;
       place-items: center;
       background:
@@ -231,7 +237,7 @@
 
     .nav-button {
       min-height: 44px;
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       padding: 0 12px;
       display: flex;
       align-items: center;
@@ -321,7 +327,7 @@
       display: none;
       width: 40px;
       height: 40px;
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       align-items: center;
       justify-content: center;
       background: var(--surface);
@@ -334,7 +340,7 @@
       max-width: 620px;
       min-height: 44px;
       border: 1px solid transparent;
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       gap: 10px;
@@ -490,7 +496,7 @@
     .metric-icon {
       width: 34px;
       height: 34px;
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       display: grid;
       place-items: center;
       background: var(--primary-soft);
@@ -621,7 +627,7 @@
       align-items: center;
       gap: 10px;
       border: 1px solid var(--line);
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       background: #ffffff;
       padding: 8px 10px;
     }
@@ -759,7 +765,7 @@
     .workflow-icon {
       width: 34px;
       height: 34px;
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       display: grid;
       place-items: center;
       background: var(--surface-muted);
@@ -810,7 +816,7 @@
     .filter-token {
       min-height: 54px;
       border: 1px solid var(--line);
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       background: var(--surface);
       padding: 10px 12px;
       display: grid;
@@ -901,7 +907,7 @@
     .readiness-card {
       min-height: 104px;
       border: 1px solid var(--line);
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       background: #ffffff;
       padding: 12px;
       display: grid;
@@ -944,7 +950,7 @@
       top: -22px;
       width: 82px;
       height: 82px;
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       background: rgba(26, 115, 232, 0.08);
       pointer-events: none;
       transform: rotate(18deg);
@@ -1060,7 +1066,7 @@
 
     .button {
       min-height: 40px;
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       padding: 0 14px;
       display: inline-flex;
       align-items: center;
@@ -1121,7 +1127,7 @@
       width: 36px;
       height: 36px;
       padding: 0;
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       display: inline-grid;
       place-items: center;
       background: transparent;
@@ -1175,7 +1181,7 @@
       width: 100%;
       min-height: 40px;
       border: 1px solid var(--line-strong);
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       background: #ffffff;
       color: var(--text);
       padding: 0 11px;
@@ -1205,7 +1211,7 @@
     .field .checkbox-field {
       min-height: 40px;
       border: 1px solid var(--line-strong);
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       background: #ffffff;
       color: var(--text);
       padding: 0 11px;
@@ -1535,7 +1541,7 @@
 
     .mini-metric {
       border: 1px solid var(--line);
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       padding: 11px;
       background: #faf9f7;
     }
@@ -1612,7 +1618,7 @@
       min-width: 34px;
       height: 34px;
       border: 1px solid var(--line);
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       background: #ffffff;
       color: var(--text);
       font-weight: 600;
@@ -1935,7 +1941,7 @@
       grid-template-columns: auto minmax(0, 1fr);
       gap: 10px;
       padding: 11px;
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       background: var(--bg);
       border: 1px solid var(--line);
     }
@@ -2183,7 +2189,7 @@
     .swatch {
       width: 10px;
       height: 10px;
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       flex: 0 0 auto;
       background: var(--primary);
     }
@@ -2224,7 +2230,7 @@
 
     .org-team {
       border: 1px solid var(--line);
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       padding: 12px;
       background: #faf9f7;
       min-height: 112px;
@@ -2323,7 +2329,7 @@
       width: 14px;
       height: 14px;
       border: 0;
-      border-radius: 2px;
+      border-radius: 6px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -2343,7 +2349,7 @@
       min-width: 0;
       width: 100%;
       border: 1px solid transparent;
-      border-radius: 2px;
+      border-radius: 6px;
       background: transparent;
       padding: 4px 7px;
       display: flex;
@@ -2411,7 +2417,7 @@
 
     .org-selected-summary {
       border: 1px solid var(--line);
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       padding: 12px;
       background: #faf9f7;
       color: var(--muted);
@@ -2515,7 +2521,7 @@
 
     .blueprint-hero-meta span {
       border: 1px solid var(--line);
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       background: #ffffff;
       padding: 11px;
       color: var(--muted);
@@ -2545,7 +2551,7 @@
       justify-content: center;
       white-space: nowrap;
       border: 1px solid var(--line);
-      border-radius: 3px;
+      border-radius: var(--radius-sm);
       padding: 0 11px;
       color: var(--primary-strong);
       background: #ffffff;
@@ -3309,6 +3315,24 @@
       #employeeTable td:nth-child(6),
       #employeeTable td:nth-child(8) { display: none; }
 
+      /* 월별인원현황은 피벗 표라 카드로 못 바꾼다. 대신 가로로 밀어도
+         행 이름이 남도록 첫 열을 고정한다. */
+      .monthly-headcount-wrap { position: relative; }
+
+      .monthly-headcount-table th:first-child,
+      .monthly-headcount-table td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background: var(--surface);
+        box-shadow: 1px 0 0 var(--line);
+      }
+
+      .monthly-headcount-table thead th:first-child {
+        z-index: 4;
+        background: var(--surface-muted);
+      }
+
       .pagination { flex-direction: column; align-items: stretch; gap: 10px; }
       .pagination-controls { justify-content: space-between; }
 
@@ -3316,7 +3340,8 @@
       .button,
       .nav-button,
       .page-button,
-      .drawer-tab { min-height: 44px; }
+      .drawer-tab,
+      .sidebar-footer .button { min-height: 44px; }
 
       .icon-button { min-width: 42px; min-height: 42px; }
       .page-button { min-width: 42px; }
@@ -3648,7 +3673,7 @@
       gap: 9px;
       width: 100%;
       padding: 7px 10px;
-      border-radius: 2px;
+      border-radius: 6px;
       background: transparent;
       color: var(--text);
       font-size: 0.86rem;
@@ -3669,7 +3694,7 @@
       display: inline-block;
       margin-left: 7px;
       padding: 1px 7px;
-      border-radius: 2px;
+      border-radius: 6px;
       background: var(--surface-muted);
       color: var(--muted);
       font-size: 0.74rem;
@@ -3718,7 +3743,7 @@
     .bar-legend i {
       width: 9px;
       height: 9px;
-      border-radius: 2px;
+      border-radius: 6px;
       flex: none;
     }
 
@@ -3771,7 +3796,7 @@
        괘선으로 구분하고, 붉은색은 직인처럼 아껴 쓴다.
        ========================================================== */
 
-    /* 제목만 명조. 표·라벨·숫자는 고딕 유지(작은 크기 가독성) */
+    /* 제목 — 자간을 조이고 굵기로 위계를 만든다 */
     .topbar h1,
     .auth-card h1,
     .section-head h2,
@@ -3780,11 +3805,21 @@
     .blueprint-hero h2,
     .modal-header h2,
     .analytics-section-title,
-    .org-tree-title h2 {
-      font-family: var(--font-head);
-      font-weight: 700;
-      letter-spacing: -0.01em;
+    .org-tree-title h2,
+    .drawer-id strong {
+      font-family: inherit;
+      font-weight: 650;
+      letter-spacing: -0.022em;
     }
+
+    .metric-value,
+    .leave-figure b,
+    .m-kpi b {
+      font-weight: 680;
+      letter-spacing: -0.03em;
+    }
+
+    body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 
     /* 숫자는 명조를 쓰지 않고 자릿수를 맞춘다 */
     .metric-value,
@@ -3801,14 +3836,16 @@
       position: sticky;
       top: 0;
       z-index: 1;
-      background: var(--surface-muted);
-      border-bottom: 1px solid var(--line-strong);
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
       text-transform: none;
-      letter-spacing: 0.01em;
+      letter-spacing: 0;
       font-weight: 600;
     }
 
-    tbody tr:hover { background: #faf9f7; }
+    tbody tr:hover { background: var(--bg); }
+    tbody tr.clickable-row:hover { background: var(--primary-soft); outline: none; }
 
     /* 위험 동작은 채우지 않는다 — 저장(직인 채움)과 구분 */
     .button.danger {
@@ -3823,14 +3860,14 @@
       border-color: var(--primary-strong);
     }
 
-    /* 브랜드 마크 = 직인 */
     .brand-mark {
-      background: var(--seal);
+      background: var(--primary);
       color: #ffffff;
-      border-radius: 2px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(217, 45, 32, 0.28);
     }
 
-    /* 패널 — 그림자 대신 괘선 */
+    /* 패널 — 옅은 그림자로 흰 카드를 띄운다 */
     .panel,
     .metric-card,
     .stat-card,
@@ -3839,22 +3876,38 @@
     .readiness-card,
     .strategy-card {
       border: 1px solid var(--line);
-      box-shadow: none;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
     }
 
     .workflow-card:hover,
     .metric-card:hover {
-      border-color: var(--line-strong);
+      border-color: var(--primary-line);
+      box-shadow: var(--shadow-lift);
       transform: none;
     }
 
-    /* 배지 — 인장처럼 각지게 */
+    .modal, .detail-drawer, .row-menu, .toast { box-shadow: var(--shadow-lift), 0 16px 48px rgba(16, 24, 40, 0.12); }
+
+    /* 배지 — 알약 형태 */
     .badge,
     .signal-badge,
     .priority-pill {
-      border-radius: 2px;
+      border-radius: 999px;
       font-weight: 600;
-      letter-spacing: 0.01em;
+      letter-spacing: 0;
+      padding: 2px 9px;
+    }
+
+    /* 퇴직은 위험이 아니라 상태다. 레드는 브랜드와 위험에만 남긴다 */
+    .badge.neutral {
+      background: var(--neutral-soft);
+      color: var(--neutral);
+    }
+
+    .avatar { border-radius: 999px; }
+    .button, .icon-button, .page-button, .field input, .field select, .field textarea, .m-input {
+      border-radius: var(--radius-sm);
     }
 
     /* 입력 — 밑줄 강조 대신 테두리 강조 */
@@ -3880,7 +3933,8 @@
     .certificate-document {
       background: #ffffff;
       border: 1px solid var(--line);
-      box-shadow: none;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
     }
 
   </style>
@@ -4812,6 +4866,10 @@
               </div>
               <div class="org-tree-actions">
                 <strong>부서</strong>
+                <button class="button ghost" type="button" id="orgBuildFromEmployees" title="사원 정보의 부서·팀·파트로 조직도를 만듭니다">
+                  <i data-lucide="wand-sparkles"></i>
+                  사원 데이터로 만들기
+                </button>
                 <button class="icon-button" type="button" id="orgAddChild" aria-label="하위 조직 추가">
                   <i data-lucide="plus"></i>
                 </button>
@@ -6586,7 +6644,7 @@
                     <span class="activity-dot"></span>
                     <div>
                       <strong>민감정보 암호화</strong>
-                      <span>주민등록번호, 급여, 계좌, 건강정보는 이 프로토타입에 저장하지 않는 것이 안전합니다.</span>
+                      <span>주민등록번호는 마스킹 표시되며 전체 열람 시 감사 로그가 남습니다. 급여, 계좌, 건강정보는 저장하지 않습니다.</span>
                     </div>
                   </li>
                   <li class="insight-item">
@@ -7021,6 +7079,7 @@
 
     const employeeDefaults = {
       legalName: "",
+      residentId: "",
       part: "",
       gender: "",
       nationality: "대한민국",
@@ -7828,6 +7887,7 @@
       orgNodeMemo: document.querySelector("#orgNodeMemo"),
       orgOpenSettings: document.querySelector("#orgOpenSettings"),
       orgAddChild: document.querySelector("#orgAddChild"),
+      orgBuildFromEmployees: document.querySelector("#orgBuildFromEmployees"),
       orgDeleteNode: document.querySelector("#orgDeleteNode"),
       orgMoveUp: document.querySelector("#orgMoveUp"),
       orgMoveDown: document.querySelector("#orgMoveDown"),
@@ -8211,7 +8271,8 @@
         "data:update": "데이터 저장",
         "user:approve": "계정 승인",
         "user:reject": "접근 반려",
-        "user:update": "권한 변경"
+        "user:update": "권한 변경",
+        "privacy:view": "주민등록번호 열람"
       }[action] || action;
     }
 
@@ -8659,7 +8720,7 @@
         const status = employeeStatusAsOf(employee);
         if (status === "재직") badge.classList.add("success");
         if (status === "휴직") badge.classList.add("warning");
-        if (status === "퇴직") badge.classList.add("danger");
+        if (status === "퇴직") badge.classList.add("neutral");
         badge.textContent = status;
 
         body.append(drawerGroup("소속 · 고용", [
@@ -8679,6 +8740,28 @@
           drawerKv("퇴직일", formatDate(employee.retirementDate)),
           drawerKv("개인정보 동의", formatDate(employee.privacyConsentDate))
         ]));
+
+        if (text(employee.residentId, "")) {
+          const holder = document.createElement("span");
+          holder.textContent = maskResidentId(employee.residentId);
+          const wrap = document.createElement("span");
+          wrap.style.display = "inline-flex";
+          wrap.style.alignItems = "center";
+          wrap.style.gap = "8px";
+          wrap.append(holder);
+          if (canViewResidentId()) {
+            const reveal = document.createElement("button");
+            reveal.type = "button";
+            reveal.className = "button ghost";
+            reveal.style.minHeight = "24px";
+            reveal.style.padding = "1px 8px";
+            reveal.style.fontSize = "0.74rem";
+            reveal.textContent = "전체 보기";
+            reveal.addEventListener("click", () => revealResidentId(employee, holder, reveal));
+            wrap.append(reveal);
+          }
+          body.append(drawerGroup("고유식별정보", [drawerKv("주민등록번호", wrap)]));
+        }
 
         body.append(drawerGroup("연락처", [
           drawerKv("이메일", employee.email),
@@ -8843,21 +8926,31 @@
       document.body.append(menu);
       state.openRowMenu = menu;
 
+      // 아이콘을 먼저 그려야 메뉴의 실제 높이가 나온다. 순서가 바뀌면
+      // 화면 아래로 삐져나가는 위치에 놓이게 된다.
+      if (window.lucide) window.lucide.createIcons();
+
       // 좁은 화면에서는 하단 시트로 붙인다 (CSS 가 위치를 잡는다)
       if (window.matchMedia("(max-width: 640px)").matches) {
         menu.classList.add("is-sheet");
       } else {
         const rect = anchor.getBoundingClientRect();
-        const width = menu.offsetWidth;
-        const height = menu.offsetHeight;
-        let left = Math.min(Math.max(8, rect.right - width), window.innerWidth - width - 8);
+        const first = menu.getBoundingClientRect();
+        const left = Math.min(Math.max(8, rect.right - first.width), window.innerWidth - first.width - 8);
         let top = rect.bottom + 6;
-        if (top + height > window.innerHeight - 8) top = Math.max(8, rect.top - height - 6);
+        if (top + first.height > window.innerHeight - 8) top = rect.top - first.height - 6;
         menu.style.left = `${left}px`;
-        menu.style.top = `${top}px`;
+        menu.style.top = `${Math.max(8, top)}px`;
+
+        // 배치한 뒤 실제 크기로 한 번 더 보정한다.
+        // 아이콘·글꼴이 늦게 잡히면 처음 측정한 높이가 실제와 다를 수 있다.
+        const placed = menu.getBoundingClientRect();
+        if (placed.bottom > window.innerHeight - 8 || placed.top < 8) {
+          const fixed = Math.max(8, window.innerHeight - placed.height - 8);
+          menu.style.top = `${fixed}px`;
+        }
       }
 
-      if (window.lucide) window.lucide.createIcons();
       menu.querySelector("button:not(:disabled)")?.focus();
     }
 
@@ -8898,6 +8991,116 @@
       if (window.lucide) window.lucide.createIcons();
       elements.assignmentEmployee.focus();
       showToast(`${employee.name} 사원의 발령 정보를 불러왔습니다.`);
+    }
+
+    // =========================================================
+    // 주민등록번호 — 고유식별정보.
+    // 기본은 마스킹해서 보여주고, 전체 열람은 감사 기록으로 남긴다.
+    // =========================================================
+
+    function normalizeResidentId(value) {
+      const digits = text(value, "").replace(/\D/g, "").slice(0, 13);
+      if (!digits) return "";
+      if (digits.length <= 6) return digits;
+      return digits.slice(0, 6) + "-" + digits.slice(6);
+    }
+
+    function maskResidentId(value) {
+      const digits = normalizeResidentId(value).replace(/\D/g, "");
+      if (!digits) return "";
+      if (digits.length < 7) return digits;
+      return digits.slice(0, 6) + "-" + digits.slice(6, 7) + "*".repeat(Math.max(0, digits.length - 7));
+    }
+
+    // 조회 전용(viewer) 계정은 볼 수 없다
+    function canViewResidentId() {
+      return ["owner", "admin", "hr_manager"].includes(currentRole());
+    }
+
+    function revealResidentId(employee, holder, button) {
+      if (!canViewResidentId()) {
+        showToast("주민등록번호는 조회 권한 계정에서 볼 수 없습니다.");
+        return;
+      }
+      holder.textContent = normalizeResidentId(employee.residentId);
+      button?.remove();
+      addAuditLog("privacy:view", employee.name, "주민등록번호 열람 (" + text(employee.employeeNo, "사번없음") + ")");
+      showToast("열람 기록을 남겼습니다.");
+    }
+
+    // =========================================================
+    // 엑셀 업로드 병합 — 사번을 열쇠로 갱신하거나 추가한다
+    // =========================================================
+
+    function findExistingEmployee(incoming) {
+      const no = text(incoming.employeeNo, "");
+      if (no) {
+        const byNo = state.employees.find((item) => text(item.employeeNo, "") === no);
+        if (byNo) return byNo;
+      }
+      // 사번이 비어 있으면 이름 + 입사일로 한 번 더 찾는다
+      const name = text(incoming.name, "");
+      const join = text(incoming.joinDate, "");
+      if (!name || !join) return null;
+      return state.employees.find((item) => text(item.name, "") === name && text(item.joinDate, "") === join) || null;
+    }
+
+    // 파일에 값이 있는 항목만 덮어쓴다.
+    // 앱에서만 관리하는 항목(비상연락처, 메모, 수습종료일 등)을 지키기 위해서다.
+    function mergeEmployeeValues(existing, incoming) {
+      const merged = { ...existing };
+      const changed = [];
+      Object.entries(incoming).forEach(([key, value]) => {
+        if (key === "id") return;
+        const next = typeof value === "string" ? value.trim() : value;
+        if (next === "" || next === null || next === undefined) return;
+        if (String(existing[key] === undefined ? "" : existing[key]) === String(next)) return;
+        merged[key] = next;
+        changed.push(key);
+      });
+      return { merged, changed };
+    }
+
+    function mergeEmployeesByEmployeeNo(incomingList) {
+      const added = [];
+      const updated = [];
+      let untouched = 0;
+
+      incomingList.forEach((incoming) => {
+        const existing = findExistingEmployee(incoming);
+        if (!existing) {
+          added.push(incoming);
+          return;
+        }
+        const result = mergeEmployeeValues(existing, incoming);
+        if (!result.changed.length) {
+          untouched += 1;
+          return;
+        }
+        updated.push(result.merged);
+      });
+
+      const ok = window.confirm([
+        "파일에서 " + incomingList.length + "명을 확인했습니다.",
+        "",
+        "신규 등록   " + added.length + "명",
+        "정보 변경   " + updated.length + "명",
+        "변경 없음   " + untouched + "명",
+        "",
+        "이대로 반영할까요?"
+      ].join("\n"));
+
+      if (!ok) {
+        showToast("업로드를 취소했습니다.");
+        return null;
+      }
+
+      updated.forEach((employee) => {
+        const index = state.employees.findIndex((item) => item.id === employee.id);
+        if (index >= 0) state.employees.splice(index, 1, normalizeEmployee(employee));
+      });
+      state.employees.push(...added);
+      return { added: added.length, updated: updated.length, untouched };
     }
 
     function makeIcon(name) {
@@ -9621,7 +9824,7 @@
       badge.className = "badge";
       if (status === "재직") badge.classList.add("success");
       if (status === "휴직") badge.classList.add("warning");
-      if (status === "퇴직") badge.classList.add("danger");
+      if (status === "퇴직") badge.classList.add("neutral");
       badge.textContent = text(status);
       td.append(badge);
       return td;
@@ -10023,6 +10226,94 @@
         if (orgCompare !== 0) return orgCompare;
         return text(a.name).localeCompare(text(b.name), "ko");
       });
+    }
+
+    // =========================================================
+    // 사원 정보의 부서·팀·파트로 조직도를 세운다.
+    // 이미 있는 조직은 건드리지 않고, 없는 것만 채운다.
+    // =========================================================
+
+    function buildOrganizationFromEmployees() {
+      if (!requireWritePermission()) return;
+
+      const nodes = orgNodes().slice();
+      const rootExists = nodes.some((node) => node.id === ROOT_ORG_ID);
+      if (!rootExists) {
+        nodes.unshift({
+          id: ROOT_ORG_ID,
+          name: text(state.settings.companyName, "회사"),
+          parentId: "",
+          type: "회사",
+          memo: ""
+        });
+      }
+
+      // 같은 상위 아래에 같은 이름이 있으면 그것을 쓴다
+      const findChild = (parentId, name) =>
+        nodes.find((node) => node.parentId === parentId && text(node.name, "") === name);
+
+      // 자리(부서/팀/파트)가 아니라 이름 끝말로 유형을 정한다.
+      // '경영지원본부 > 재무기획부문 > 재무기획팀' 처럼 팀이 세 번째 자리에 와도 팀으로 남는다.
+      const nodeTypeOf = (name, fallback) => {
+        const value = text(name, "");
+        if (value.endsWith("본부")) return "본부";
+        if (value.endsWith("부문")) return "부서";
+        if (value.endsWith("팀")) return "팀";
+        if (value.endsWith("파트")) return "파트";
+        if (value.endsWith("법인")) return "법인";
+        return fallback;
+      };
+
+      let created = 0;
+      const ensure = (parentId, name, type) => {
+        const clean = text(name, "");
+        if (!clean) return parentId;
+        const found = findChild(parentId, clean);
+        if (found) return found.id;
+        const id = `org-${Date.now()}-${created}-${Math.random().toString(36).slice(2, 6)}`;
+        nodes.push({ id, name: clean, parentId, type, memo: "" });
+        created += 1;
+        return id;
+      };
+
+      // 인원이 많은 조직부터 만들어 트리 순서를 자연스럽게 둔다
+      const seen = new Map();
+      state.employees.forEach((employee) => {
+        const key = [text(employee.department, ""), text(employee.team, ""), text(employee.part, "")].join("\u0000");
+        seen.set(key, (seen.get(key) || 0) + 1);
+      });
+
+      [...seen.keys()]
+        .sort((a, b) => seen.get(b) - seen.get(a))
+        .forEach((key) => {
+          const [department, team, part] = key.split("\u0000");
+          if (!department && !team && !part) return;
+          let parentId = ROOT_ORG_ID;
+          parentId = ensure(parentId, department, nodeTypeOf(department, "부서"));
+          parentId = ensure(parentId, team, nodeTypeOf(team, "팀"));
+          ensure(parentId, part, nodeTypeOf(part, "파트"));
+        });
+
+      if (!created) {
+        showToast("추가할 조직이 없습니다. 이미 모두 등록되어 있습니다.");
+        return;
+      }
+
+      const ok = window.confirm([
+        `사원 ${state.employees.length}명의 소속을 훑어 조직 ${created}개를 새로 만듭니다.`,
+        "",
+        "이미 있는 조직은 그대로 둡니다.",
+        "만든 뒤 조직도에서 이름과 순서를 고칠 수 있습니다.",
+        "",
+        "계속할까요?"
+      ].join("\n"));
+      if (!ok) return;
+
+      state.settings.organizationNodes = nodes;
+      saveSettings();
+      renderAll();
+      if (window.lucide) window.lucide.createIcons();
+      showToast(`조직 ${created}개를 만들었습니다.`);
     }
 
     function startOrganizationNodeCreate(mode = "child") {
@@ -14640,12 +14931,11 @@
       if (!field) return;
       const container = elements.modal.querySelector(".modal");
       if (!container) return;
-      requestAnimationFrame(() => {
-        const target = field.getBoundingClientRect();
-        const box = container.getBoundingClientRect();
-        const offset = target.top - box.top - Math.max(90, box.height * 0.25);
-        container.scrollTop = Math.max(0, container.scrollTop + offset);
-      });
+      // getBoundingClientRect 가 레이아웃을 확정시키므로 이 시점 좌표가 정확하다.
+      const target = field.getBoundingClientRect();
+      const box = container.getBoundingClientRect();
+      const offset = target.top - box.top - Math.max(90, box.height * 0.25);
+      container.scrollTop = Math.max(0, container.scrollTop + offset);
     }
 
     function markEmployeeFieldError(input, message) {
@@ -14746,7 +15036,7 @@
     const employeeExcelColumns = [
       { header: "사번", key: "employeeNo", aliases: ["사원번호", "직원번호", "근로자번호"] },
       { header: "이름", key: "name", required: true, aliases: ["성명", "직원명", "사원명", "근로자명", "근로자"] },
-      { header: "주민번호 앞6자리+뒤1자리", key: "residentIdPart", importOnly: true, aliases: ["주민번호", "주민등록번호", "주민번호앞7자리", "주민등록번호앞7자리"] },
+      { header: "주민등록번호", key: "residentId", aliases: ["주민번호", "주민(외국인)등록번호", "주민번호 앞6자리+뒤1자리", "주민번호앞7자리", "주민등록번호앞7자리"] },
       { header: "성별", key: "gender" },
       { header: "국적", key: "nationality" },
       { header: "혼인상태", key: "maritalStatus" },
@@ -15044,7 +15334,8 @@
 
     function validateImportedEmployees(employees) {
       const errors = [];
-      const existingNos = new Set(state.employees.map((employee) => employee.employeeNo).filter(Boolean));
+      // 기존 사원과 사번이 같은 건 '중복'이 아니라 '갱신 대상'이다.
+      // 파일 안에서 같은 사번이 두 번 나오는 경우만 막는다.
       const uploadNos = new Set();
       employees.forEach((employee, index) => {
         const row = index + 2;
@@ -15053,7 +15344,7 @@
         });
         if (!employee.department && !employee.team && !employee.part) errors.push(`${row}행: 부서, 팀, 파트 중 하나를 입력하세요.`);
         if (employee.employeeNo) {
-          if (existingNos.has(employee.employeeNo) || uploadNos.has(employee.employeeNo)) errors.push(`${row}행: 사번 ${employee.employeeNo}이(가) 중복됩니다.`);
+          if (uploadNos.has(employee.employeeNo)) errors.push(`${row}행: 사번 ${employee.employeeNo}이(가) 파일 안에서 중복됩니다.`);
           uploadNos.add(employee.employeeNo);
         }
         if (employee.residentIdPartError) errors.push(`${row}행: ${employee.residentIdPartError}`);
@@ -15084,13 +15375,14 @@
               employee[column.key] = valueFromExcelRow(row, column);
             });
             completeImportedOrganization(employee);
-            const residentInfo = residentInfoFromPartial(employee.residentIdPart);
+            // 앞 7자리로 생년월일·성별을 채우고, 번호 자체는 보관한다
+            employee.residentId = normalizeResidentId(employee.residentId);
+            const residentInfo = residentInfoFromPartial(employee.residentId);
             if (residentInfo && !residentInfo.error) {
-              employee.birthDate = residentInfo.birthDate;
-              employee.gender = residentInfo.gender;
+              employee.birthDate = employee.birthDate || residentInfo.birthDate;
+              employee.gender = employee.gender || residentInfo.gender;
             }
             employee.residentIdPartError = residentInfo?.error || "";
-            delete employee.residentIdPart;
             employee.status = employee.status || "재직";
             employee.nationality = employee.nationality || "대한민국";
             employee.employmentType = employee.employmentType || state.settings.employmentTypes[0] || "정규직";
@@ -15110,10 +15402,13 @@
         }
 
         employees.forEach((employee) => delete employee.residentIdPartError);
-        state.employees.push(...employees);
+
+        // 덧붙이기만 하면 중복이 쌓인다. 사번 기준으로 갱신하거나 추가한다.
+        const summary = mergeEmployeesByEmployeeNo(employees);
+        if (!summary) return;
         saveEmployees();
         renderAll();
-        showToast(`${employees.length}명의 사원을 업로드했습니다.`);
+        showToast(`신규 ${summary.added}명 · 정보변경 ${summary.updated}명을 반영했습니다.`);
       } catch (error) {
         console.error("employee excel import failed", error);
         showToast("엑셀 파일을 읽지 못했습니다. 양식을 확인하세요.");
@@ -15367,6 +15662,7 @@
       on(elements.settingCompanySealImage, "change", handleCompanySealUpload);
       on(elements.organizationForm, "submit", saveOrganizationNode);
       on(elements.orgOpenSettings, "click", () => switchView("settings"));
+      on(elements.orgBuildFromEmployees, "click", buildOrganizationFromEmployees);
       on(elements.orgAddChild, "click", () => startOrganizationNodeCreate("child"));
       on(elements.orgDeleteNode, "click", deleteSelectedOrganizationNode);
       on(elements.orgMoveUp, "click", () => moveSelectedOrganizationNode("up"));
@@ -15381,6 +15677,11 @@
       on(elements.certificateEmployee, "input", renderCertificatePreview);
       on(elements.certificateEmployee, "change", () => {
         syncCertificateResidentControls(true);
+        // 저장된 주민등록번호가 있으면 채워 준다. 매번 손으로 칠 필요가 없다.
+        const picked = state.employees.find((item) => item.id === elements.certificateEmployee.value);
+        if (picked && text(picked.residentId, "") && canViewResidentId() && elements.certificateResidentFull) {
+          elements.certificateResidentFull.value = normalizeResidentId(picked.residentId);
+        }
         renderCertificatePreview();
       });
       on(elements.certificateResidentFullToggle, "change", () => {
