@@ -3070,6 +3070,148 @@
       margin: 0;
     }
 
+    .checklist {
+      list-style: none;
+      margin: 0 0 14px;
+      padding: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .checklist li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface-muted);
+    }
+
+    .checklist label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .checklist input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary);
+    }
+
+    .checklist time {
+      color: var(--muted);
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .topbar-search {
+      position: relative;
+    }
+
+    #globalSearch {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      background: transparent;
+      font: inherit;
+      color: var(--text);
+      outline: none;
+    }
+
+    #globalSearch::placeholder {
+      color: var(--muted);
+    }
+
+    .global-search-results {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      margin: 0;
+      padding: 6px;
+      list-style: none;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow);
+      z-index: 60;
+      max-height: 360px;
+      overflow: auto;
+    }
+
+    .global-search-results button {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      font: inherit;
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .global-search-results button:hover,
+    .global-search-results button:focus {
+      background: var(--surface-muted);
+    }
+
+    .global-search-results small,
+    .global-search-empty {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .global-search-empty {
+      padding: 8px 10px;
+    }
+
+    .bulk-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface-muted);
+    }
+
+    .select-col {
+      width: 36px;
+    }
+
+    .select-col input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .deadline-list .insight-item {
+      align-items: center;
+    }
+
+    .deadline-list .badge {
+      flex-shrink: 0;
+      min-width: 56px;
+      justify-content: center;
+    }
+
+    .deadline-list .button {
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
     @media print {
       html,
       body {
@@ -3089,6 +3231,7 @@
       #certificates .grid.two-column > .panel:first-child,
       #certificates .grid.two-column > .panel:last-child > .section-head,
       #certificates .notice,
+      #certificates .certificate-register,
       .form-actions {
         display: none !important;
       }
@@ -3993,6 +4136,32 @@
           <i data-lucide="file-text"></i>
           <span>증명서 발급</span>
         </button>
+        <div class="nav-section-label">업무 처리</div>
+        <button class="nav-button" type="button" data-view-target="lifecycle">
+          <i data-lucide="user-check"></i>
+          <span>입사·퇴사 처리</span>
+        </button>
+        <button class="nav-button" type="button" data-view-target="assignments">
+          <i data-lucide="git-branch"></i>
+          <span>계약·발령</span>
+        </button>
+        <button class="nav-button" type="button" data-view-target="training">
+          <i data-lucide="graduation-cap"></i>
+          <span>교육·자격</span>
+        </button>
+        <button class="nav-button" type="button" data-view-target="reviews">
+          <i data-lucide="clipboard-list"></i>
+          <span>평가·면담</span>
+        </button>
+        <button class="nav-button" type="button" data-view-target="monthly-report">
+          <i data-lucide="calendar-check"></i>
+          <span>월간업무보고</span>
+        </button>
+        <div class="nav-section-label">정보 확인</div>
+        <button class="nav-button" type="button" data-view-target="attendance">
+          <i data-lucide="calendar-days"></i>
+          <span>연차 부여 예상</span>
+        </button>
         <div class="nav-section-label">Insight</div>
         <button class="nav-button" type="button" data-view-target="statistics">
           <i data-lucide="chart-no-axes-combined"></i>
@@ -4030,7 +4199,8 @@
         </div>
         <div class="topbar-search" aria-label="전역 검색">
           <i data-lucide="search"></i>
-          <span>사원, 조직, 통계 검색</span>
+          <input id="globalSearch" type="search" placeholder="사원 이름, 사번, 부서, 연락처 검색" autocomplete="off" aria-label="사원 검색" />
+          <ul class="global-search-results" id="globalSearchResults" hidden></ul>
         </div>
         <div class="topbar-actions">
           <span class="status-chip"><i data-lucide="shield-check"></i>권한 기반 운영</span>
@@ -4188,8 +4358,8 @@
                   <span class="workflow-icon"><i data-lucide="calendar-days"></i></span>
                   <span class="signal-badge">휴가</span>
                 </span>
-                <h3>근태·휴가 기준</h3>
-                <p>연차 산정 기준과 휴직·복직·출산휴가·육아휴직 통계 확장 기반을 관리합니다.</p>
+                <h3>연차 부여 예상 (참고)</h3>
+                <p>입사일 기준 연차 부여 예상일수만 참고용으로 확인합니다. 연차 사용·급여 관리는 별도 시스템에서 합니다.</p>
               </button>
               <button class="workflow-card" type="button" data-view-shortcut="training">
                 <span class="workflow-card-header">
@@ -4216,6 +4386,16 @@
                 <p>조직도 기준 인원과 월간 보고 매핑 차이를 점검하고 보고용 데이터를 정리합니다.</p>
               </button>
             </div>
+          </section>
+
+          <section class="panel" aria-labelledby="deadline-title">
+            <div class="section-head">
+              <div>
+                <h2 id="deadline-title">처리 기한 알림 <span class="tab-count" id="deadlineCount">0</span></h2>
+                <p>수습·계약·정년, 발령 미반영, 교육·평가 기한, 입퇴사 체크리스트, 개인정보 보유기간 기준으로 60일 안에 처리할 항목입니다. 지난 기한은 D+로 표시합니다.</p>
+              </div>
+            </div>
+            <ul class="insight-list deadline-list" id="deadlineList"></ul>
           </section>
 
           <div class="grid two-column">
@@ -4260,455 +4440,6 @@
                   </tr>
                 </thead>
                 <tbody id="recentTable"></tbody>
-              </table>
-            </div>
-          </section>
-        </section>
-
-        <section class="view" id="blueprint" aria-labelledby="blueprint-title">
-          <div class="blueprint-hero">
-            <div>
-              <p class="page-kicker">PeopleOps Platform Blueprint</p>
-              <h2 id="blueprint-title">인사관리 시스템을 데이터 기반 PeopleOps 플랫폼으로 고도화</h2>
-              <p>
-                기존 핵심 메뉴는 유지하되, 사원 원장 중심의 관리 도구를 조직 운영, 인력 리스크, 정부 대응 통계, 경영 의사결정까지 연결하는 실무형 HR Tech SaaS 구조로 재설계합니다.
-              </p>
-            </div>
-            <div class="blueprint-hero-meta" aria-label="설계 전제">
-              <span>가정<strong>한국 기준, 중소·중견기업 PeopleOps 운영</strong></span>
-              <span>범위<strong>IA, 화면, 통계, 대시보드, 권한</strong></span>
-              <span>유지 메뉴<strong>사원관리, 조직도, 증명서, 통계, 설정</strong></span>
-              <span>주의<strong>법정 제출은 사업장별 추가 확인 필요</strong></span>
-            </div>
-          </div>
-
-          <nav class="blueprint-nav" aria-label="플랫폼 설계서 바로가기">
-            <a href="#brand-blueprint">1. 리브랜딩</a>
-            <a href="#ux-blueprint">2. UI/UX</a>
-            <a href="#ia-blueprint">3. IA</a>
-            <a href="#menu-blueprint">4. 메뉴 기능</a>
-            <a href="#analytics-blueprint">5. 통계센터</a>
-            <a href="#dashboard-blueprint">6. 대시보드</a>
-            <a href="#extension-blueprint">7. 추가 기능</a>
-            <a href="#recommend-blueprint">8. 권장안</a>
-          </nav>
-
-          <section class="panel" id="brand-blueprint" aria-labelledby="brand-blueprint-title">
-            <div class="section-head">
-              <div>
-                <h2 id="brand-blueprint-title">1. 서비스 리브랜딩 방향</h2>
-                <p>사원정보 관리에서 인력 의사결정 플랫폼으로 포지션을 전환합니다.</p>
-              </div>
-            </div>
-            <div class="strategy-grid">
-              <article class="strategy-card">
-                <h3>서비스 컨셉</h3>
-                <p>PeopleOps Hub는 인사 원장, 조직도, 문서, 발령, 교육, 통계를 연결해 조직 운영의 현재 상태와 다음 액션을 제안하는 HR 운영 콘솔입니다.</p>
-                <ul class="tag-list">
-                  <li>Single Source of Truth</li>
-                  <li>People Analytics</li>
-                  <li>Actionable HR</li>
-                </ul>
-              </article>
-              <article class="strategy-card">
-                <h3>핵심 가치</h3>
-                <ul class="compact-list">
-                  <li>데이터 누락과 문서 누락을 조기에 발견합니다.</li>
-                  <li>경영진이 인력 구조와 성장·이탈 흐름을 즉시 파악합니다.</li>
-                  <li>정부 대응 통계와 내부 보고 지표를 같은 데이터 모델에서 산출합니다.</li>
-                  <li>권한과 감사 로그를 통해 개인정보 접근 리스크를 낮춥니다.</li>
-                </ul>
-              </article>
-              <article class="strategy-card">
-                <h3>타깃 사용자</h3>
-                <ul class="compact-list">
-                  <li>경영진: 인력 규모, 비용 영향, 조직 성장성 확인</li>
-                  <li>인사담당자: 입퇴사, 발령, 증명서, 통계 실무 처리</li>
-                  <li>부서장: 팀 인원, 계약 종료, 교육, 성과 리스크 확인</li>
-                  <li>운영자: 권한, 기준값, 조직 마스터, 로그 관리</li>
-                </ul>
-              </article>
-              <article class="strategy-card">
-                <h3>차별화 포인트</h3>
-                <ul class="compact-list">
-                  <li>사원정보 변경이 조직도, 통계, 월간보고에 즉시 반영됩니다.</li>
-                  <li>법정·정부 대응 가능 통계를 별도 카탈로그로 관리합니다.</li>
-                  <li>직무·역량·교육·성과까지 확장 가능한 People Graph를 지향합니다.</li>
-                  <li>운영 체크리스트와 액션 버튼을 대시보드에 배치합니다.</li>
-                </ul>
-              </article>
-            </div>
-          </section>
-
-          <section class="panel" id="ux-blueprint" aria-labelledby="ux-blueprint-title">
-            <div class="section-head">
-              <div>
-                <h2 id="ux-blueprint-title">2. 최신 SaaS 스타일 UI/UX 방향</h2>
-                <p>2025년형 Enterprise SaaS 기준으로 밀도, 탐색성, 데이터 해석성을 우선합니다.</p>
-              </div>
-            </div>
-            <div class="table-wrap">
-              <table class="matrix-table">
-                <caption class="sr-only">UI UX 방향 정의</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">구분</th>
-                    <th scope="col">방향</th>
-                    <th scope="col">실행 기준</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>디자인 컨셉</td>
-                    <td>조용하고 밀도 있는 운영형 SaaS. 과도한 장식보다 명확한 정보 계층, 상태 배지, 액션 중심 UI를 우선합니다.</td>
-                    <td>화이트·뉴트럴 배경, 8px 이하 라운드, 명확한 구분선, 색상은 상태와 우선순위 표현에 제한적으로 사용</td>
-                  </tr>
-                  <tr>
-                    <td>레이아웃 구조</td>
-                    <td>좌측 사이드바, 상단 컨텍스트 바, 중앙 작업영역, 테이블·차트·상세 패널 조합을 기본으로 둡니다.</td>
-                    <td>운영 화면은 검색·필터·테이블·상세/모달 구조, 분석 화면은 KPI·차트·드릴다운 테이블 구조</td>
-                  </tr>
-                  <tr>
-                    <td>사이드바 전략</td>
-                    <td>기능 메뉴보다 업무 흐름 중심으로 묶습니다. 대시보드, 인사정보, 조직관리, 문서, 라이프사이클, Analytics, 설정 순으로 확장합니다.</td>
-                    <td>핵심 1차 메뉴 8~10개 유지, 세부 기능은 탭·필터·상세 패널로 흡수</td>
-                  </tr>
-                  <tr>
-                    <td>대시보드 구성</td>
-                    <td>역할별 뷰를 분리합니다. 경영진은 KPI와 추세, 인사담당자는 처리 대기, 부서장은 팀 리스크와 액션을 봅니다.</td>
-                    <td>동일 데이터셋을 권한·역할에 따라 카드, 알림, 차트 우선순위만 다르게 노출</td>
-                  </tr>
-                  <tr>
-                    <td>카드형 UI</td>
-                    <td>KPI 카드는 짧은 값과 해석 문장까지 제공합니다. 카드 클릭 시 해당 필터가 적용된 상세 목록으로 이동합니다.</td>
-                    <td>값, 전월 대비, 기준일, 데이터 품질 상태를 함께 표시</td>
-                  </tr>
-                  <tr>
-                    <td>데이터 시각화</td>
-                    <td>인력 구성은 도넛·100% 누적 막대, 흐름은 라인·막대 혼합, 조직 비교는 정렬 가능한 막대와 피벗 테이블을 사용합니다.</td>
-                    <td>다운로드, 필터 저장, 기준일 고정, 산식 설명 툴팁 제공</td>
-                  </tr>
-                  <tr>
-                    <td>모바일 대응</td>
-                    <td>조회·승인·알림 확인 중심으로 축소합니다. 대량 입력, 엑셀 업로드, 설정은 데스크톱 우선으로 둡니다.</td>
-                    <td>모바일에서는 KPI 1열, 테이블은 카드형 요약, 상세 액션은 하단 고정 버튼</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section class="panel" id="ia-blueprint" aria-labelledby="ia-blueprint-title">
-            <div class="section-head">
-              <div>
-                <h2 id="ia-blueprint-title">3. 신규 메뉴 구조(IA)</h2>
-                <p>기존 핵심 메뉴를 유지하면서 PeopleOps 확장 메뉴를 업무 흐름별로 배치합니다.</p>
-              </div>
-            </div>
-            <ul class="ia-tree">
-              <li>
-                <strong><i data-lucide="layout-dashboard"></i>대시보드</strong>
-                <ul>
-                  <li>경영진 대시보드</li>
-                  <li>인사담당자 대시보드</li>
-                  <li>부서장 대시보드</li>
-                  <li>알림·액션센터</li>
-                </ul>
-              </li>
-              <li>
-                <strong><i data-lucide="id-card"></i>인사정보</strong>
-                <ul>
-                  <li>사원관리</li>
-                  <li>인재 프로파일</li>
-                  <li>계약·발령 이력</li>
-                  <li>개인정보 동의·보관</li>
-                </ul>
-              </li>
-              <li>
-                <strong><i data-lucide="network"></i>조직관리</strong>
-                <ul>
-                  <li>조직도</li>
-                  <li>부서·팀·파트 관리</li>
-                  <li>정원·현원 관리</li>
-                  <li>조직 변경 시뮬레이션</li>
-                </ul>
-              </li>
-              <li>
-                <strong><i data-lucide="file-text"></i>문서·증명서</strong>
-                <ul>
-                  <li>증명서 발급</li>
-                  <li>근로계약·동의서 현황</li>
-                  <li>발급 이력·감사 로그</li>
-                  <li>템플릿·직인 관리</li>
-                </ul>
-              </li>
-              <li>
-                <strong><i data-lucide="user-plus"></i>People Lifecycle</strong>
-                <ul>
-                  <li>온보딩</li>
-                  <li>수습·계약 종료 관리</li>
-                  <li>퇴사·오프보딩</li>
-                  <li>휴직·복직</li>
-                </ul>
-              </li>
-              <li>
-                <strong><i data-lucide="calendar-days"></i>근태·휴가</strong>
-                <ul>
-                  <li>연차 산정 기준</li>
-                  <li>휴직·출산휴가·육아휴직</li>
-                  <li>근무형태 현황</li>
-                  <li>휴가 통계</li>
-                </ul>
-              </li>
-              <li>
-                <strong><i data-lucide="graduation-cap"></i>성장·성과</strong>
-                <ul>
-                  <li>교육/자격 관리</li>
-                  <li>평가/보상</li>
-                  <li>승진 현황</li>
-                  <li>핵심인재·승계계획</li>
-                </ul>
-              </li>
-              <li>
-                <strong><i data-lucide="chart-no-axes-combined"></i>People Analytics</strong>
-                <ul>
-                  <li>통계센터</li>
-                  <li>정부 대응 통계</li>
-                  <li>조직 운영 분석</li>
-                  <li>월간업무보고</li>
-                </ul>
-              </li>
-              <li>
-                <strong><i data-lucide="settings"></i>운영관리</strong>
-                <ul>
-                  <li>운영설정</li>
-                  <li>운영자관리</li>
-                  <li>권한·역할 정책</li>
-                  <li>감사 로그·데이터 품질</li>
-                </ul>
-              </li>
-            </ul>
-          </section>
-
-          <section class="panel" id="menu-blueprint" aria-labelledby="menu-blueprint-title">
-            <div class="section-head">
-              <div>
-                <h2 id="menu-blueprint-title">4. 메뉴별 상세 기능 정의</h2>
-                <p>필수 메뉴와 신규 제안 메뉴를 목적, 기능, 화면, 데이터, 권한 기준으로 정의합니다.</p>
-              </div>
-            </div>
-            <div class="spec-accordion">
-              <details open>
-                <summary>사원관리</summary>
-                <div class="spec-body">
-                  <dl class="spec-list">
-                    <dt>목적</dt><dd>사원 원장을 PeopleOps 플랫폼의 기준 데이터로 관리합니다.</dd>
-                    <dt>주요 기능</dt><dd>등록·수정·검색·필터, 엑셀 업로드, CSV 다운로드, 정보완성도 점검, 개인정보 동의일 관리</dd>
-                    <dt>화면 구성</dt><dd>검색/필터 툴바, 사원 테이블, 등록 모달, 상세 프로파일 탭, 데이터 품질 알림</dd>
-                    <dt>주요 데이터</dt><dd>사번, 성명, 성별, 생년월일, 국적, 부서, 팀, 직책, 직급, 고용형태, 입사일, 계약종료일, 퇴직일, 교육·자격 요약</dd>
-                    <dt>권한 체계</dt><dd>소유자·관리자 전체 수정, 인사담당 수정, 부서장 소속 조회, 조회전용 다운로드 제한 옵션</dd>
-                  </dl>
-                </div>
-              </details>
-              <details>
-                <summary>조직도</summary>
-                <div class="spec-body">
-                  <dl class="spec-list">
-                    <dt>목적</dt><dd>조직 계층과 현원을 연결해 조직별 인력 구조를 실시간으로 확인합니다.</dd>
-                    <dt>주요 기능</dt><dd>본부·부서·팀·파트 트리, 조직 추가·이동·삭제, 조직별 인원 집계, 정원 대비 현원, 조직 변경 이력</dd>
-                    <dt>화면 구성</dt><dd>좌측 조직 트리, 우측 조직 속성 편집, 하단 조직원 목록, 조직도 검색</dd>
-                    <dt>주요 데이터</dt><dd>조직 ID, 조직명, 상위 조직, 조직 유형, 조직 메모, 소속 인원, 조직장, 코스트센터</dd>
-                    <dt>권한 체계</dt><dd>조직 마스터 수정은 관리자 이상, 부서장은 소속 조직 조회, 변경 이력은 소유자·관리자 열람</dd>
-                  </dl>
-                </div>
-              </details>
-              <details>
-                <summary>증명서 발급</summary>
-                <div class="spec-body">
-                  <dl class="spec-list">
-                    <dt>목적</dt><dd>재직·경력·퇴직 증명서를 표준 템플릿으로 발급하고 이력을 남깁니다.</dd>
-                    <dt>주요 기능</dt><dd>대상자 검색, 증명서 유형 선택, 용도·제출처 입력, 직인 이미지 반영, 출력, 발급 이력 저장</dd>
-                    <dt>화면 구성</dt><dd>발급 입력 폼, 출력 미리보기, 발급 이력 테이블, 템플릿 설정 연결</dd>
-                    <dt>주요 데이터</dt><dd>발급번호, 사원정보, 증명서 유형, 발급일, 용도, 제출처, 발급자, 출력 여부</dd>
-                    <dt>권한 체계</dt><dd>발급은 인사담당 이상, 부서장은 요청 조회만, 모든 발급은 감사 로그 기록</dd>
-                  </dl>
-                </div>
-              </details>
-              <details>
-                <summary>통계 / People Analytics</summary>
-                <div class="spec-body">
-                  <dl class="spec-list">
-                    <dt>목적</dt><dd>인력 구성, 입퇴사 흐름, 정부 대응 통계, 조직 운영 지표를 통합 제공합니다.</dd>
-                    <dt>주요 기능</dt><dd>KPI, 차트, 교차표, 필터, 다운로드, 산식 설명, 법정 제출 대응 통계 카탈로그, 월간보고 매핑</dd>
-                    <dt>화면 구성</dt><dd>요약 KPI, 구성 차트, 라이프사이클 추이, 정부 대응 탭, 조직별 드릴다운, 다운로드 패널</dd>
-                    <dt>주요 데이터</dt><dd>고용형태, 성별, 연령, 근속, 입사일, 퇴직일, 조직, 직급, 직책, 사업장, 장애·보훈·외국인 여부, 휴직·휴가 이력</dd>
-                    <dt>권한 체계</dt><dd>집계 통계는 관리자·인사담당·경영진, 민감 항목 원천 데이터는 소유자·관리자 제한</dd>
-                  </dl>
-                </div>
-              </details>
-              <details>
-                <summary>운영설정</summary>
-                <div class="spec-body">
-                  <dl class="spec-list">
-                    <dt>목적</dt><dd>회사 기준값, 사번 규칙, 조직 기준, 직인, 통계 기준을 중앙 관리합니다.</dd>
-                    <dt>주요 기능</dt><dd>회사정보, 사번 생성 규칙, 기준 코드, 조직 기본값, 개인정보 보관 기준, 월간보고 매핑</dd>
-                    <dt>화면 구성</dt><dd>회사 설정, 사번 규칙, 코드 목록, 증명서 직인, 데이터 초기화, 백업 안내</dd>
-                    <dt>주요 데이터</dt><dd>회사명, 대표자, 사업자번호, 주소, HR 담당자, 직책·직급·고용형태·근무지 코드, 직인 이미지</dd>
-                    <dt>권한 체계</dt><dd>소유자·관리자만 수정, 인사담당 일부 코드 조회, 초기화는 소유자 확인 절차 필요</dd>
-                  </dl>
-                </div>
-              </details>
-              <details>
-                <summary>운영자관리</summary>
-                <div class="spec-body">
-                  <dl class="spec-list">
-                    <dt>목적</dt><dd>개인정보 접근 권한을 최소 권한 원칙으로 통제합니다.</dd>
-                    <dt>주요 기능</dt><dd>접근 요청 승인·반려, 역할 부여, 계정 중지, 운영 로그 조회, 권한 정책 설명</dd>
-                    <dt>화면 구성</dt><dd>운영자 KPI, 접근 요청 목록, 계정 테이블, 감사 로그, 역할 정책 패널</dd>
-                    <dt>주요 데이터</dt><dd>UID, 이메일, 표시명, 역할, 상태, 승인일, 마지막 수정일, 액션 로그</dd>
-                    <dt>권한 체계</dt><dd>소유자 전용. 관리자·인사담당은 본인 세션 정보만 조회</dd>
-                  </dl>
-                </div>
-              </details>
-              <details>
-                <summary>추가 제안 메뉴</summary>
-                <div class="spec-body">
-                  <dl class="spec-list">
-                    <dt>인재 프로파일</dt><dd>스킬, 경력, 자격, 교육, 평가, 승진 이력을 사람 단위로 통합합니다.</dd>
-                    <dt>인재풀 관리</dt><dd>채용 후보자와 내부 전환 후보자를 관리하고 채용 성과와 연결합니다.</dd>
-                    <dt>승계계획</dt><dd>핵심 직책별 후보군, 준비도, 공백 리스크를 관리합니다.</dd>
-                    <dt>조직 건강도</dt><dd>이직률, 휴직, 교육 이수, 평가 분포, 인력 성장률을 결합해 조직 안정성을 봅니다.</dd>
-                    <dt>AI 분석</dt><dd>추세 요약, 이상치 탐지, 이직 위험 신호, 교육 추천을 보조합니다. 최종 판단은 담당자가 수행합니다.</dd>
-                  </dl>
-                </div>
-              </details>
-            </div>
-          </section>
-
-          <section class="panel" id="analytics-blueprint" aria-labelledby="analytics-blueprint-title">
-            <div class="section-head">
-              <div>
-                <h2 id="analytics-blueprint-title">5. People Analytics 통계센터 설계</h2>
-                <p>실제 통계 표준은 아래 People Analytics 메뉴의 상세 매트릭스와 동일하게 운영합니다.</p>
-              </div>
-            </div>
-            <div class="notice">
-              <i data-lucide="alert-triangle"></i>
-              <span>법정·정부 제출 항목은 사업장 규모, 업종, 고용형태, 관할 기관 해석에 따라 달라질 수 있습니다. 이 화면은 대응 가능한 데이터 체계 제안이며, 실제 제출 전에는 최신 법령·고용노동부 안내·전문가 검토가 필요합니다.</span>
-            </div>
-            <div class="table-wrap">
-              <table class="matrix-table">
-                <caption class="sr-only">People Analytics 핵심 통계 설계 요약</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">통계</th>
-                    <th scope="col">차트 유형</th>
-                    <th scope="col">데이터 소스</th>
-                    <th scope="col">필터 조건</th>
-                    <th scope="col">다운로드</th>
-                    <th scope="col">활용 목적</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr><td>고용형태 분포</td><td>도넛, 100% 누적 막대</td><td>사원관리 고용형태</td><td>기준일, 조직, 사업장, 상태</td><td>CSV, XLSX, PNG</td><td>정규직·계약직·파견직 등 인력 구성 점검</td></tr>
-                  <tr><td>입퇴사 추이</td><td>월별 막대, 연도별 라인</td><td>입사일, 퇴직일</td><td>기간, 조직, 직군, 고용형태</td><td>CSV, XLSX</td><td>채용 수요, 이탈 흐름, 조직 성장률 분석</td></tr>
-                  <tr><td>조직/직급/사업장 현황</td><td>정렬 막대, 피벗 테이블</td><td>조직도, 직급, 사업장 코드</td><td>조직, 직급, 직책, 사업장</td><td>CSV, XLSX</td><td>정원·현원, 배치 불균형, 보고자료 작성</td></tr>
-                  <tr><td>정부 대응 통계</td><td>카탈로그, 기준 충족표</td><td>장애 여부, 생년월일, 성별, 휴직·휴가, 고용형태, 국적</td><td>기준일, 법인, 사업장, 재직상태</td><td>XLSX, 제출 검토용 CSV</td><td>장애인·고령자·고용형태 등 법정 제출 가능 데이터 준비</td></tr>
-                  <tr><td>조직 안정성 지수</td><td>스코어 카드, 추세선</td><td>퇴사율, 유지율, 평균 근속, 결원, 교육 이수</td><td>조직, 기간, 직군, 관리자</td><td>PDF, XLSX</td><td>경영진 보고와 우선 개입 조직 선정</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section class="panel" id="dashboard-blueprint" aria-labelledby="dashboard-blueprint-title">
-            <div class="section-head">
-              <div>
-                <h2 id="dashboard-blueprint-title">6. 대시보드 설계</h2>
-                <p>동일 데이터를 역할별 의사결정 방식에 맞춰 다르게 노출합니다.</p>
-              </div>
-            </div>
-            <div class="dashboard-grid">
-              <article class="dashboard-card">
-                <h3>경영진용</h3>
-                <ul class="dashboard-list">
-                  <li><strong>KPI</strong> 총 재직, 전월 대비 증감, 이직률, 평균 근속, 정규직 비율, 조직 성장률</li>
-                  <li><strong>주요 카드</strong> 인력 규모, 핵심인재, 고위험 조직, 채용 진행, 법정 대응 현황</li>
-                  <li><strong>알림</strong> 퇴사율 급증, 계약 종료 집중, 데이터 누락, 제출 일정</li>
-                  <li><strong>차트</strong> 연도별 입퇴사, 조직별 현원, 고용형태, 사업장별 인력</li>
-                  <li><strong>액션</strong> 경영 보고 다운로드, 조직 드릴다운, 인력 계획 검토</li>
-                </ul>
-              </article>
-              <article class="dashboard-card">
-                <h3>인사담당자용</h3>
-                <ul class="dashboard-list">
-                  <li><strong>KPI</strong> 처리 대기 증명서, 누락 필수정보, 계약 종료 예정, 휴직·복직 예정, 교육 미이수</li>
-                  <li><strong>주요 카드</strong> 온보딩 체크, 오프보딩 체크, 발령 반영, 문서 보완, 데이터 품질</li>
-                  <li><strong>알림</strong> 개인정보 동의 미입력, 계약 만료 30일 전, 직인·템플릿 누락</li>
-                  <li><strong>차트</strong> 월별 입사, 월별 퇴사, 정보완성도, 처리 SLA</li>
-                  <li><strong>액션</strong> 사원 등록, 엑셀 업로드, 증명서 발급, CSV/XLSX 다운로드</li>
-                </ul>
-              </article>
-              <article class="dashboard-card">
-                <h3>부서장용</h3>
-                <ul class="dashboard-list">
-                  <li><strong>KPI</strong> 소속 인원, 신규 입사, 퇴사 예정, 평균 근속, 교육 이수율, 공석</li>
-                  <li><strong>주요 카드</strong> 팀 구성, 계약 종료자, 수습 평가 대상, 승진 후보, 교육 필요자</li>
-                  <li><strong>알림</strong> 수습 종료, 교육 미이수, 퇴사 예정, 핵심 역할 공백</li>
-                  <li><strong>차트</strong> 팀 직급 분포, 근속 분포, 월별 인원, 교육·자격 현황</li>
-                  <li><strong>액션</strong> 소속 목록 보기, 면담 기록 요청, 교육 추천, 인력 요청</li>
-                </ul>
-              </article>
-            </div>
-          </section>
-
-          <section class="panel" id="extension-blueprint" aria-labelledby="extension-blueprint-title">
-            <div class="section-head">
-              <div>
-                <h2 id="extension-blueprint-title">7. 경쟁력 강화를 위한 추가 기능 제안</h2>
-                <p>PeopleOps 고도화는 데이터 품질, 분석, 예측 순서로 단계화합니다.</p>
-              </div>
-            </div>
-            <div class="feature-grid">
-              <article class="feature-card"><span class="priority-pill high">P1</span><h3>인재 프로파일</h3><p>사원 원장에 스킬, 경력, 자격, 교육, 평가 요약을 연결합니다. 모든 고도화 기능의 기반입니다.</p></article>
-              <article class="feature-card"><span class="priority-pill high">P1</span><h3>데이터 품질 센터</h3><p>필수값 누락, 중복 사번, 조직 미매칭, 계약 종료일 누락을 자동 점검합니다.</p></article>
-              <article class="feature-card"><span class="priority-pill high">P1</span><h3>정부 대응 통계 카탈로그</h3><p>장애인, 고령자, 고용형태, 휴직·휴가 등 제출 검토용 통계를 기준일별로 저장합니다.</p></article>
-              <article class="feature-card"><span class="priority-pill medium">P2</span><h3>이직 위험도 분석</h3><p>근속, 조직 변동, 계약, 평가, 교육 데이터를 결합해 위험 신호를 보조 지표로 표시합니다.</p></article>
-              <article class="feature-card"><span class="priority-pill medium">P2</span><h3>인재 매트릭스</h3><p>성과와 잠재력을 9-box 형태로 보되 평가 편향과 개인정보 노출을 통제합니다.</p></article>
-              <article class="feature-card"><span class="priority-pill medium">P2</span><h3>승계계획</h3><p>핵심 직책별 후보자, 준비도, 대체 가능 시점, 공석 리스크를 관리합니다.</p></article>
-              <article class="feature-card"><span class="priority-pill medium">P2</span><h3>성과 연계 분석</h3><p>조직별 평가, 승진, 교육, 이직 흐름을 연결해 보상·육성 의사결정을 지원합니다.</p></article>
-              <article class="feature-card"><span class="priority-pill low">P3</span><h3>AI 분석</h3><p>월간 인력 리포트 요약, 이상치 탐지, 질문형 분석을 지원합니다. 법적 판단과 인사 결정은 사람이 확정합니다.</p></article>
-              <article class="feature-card"><span class="priority-pill low">P3</span><h3>인력 예측</h3><p>입퇴사 추세와 채용 계획을 기반으로 월별 재직 인원을 예측합니다. 충분한 이력 데이터가 선행되어야 합니다.</p></article>
-            </div>
-          </section>
-
-          <section class="panel" id="recommend-blueprint" aria-labelledby="recommend-blueprint-title">
-            <div class="section-head">
-              <div>
-                <h2 id="recommend-blueprint-title">8. 최종 권장안</h2>
-                <p>현실적인 개발 난이도와 운영 효과를 기준으로 우선순위를 정리합니다.</p>
-              </div>
-            </div>
-            <div class="table-wrap">
-              <table class="matrix-table">
-                <caption class="sr-only">최종 권장안</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">구분</th>
-                    <th scope="col">도입 권장도</th>
-                    <th scope="col">기대효과</th>
-                    <th scope="col">개발난이도</th>
-                    <th scope="col">우선순위</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr><td>데이터 품질 센터</td><td>매우 높음</td><td>통계 신뢰도, 정부 대응, 운영 누락 방지</td><td>낮음</td><td>P1</td></tr>
-                  <tr><td>People Analytics 통계센터</td><td>매우 높음</td><td>경영 보고와 HR 실무 통계를 한 화면에서 처리</td><td>보통</td><td>P1</td></tr>
-                  <tr><td>정부 대응 통계 카탈로그</td><td>높음</td><td>장애인·고령자·고용형태 등 제출 검토 시간 절감</td><td>보통</td><td>P1</td></tr>
-                  <tr><td>역할별 대시보드</td><td>높음</td><td>경영진, HR, 부서장별 의사결정 속도 개선</td><td>보통</td><td>P1</td></tr>
-                  <tr><td>인재 프로파일</td><td>높음</td><td>교육, 평가, 승진, 핵심인재 관리 기반 확보</td><td>보통</td><td>P2</td></tr>
-                  <tr><td>승계계획·핵심인재</td><td>중간</td><td>핵심 직책 공백 리스크 관리</td><td>높음</td><td>P2</td></tr>
-                  <tr><td>AI 분석·이직 위험도</td><td>중간</td><td>이상 신호 탐지와 리포트 자동화</td><td>높음</td><td>P3</td></tr>
-                </tbody>
               </table>
             </div>
           </section>
@@ -4763,11 +4494,36 @@
               </button>
             </div>
 
+            <div class="bulk-bar" id="bulkBar" hidden>
+              <strong id="bulkCount">0명 선택</strong>
+              <select id="bulkField" aria-label="일괄 변경 항목">
+                <option value="department">부서</option>
+                <option value="team">팀</option>
+                <option value="location">근무지</option>
+                <option value="employmentType">고용형태</option>
+                <option value="workType">근무형태</option>
+                <option value="status">상태</option>
+              </select>
+              <select id="bulkValue" aria-label="변경할 값"></select>
+              <button class="button primary" type="button" id="bulkApply">
+                <i data-lucide="check"></i>
+                일괄 변경
+              </button>
+              <button class="button ghost" type="button" id="bulkExport">
+                <i data-lucide="download"></i>
+                선택 CSV 내보내기
+              </button>
+              <button class="button ghost" type="button" id="bulkClear">선택 해제</button>
+            </div>
+
             <div class="table-wrap" id="employeeTableWrap">
               <table>
                 <caption class="sr-only">사원 등록 정보 목록</caption>
                 <thead>
                   <tr>
+                    <th scope="col" class="select-col">
+                      <input type="checkbox" id="employeeSelectAll" aria-label="현재 페이지 전체 선택" />
+                    </th>
                     <th scope="col">
                       <button class="sort-button" type="button" data-employee-sort="person" data-sort-label="사원">
                         사원 <span class="sort-indicator" aria-hidden="true">↕</span>
@@ -5041,6 +4797,49 @@
               <article class="certificate-document" id="certificatePreview"></article>
             </section>
           </div>
+
+          <section class="panel certificate-register" aria-labelledby="certificate-register-title">
+            <div class="section-head">
+              <div>
+                <h2 id="certificate-register-title">발급 대장 <span class="tab-count" id="certificateRegisterCount">0건</span></h2>
+                <p>발급한 증명서 기록입니다. 기간·종류·이름으로 찾고 엑셀로 내보낼 수 있습니다. 재출력은 대장에 기록됩니다.</p>
+              </div>
+            </div>
+            <div class="filters">
+              <input id="registerFrom" type="date" aria-label="발급일 시작" />
+              <input id="registerTo" type="date" aria-label="발급일 종료" />
+              <select id="registerType" aria-label="증명서 종류">
+                <option value="">전체 종류</option>
+                <option value="재직증명서">재직증명서</option>
+                <option value="경력증명서">경력증명서</option>
+                <option value="퇴직증명서">퇴직증명서</option>
+                <option value="인사기록카드">인사기록카드</option>
+                <option value="원천징수영수증 요청">원천징수영수증 요청</option>
+              </select>
+              <input id="registerSearch" type="search" placeholder="이름, 사번, 발급번호, 제출처 검색" autocomplete="off" />
+              <button class="button ghost" type="button" id="exportCertificateRegister">
+                <i data-lucide="download"></i>
+                엑셀 내보내기
+              </button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">증명서 발급 대장</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">발급번호</th>
+                    <th scope="col">종류</th>
+                    <th scope="col">대상자</th>
+                    <th scope="col">발급일</th>
+                    <th scope="col">용도 / 제출처</th>
+                    <th scope="col">발급자</th>
+                    <th scope="col">재출력</th>
+                  </tr>
+                </thead>
+                <tbody id="certificateRegisterTable"></tbody>
+              </table>
+            </div>
+          </section>
         </section>
 
         <section class="view" id="lifecycle" aria-labelledby="lifecycle-title">
@@ -5079,7 +4878,7 @@
                       <th scope="col">계약/기본정보</th>
                       <th scope="col">개인정보 동의</th>
                       <th scope="col">연락/비상연락</th>
-                      <th scope="col">4대보험</th>
+                      <th scope="col">입사 체크리스트</th>
                       <th scope="col">처리상태</th>
                     </tr>
                   </thead>
@@ -5128,10 +4927,10 @@
                       <th scope="col">대상자</th>
                       <th scope="col">기준일</th>
                       <th scope="col">구분</th>
-                      <th scope="col">계정/장비</th>
-                      <th scope="col">정산</th>
-                      <th scope="col">증명서</th>
-                      <th scope="col">보관/파기</th>
+                      <th scope="col">퇴사 체크리스트</th>
+                      <th scope="col">증명서 발급</th>
+                      <th scope="col">남은 항목</th>
+                      <th scope="col">상태</th>
                     </tr>
                   </thead>
                   <tbody id="offboardingTable"></tbody>
@@ -5166,8 +4965,8 @@
         <section class="view" id="attendance" aria-labelledby="attendance-title">
           <div class="section-head">
             <div>
-              <h2 id="attendance-title">근태/휴가 관리</h2>
-              <p>입사일과 운영 설정 기준에 따라 연차 부여 예상일수를 확인합니다.</p>
+              <h2 id="attendance-title">연차 부여 예상 (참고)</h2>
+              <p>입사일과 근로기준법 제60조 기본 구조로 계산한 참고값입니다. 실제 연차 부여·사용·잔여 관리와 급여는 이 시스템에서 하지 않습니다.</p>
             </div>
           </div>
 
@@ -6583,6 +6382,15 @@
                     <label for="settingWorkTypes">근무형태</label>
                     <textarea id="settingWorkTypes" class="textarea-code" data-setting-list="workTypes"></textarea>
                   </div>
+                  <div class="field">
+                    <label for="settingOnboardingChecklist">입사 체크리스트 (한 줄에 하나)</label>
+                    <textarea id="settingOnboardingChecklist" class="textarea-code" data-setting-list="onboardingChecklist"></textarea>
+                    <small>사원 상세의 입퇴사 탭에서 항목별로 완료 체크합니다. 항목명을 바꾸면 기존 체크는 새 항목 기준으로 다시 표시됩니다.</small>
+                  </div>
+                  <div class="field">
+                    <label for="settingOffboardingChecklist">퇴사 체크리스트 (한 줄에 하나)</label>
+                    <textarea id="settingOffboardingChecklist" class="textarea-code" data-setting-list="offboardingChecklist"></textarea>
+                  </div>
                 </div>
                 <div class="form-actions">
                   <button class="button primary" type="submit">
@@ -6637,21 +6445,21 @@
                     <span class="activity-dot"></span>
                     <div>
                       <strong>백업/복구</strong>
-                      <span>관리자 1인 사용이라도 정기 백업과 복구 절차는 별도로 마련해야 합니다.</span>
+                      <span>아래 데이터 관리에서 JSON 전체 백업을 받을 수 있습니다. 주 1회 이상 백업하고 회사 공용 드라이브에 보관하세요. 복원은 소유자만 가능합니다.</span>
                     </div>
                   </li>
                   <li class="insight-item">
                     <span class="activity-dot"></span>
                     <div>
-                      <strong>민감정보 암호화</strong>
-                      <span>주민등록번호는 마스킹 표시되며 전체 열람 시 감사 로그가 남습니다. 급여, 계좌, 건강정보는 저장하지 않습니다.</span>
+                      <strong>고유식별정보 최소수집</strong>
+                      <span>주민등록번호는 앞 7자리(생년월일·성별)만 저장하며 뒤 6자리는 저장하지 않습니다. 증명서에 전체 번호가 필요하면 발급 시점에만 입력합니다. 급여, 계좌, 건강정보는 저장하지 않습니다.</span>
                     </div>
                   </li>
                   <li class="insight-item">
                     <span class="activity-dot"></span>
                     <div>
                       <strong>변경 이력</strong>
-                      <span>입사, 전보, 휴직, 퇴직, 개인정보 수정은 감사 로그로 남겨야 합니다.</span>
+                      <span>사원 정보 수정·발령 반영·엑셀 병합은 항목 단위로 변경 이력이 남으며 사원 상세의 이력 탭에서 확인합니다.</span>
                     </div>
                   </li>
                 </ul>
@@ -6684,6 +6492,42 @@
                 저장 데이터 초기화
               </button>
             </div>
+            <div class="filters" style="margin-top: 10px;">
+              <button class="button primary" type="button" id="backupAll">
+                <i data-lucide="archive"></i>
+                전체 백업 (JSON)
+              </button>
+              <button class="button ghost" type="button" id="restoreBackup" data-permission="manage-users">
+                <i data-lucide="archive-restore"></i>
+                백업 복원 (소유자)
+              </button>
+              <input type="file" id="restoreBackupInput" accept=".json,application/json" hidden />
+            </div>
+          </section>
+
+          <section class="panel" aria-labelledby="trash-title">
+            <div class="section-head">
+              <div>
+                <h2 id="trash-title">휴지통 <span class="tab-count" id="trashCount">0</span></h2>
+                <p>삭제한 사원은 여기로 이동하며 복원할 수 있습니다. 영구 삭제는 소유자만 가능합니다.</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only">삭제된 사원 목록</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">사번</th>
+                    <th scope="col">이름</th>
+                    <th scope="col">소속</th>
+                    <th scope="col">삭제일시</th>
+                    <th scope="col">삭제자</th>
+                    <th scope="col">작업</th>
+                  </tr>
+                </thead>
+                <tbody id="trashTableBody"></tbody>
+              </table>
+            </div>
           </section>
         </section>
       </main>
@@ -6709,7 +6553,9 @@
       <button class="drawer-tab is-active" type="button" data-drawer-tab="basic">기본</button>
       <button class="drawer-tab" type="button" data-drawer-tab="assignment">발령<span class="tab-count" id="drawerCountAssignment"></span></button>
       <button class="drawer-tab" type="button" data-drawer-tab="certificate">증명서<span class="tab-count" id="drawerCountCertificate"></span></button>
-      <button class="drawer-tab" type="button" data-drawer-tab="leave">연차</button>
+      <button class="drawer-tab" type="button" data-drawer-tab="lifecycle">입퇴사</button>
+      <button class="drawer-tab" type="button" data-drawer-tab="history">이력<span class="tab-count" id="drawerCountHistory"></span></button>
+      <button class="drawer-tab" type="button" data-drawer-tab="leave">연차(참고)</button>
     </nav>
 
     <div class="drawer-body" id="drawerBody"></div>
@@ -7062,7 +6908,9 @@
       locations: ["서울 본사", "판교 오피스", "부산 지사", "원격"],
       jobGroups: ["인사직군", "개발직군", "디자인직군", "재무직군", "사업직군", "운영직군", "품질직군"],
       gradeLevels: ["임원", "L5", "L4", "L3", "L2-대리", "L2-주임", "L2", "L1", "인턴"],
-      workTypes: ["전일제", "단시간", "시차출퇴근", "원격", "하이브리드"]
+      workTypes: ["전일제", "단시간", "시차출퇴근", "원격", "하이브리드"],
+      onboardingChecklist: ["근로계약서 체결", "개인정보 동의서 수령", "4대보험 취득신고", "계정·이메일 발급", "장비·출입증 지급", "법정의무교육 안내", "조직 배치·자리 준비"],
+      offboardingChecklist: ["사직서 수령", "인수인계 확인", "장비·출입증 회수", "계정 회수", "4대보험 상실신고", "퇴직 정산 확인(급여 담당 전달)", "증명서 발급", "개인정보 보유기간 등록"]
     };
 
     Object.assign(defaultSettings, {
@@ -7548,6 +7396,9 @@
       settings: { ...defaultSettings },
       certificates: [],
       operationRecords: {},
+      deletedEmployees: [],
+      employeeHistory: [],
+      selectedEmployeeIds: new Set(),
       members: [],
       accessRequests: [],
       auditLogs: [],
@@ -7596,15 +7447,14 @@
 
     const titles = {
       dashboard: ["Overview", "전사 PeopleOps 대시보드"],
-      blueprint: ["Blueprint", "PeopleOps 플랫폼 설계"],
       employees: ["People Directory", "사원 정보 관리"],
       organization: ["Organization", "조직도"],
       certificates: ["Certificates", "증명서 발급"],
       lifecycle: ["Lifecycle", "입사·퇴사 처리"],
-      attendance: ["Attendance", "근태/휴가 관리"],
+      attendance: ["Reference", "연차 부여 예상 (참고)"],
       assignments: ["Contracts", "계약/발령 관리"],
       training: ["Learning", "교육/자격 관리"],
-      reviews: ["Review", "평가/보상"],
+      reviews: ["Review", "평가/면담"],
       statistics: ["People Analytics", "통계센터"],
       "monthly-report": ["Monthly Report", "월간업무보고"],
       administration: ["Administration", "운영자 관리"],
@@ -7703,7 +7553,7 @@
         statuses: ["대상", "진행중", "이수", "미이수", "면제"]
       },
       reviews: {
-        title: "평가/보상 기록",
+        title: "평가/면담 기록",
         description: "평가, 승진 검토, 보상 변경 검토 이력을 남깁니다. 급여 원문은 저장하지 않습니다.",
         subjectLabel: "평가/검토명",
         subjectPlaceholder: "예: 2026 상반기 평가, 승진 검토",
@@ -8033,6 +7883,7 @@
       return {
         ...merged,
         disabilityStatus,
+        residentId: normalizeResidentId(merged.residentId),
         employeeNo: migrateEmployeeNo(merged.employeeNo),
         team: translateKnownValue(merged.team, legacyTeamLabels),
         jobGroup: translateKnownValue(merged.jobGroup, legacyJobGroupLabels),
@@ -8151,7 +8002,7 @@
     function normalizeSettings(settings = {}) {
       const merged = { ...defaultSettings, ...settings };
       merged.employeeNoUseDeptCode = "false";
-      ["departments", "teams", "parts", "positions", "employmentTypes", "locations", "jobGroups", "gradeLevels", "workTypes"].forEach((key) => {
+      ["departments", "teams", "parts", "positions", "employmentTypes", "locations", "jobGroups", "gradeLevels", "workTypes", "onboardingChecklist", "offboardingChecklist"].forEach((key) => {
         merged[key] = Array.isArray(merged[key]) && merged[key].length ? merged[key] : defaultSettings[key];
       });
       merged.gradeLevels = gradeLevelOptions(merged.gradeLevels);
@@ -8272,7 +8123,16 @@
         "user:approve": "계정 승인",
         "user:reject": "접근 반려",
         "user:update": "권한 변경",
-        "privacy:view": "주민등록번호 열람"
+        "privacy:view": "주민등록번호 열람",
+        "employee:delete": "사원 휴지통 이동",
+        "employee:restore": "사원 복원",
+        "employee:purge": "사원 영구 삭제",
+        "data:backup": "전체 백업",
+        "data:restore": "백업 복원",
+        "data:export": "데이터 내보내기",
+        "certificate:issue": "증명서 발급",
+        "certificate:print": "증명서 출력",
+        "assignment:print": "발령장 출력"
       }[action] || action;
     }
 
@@ -8290,6 +8150,67 @@
       }).catch((error) => {
         console.error("audit log failed", error);
       });
+    }
+
+    // ---------- 사원 정보 변경 이력 (항목 단위) ----------
+    const HISTORY_SKIP_KEYS = new Set(["id", "deletedAt", "deletedBy", "residentIdPartError"]);
+    const EXTRA_FIELD_LABELS = {
+      legalName: "법적 성명",
+      residentId: "주민번호 앞7자리",
+      location: "근무지",
+      profileCompleteness: "정보완성도"
+    };
+
+    function employeeFieldLabel(key) {
+      const column = employeeExcelColumns.find((item) => item.key === key);
+      return column ? column.header : (EXTRA_FIELD_LABELS[key] || key);
+    }
+
+    function employeeChanges(before = {}, after = {}) {
+      const keys = new Set([...Object.keys(before), ...Object.keys(after)]);
+      const changes = [];
+      keys.forEach((key) => {
+        if (HISTORY_SKIP_KEYS.has(key)) return;
+        const prev = before[key];
+        const next = after[key];
+        if ((prev && typeof prev === "object") || (next && typeof next === "object")) return;
+        if (String(prev ?? "") === String(next ?? "")) return;
+        changes.push({ field: key, label: employeeFieldLabel(key), before: String(prev ?? ""), after: String(next ?? "") });
+      });
+      return changes;
+    }
+
+    function recordEmployeeHistory(employee, source, changes = [], summary = "") {
+      if (!state.user || !canWriteData() || !employee) return Promise.resolve();
+      if (!changes.length && !summary) return Promise.resolve();
+      return addDoc(firestorePublicCollection("employeeHistory"), {
+        employeeId: employee.id,
+        employeeNo: text(employee.employeeNo, ""),
+        employeeName: text(employee.name, ""),
+        source,
+        summary,
+        changes,
+        actorUid: state.user.uid,
+        actorEmail: state.user.email || "",
+        actorName: state.user.displayName || "",
+        createdAt: serverTimestamp()
+      }).catch((error) => {
+        console.error("employee history failed", error);
+      });
+    }
+
+    function historyTime(record) {
+      const value = record?.createdAt;
+      if (!value) return 0;
+      if (typeof value.toMillis === "function") return value.toMillis();
+      const millis = new Date(value).getTime();
+      return Number.isNaN(millis) ? 0 : millis;
+    }
+
+    function employeeHistoryFor(employee) {
+      return state.employeeHistory
+        .filter((record) => record.employeeId === employee.id)
+        .sort((a, b) => historyTime(b) - historyTime(a));
     }
 
     function persistDoc(name, value) {
@@ -8322,7 +8243,7 @@
     }
 
     function saveEmployees() {
-      return persistDoc("employees", state.employees);
+      return persistDoc("employees", [...state.employees, ...state.deletedEmployees]);
     }
 
     function saveCertificates() {
@@ -8455,13 +8376,28 @@
         if (isBundledSampleSettings(value) && canWriteData()) saveSettings();
       });
       subscribeDataDoc("employees", defaultEmployeesValue, (value) => {
-        const employees = Array.isArray(value) ? value.map(normalizeEmployee) : defaultEmployeesValue();
+        const allEmployees = Array.isArray(value) ? value.map(normalizeEmployee) : defaultEmployeesValue();
+        const employees = allEmployees.filter((employee) => !employee.deletedAt);
+        state.deletedEmployees = allEmployees.filter((employee) => employee.deletedAt);
         state.employees = isBundledSampleEmployees(employees) ? [] : employees;
         if (isBundledSampleEmployees(employees) && canWriteData()) saveEmployees();
       });
       subscribeDataDoc("certificates", defaultCertificatesValue, (value) => {
         state.certificates = Array.isArray(value) ? value : [];
       });
+      if (canReadData()) {
+        // ponytail: 이력 컬렉션 전체 구독. 수천 건을 넘기면 사원별 query(where employeeId)로 전환
+        const unsubscribeHistory = onSnapshot(firestorePublicCollection("employeeHistory"), (snapshot) => {
+          state.employeeHistory = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+          if (drawerIsOpen() && state.drawerTab === "history") {
+            renderEmployeeDrawer();
+            if (window.lucide) window.lucide.createIcons();
+          }
+        }, (error) => {
+          console.error("employeeHistory subscription failed", error);
+        });
+        state.unsubscribeData.push(unsubscribeHistory);
+      }
       subscribeDataDoc("operationRecords", defaultOperationRecordsValue, (value) => {
         state.operationRecords = { ...emptyOperationRecords(), ...(value && typeof value === "object" ? value : {}) };
         ["assignments", ...Object.keys(operationConfigs)].forEach((key) => {
@@ -8487,6 +8423,8 @@
       if (!state.appEventsBound) {
         bindEvents();
         state.appEventsBound = true;
+        const initialView = viewFromHash();
+        if (initialView && initialView !== state.currentView) switchView(initialView);
       }
       renderAll();
     }
@@ -8703,6 +8641,9 @@
       const certificates = employeeCertificates(employee);
       elements.drawerCountAssignment.textContent = assignments.length ? assignments.length : "";
       elements.drawerCountCertificate.textContent = certificates.length ? certificates.length : "";
+      const historyRecords = employeeHistoryFor(employee);
+      const historyCount = document.querySelector("#drawerCountHistory");
+      if (historyCount) historyCount.textContent = historyRecords.length ? historyRecords.length : "";
 
       elements.drawerTabs.forEach((tab) => {
         const active = tab.dataset.drawerTab === state.drawerTab;
@@ -8742,25 +8683,7 @@
         ]));
 
         if (text(employee.residentId, "")) {
-          const holder = document.createElement("span");
-          holder.textContent = maskResidentId(employee.residentId);
-          const wrap = document.createElement("span");
-          wrap.style.display = "inline-flex";
-          wrap.style.alignItems = "center";
-          wrap.style.gap = "8px";
-          wrap.append(holder);
-          if (canViewResidentId()) {
-            const reveal = document.createElement("button");
-            reveal.type = "button";
-            reveal.className = "button ghost";
-            reveal.style.minHeight = "24px";
-            reveal.style.padding = "1px 8px";
-            reveal.style.fontSize = "0.74rem";
-            reveal.textContent = "전체 보기";
-            reveal.addEventListener("click", () => revealResidentId(employee, holder, reveal));
-            wrap.append(reveal);
-          }
-          body.append(drawerGroup("고유식별정보", [drawerKv("주민등록번호", wrap)]));
+          body.append(drawerGroup("고유식별정보", [drawerKv("주민번호(앞 7자리)", maskResidentId(employee.residentId))]));
         }
 
         body.append(drawerGroup("연락처", [
@@ -8838,7 +8761,44 @@
         return;
       }
 
-      // 연차
+      if (state.drawerTab === "lifecycle") {
+        renderChecklistGroup(body, employee, "onboarding", "입사 체크리스트");
+        if (needsOffboarding(employee)) renderChecklistGroup(body, employee, "offboarding", "퇴사 체크리스트");
+        else body.append(drawerEmpty("퇴사 체크리스트는 퇴직 예정자에게 표시됩니다.", " 상태를 퇴직으로 바꾸거나 퇴직일·계약 종료일을 입력하면 나타납니다."));
+        return;
+      }
+
+      if (state.drawerTab === "history") {
+        if (!historyRecords.length) {
+          body.append(drawerEmpty("변경 이력이 없습니다.", "정보 수정, 발령 반영, 엑셀 병합이 있으면 항목 단위로 기록됩니다."));
+          return;
+        }
+        historyRecords.forEach((record) => {
+          const card = document.createElement("article");
+          card.className = "drawer-record";
+          const top = document.createElement("div");
+          top.className = "drawer-record-top";
+          const title = document.createElement("strong");
+          title.textContent = text(record.source, "변경");
+          const actor = document.createElement("span");
+          actor.className = "badge";
+          actor.textContent = text(record.actorName, "") || text(record.actorEmail, "-");
+          const when = document.createElement("time");
+          when.textContent = formatDateTime(record.createdAt);
+          top.append(title, actor, when);
+          const detail = document.createElement("p");
+          detail.style.whiteSpace = "pre-line";
+          const changes = Array.isArray(record.changes) ? record.changes : [];
+          detail.textContent = changes.length
+            ? changes.map((change) => `${change.label}: ${change.before || "(없음)"} → ${change.after || "(없음)"}`).join("\n")
+            : text(record.summary, "-");
+          card.append(top, detail);
+          body.append(card);
+        });
+        return;
+      }
+
+      // 연차 (참고용 부여 예상)
       const leave = calculateAnnualLeave(employee);
       const figure = document.createElement("div");
       figure.className = "leave-figure";
@@ -8900,8 +8860,9 @@
 
       menu.append(
         rowMenuItem("상세 보기", "eye", () => openEmployeeDrawer(employee.id)),
-        rowMenuItem("연차 현황", "calendar-days", () => openEmployeeDrawer(employee.id, "leave")),
-        rowMenuItem("발령 이력", "shuffle", () => openEmployeeDrawer(employee.id, "assignment"))
+        rowMenuItem("연차 부여 예상", "calendar-days", () => openEmployeeDrawer(employee.id, "leave")),
+        rowMenuItem("발령 이력", "shuffle", () => openEmployeeDrawer(employee.id, "assignment")),
+        rowMenuItem("변경 이력", "history", () => openEmployeeDrawer(employee.id, "history"))
       );
 
       const sep1 = document.createElement("div");
@@ -8998,8 +8959,9 @@
     // 기본은 마스킹해서 보여주고, 전체 열람은 감사 기록으로 남긴다.
     // =========================================================
 
+    // 고유식별정보 최소수집: 생년월일·성별 판별에 필요한 앞 7자리만 보관한다 (13자리 입력 시 절단)
     function normalizeResidentId(value) {
-      const digits = text(value, "").replace(/\D/g, "").slice(0, 13);
+      const digits = text(value, "").replace(/\D/g, "").slice(0, 7);
       if (!digits) return "";
       if (digits.length <= 6) return digits;
       return digits.slice(0, 6) + "-" + digits.slice(6);
@@ -9009,23 +8971,12 @@
       const digits = normalizeResidentId(value).replace(/\D/g, "");
       if (!digits) return "";
       if (digits.length < 7) return digits;
-      return digits.slice(0, 6) + "-" + digits.slice(6, 7) + "*".repeat(Math.max(0, digits.length - 7));
+      return digits.slice(0, 6) + "-" + digits.slice(6, 7) + "******";
     }
 
     // 조회 전용(viewer) 계정은 볼 수 없다
     function canViewResidentId() {
       return ["owner", "admin", "hr_manager"].includes(currentRole());
-    }
-
-    function revealResidentId(employee, holder, button) {
-      if (!canViewResidentId()) {
-        showToast("주민등록번호는 조회 권한 계정에서 볼 수 없습니다.");
-        return;
-      }
-      holder.textContent = normalizeResidentId(employee.residentId);
-      button?.remove();
-      addAuditLog("privacy:view", employee.name, "주민등록번호 열람 (" + text(employee.employeeNo, "사번없음") + ")");
-      showToast("열람 기록을 남겼습니다.");
     }
 
     // =========================================================
@@ -9097,8 +9048,13 @@
 
       updated.forEach((employee) => {
         const index = state.employees.findIndex((item) => item.id === employee.id);
-        if (index >= 0) state.employees.splice(index, 1, normalizeEmployee(employee));
+        if (index < 0) return;
+        const before = state.employees[index];
+        const after = normalizeEmployee(employee);
+        state.employees.splice(index, 1, after);
+        recordEmployeeHistory(after, "엑셀 병합", employeeChanges(before, after));
       });
+      added.forEach((employee) => recordEmployeeHistory(employee, "엑셀 신규 등록", [], `사원 등록 (${text(employee.employeeNo, "사번없음")})`));
       state.employees.push(...added);
       return { added: added.length, updated: updated.length, untouched };
     }
@@ -9274,6 +9230,55 @@
       document.body.style.overflow = open ? "hidden" : "";
     }
 
+    // ---------- 전역 검색 (상단바) ----------
+    function globalSearchMatches(query) {
+      const needle = query.trim().toLowerCase();
+      if (!needle) return [];
+      return state.employees
+        .filter((employee) => [employee.name, employee.employeeNo, employee.department, employee.team, employee.position, employee.email, employee.phone]
+          .some((value) => text(value, "").toLowerCase().includes(needle)))
+        .slice(0, 8);
+    }
+
+    function renderGlobalSearchResults() {
+      const input = document.querySelector("#globalSearch");
+      const list = document.querySelector("#globalSearchResults");
+      if (!input || !list) return;
+      list.replaceChildren();
+      if (!input.value.trim()) {
+        list.hidden = true;
+        return;
+      }
+      const matches = globalSearchMatches(input.value);
+      if (!matches.length) {
+        const li = document.createElement("li");
+        li.className = "global-search-empty";
+        li.textContent = "일치하는 사원이 없습니다.";
+        list.append(li);
+        list.hidden = false;
+        return;
+      }
+      matches.forEach((employee) => {
+        const li = document.createElement("li");
+        const button = document.createElement("button");
+        button.type = "button";
+        const name = document.createElement("span");
+        name.textContent = `${employee.name} · ${text(employee.employeeNo, "사번없음")}`;
+        const meta = document.createElement("small");
+        meta.textContent = `${orgPathLabel(employee)} · ${text(employee.position, "")} · ${text(employee.status, "")}`;
+        button.append(name, meta);
+        button.addEventListener("click", () => {
+          list.hidden = true;
+          input.value = "";
+          switchView("employees");
+          openEmployeeDrawer(employee.id);
+        });
+        li.append(button);
+        list.append(li);
+      });
+      list.hidden = false;
+    }
+
     function switchView(viewId) {
       if (viewId === "administration" && !canManageUsers()) {
         showToast("운영자 관리 메뉴는 소유자 계정만 사용할 수 있습니다.");
@@ -9288,16 +9293,22 @@
         view.classList.toggle("is-active", view.id === viewId);
       });
 
-      const sidebarActiveView = ["lifecycle", "attendance", "assignments", "training", "reviews", "monthly-report", "blueprint"].includes(viewId)
-        ? "dashboard"
-        : viewId;
+      const sidebarActiveView = viewId;
       elements.navButtons.forEach((button) => {
         const active = button.dataset.viewTarget === sidebarActiveView;
         button.classList.toggle("is-active", active);
         button.setAttribute("aria-current", active ? "page" : "false");
       });
 
+      if (window.location.hash.slice(1) !== viewId) {
+        history.pushState(null, "", `#${viewId}`);
+      }
       setSidebarOpen(false);
+    }
+
+    function viewFromHash() {
+      const viewId = window.location.hash.slice(1);
+      return viewId && titles[viewId] ? viewId : "";
     }
 
     function countBy(items, key, fallback = "미입력") {
@@ -9411,6 +9422,7 @@
         ["kpis", renderKpis],
         ["department bars", renderDepartmentBars],
         ["insights", renderInsights],
+        ["deadline alerts", renderDeadlineAlerts],
         ["recent employees", renderRecentEmployees],
         ["operation panels", buildOperationPanels],
         ["employee table", renderEmployeeTable],
@@ -9425,7 +9437,9 @@
         ["monthly report", renderMonthlyReport],
         ["operation records", renderOperationRecords],
         ["administration", renderAdministration],
-        ["settings", renderSettings]
+        ["settings", renderSettings],
+        ["trash", renderTrash],
+        ["certificate register", renderCertificateRegister]
       ].forEach(([label, callback]) => runRender(label, callback));
 
       applyRoleUi();
@@ -9774,6 +9788,7 @@
       visibleEmployees.forEach((employee) => {
         const tr = document.createElement("tr");
         tr.append(
+          makeRowCheckboxCell(employee),
           makePersonCell(employee),
           makeCell(orgPathLabel(employee)),
           makeCell(employee.position),
@@ -9795,7 +9810,101 @@
         });
         elements.employeeTable.append(tr);
       });
+      renderBulkBar(visibleEmployees);
       if (window.lucide) window.lucide.createIcons();
+    }
+
+    // ---------- 사원 일괄작업 ----------
+    function makeRowCheckboxCell(employee) {
+      const td = document.createElement("td");
+      td.className = "select-col";
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.checked = state.selectedEmployeeIds.has(employee.id);
+      input.setAttribute("aria-label", `${employee.name} 선택`);
+      input.addEventListener("click", (event) => event.stopPropagation());
+      input.addEventListener("change", () => {
+        if (input.checked) state.selectedEmployeeIds.add(employee.id);
+        else state.selectedEmployeeIds.delete(employee.id);
+        renderBulkBar();
+      });
+      td.addEventListener("click", (event) => event.stopPropagation());
+      td.append(input);
+      return td;
+    }
+
+    function visibleEmployeeIds() {
+      return [...elements.employeeTable.querySelectorAll("tr[data-employee-row]")].map((row) => row.dataset.employeeRow);
+    }
+
+    function renderBulkBar(visible) {
+      const bar = document.querySelector("#bulkBar");
+      if (!bar) return;
+      [...state.selectedEmployeeIds].forEach((id) => {
+        if (!state.employees.some((employee) => employee.id === id)) state.selectedEmployeeIds.delete(id);
+      });
+      const count = state.selectedEmployeeIds.size;
+      bar.hidden = count === 0 || !canWriteData();
+      const label = document.querySelector("#bulkCount");
+      if (label) label.textContent = `${count}명 선택`;
+      const selectAll = document.querySelector("#employeeSelectAll");
+      const visibleIds = Array.isArray(visible) ? visible.map((employee) => employee.id) : visibleEmployeeIds();
+      if (selectAll) {
+        selectAll.checked = visibleIds.length > 0 && visibleIds.every((id) => state.selectedEmployeeIds.has(id));
+        selectAll.indeterminate = !selectAll.checked && visibleIds.some((id) => state.selectedEmployeeIds.has(id));
+      }
+      renderBulkValueOptions();
+    }
+
+    function renderBulkValueOptions() {
+      const field = document.querySelector("#bulkField")?.value || "department";
+      const select = document.querySelector("#bulkValue");
+      if (!select) return;
+      const current = select.value;
+      const lists = {
+        department: state.settings.departments,
+        team: state.settings.teams,
+        location: state.settings.locations,
+        employmentType: state.settings.employmentTypes,
+        workType: state.settings.workTypes,
+        status: ["재직", "휴직", "퇴직"]
+      };
+      const values = Array.isArray(lists[field]) ? lists[field] : [];
+      select.replaceChildren();
+      values.forEach((value) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        select.append(option);
+      });
+      if (values.includes(current)) select.value = current;
+    }
+
+    function applyBulkChange() {
+      if (!requireWritePermission()) return;
+      const field = document.querySelector("#bulkField")?.value;
+      const value = document.querySelector("#bulkValue")?.value;
+      const targets = state.employees.filter((employee) => state.selectedEmployeeIds.has(employee.id));
+      if (!field || !value || !targets.length) {
+        showToast("변경할 항목과 값을 선택하세요.");
+        return;
+      }
+      const label = employeeFieldLabel(field);
+      const ok = window.confirm(`선택한 ${targets.length}명의 ${label}을(를) "${value}"(으)로 변경할까요?\n항목 단위 변경 이력이 남습니다.`);
+      if (!ok) return;
+      let changed = 0;
+      targets.forEach((employee) => {
+        if (employee[field] === value) return;
+        const before = { ...employee };
+        employee[field] = value;
+        recordEmployeeHistory(employee, "일괄 변경", employeeChanges(before, employee));
+        changed += 1;
+      });
+      saveEmployees();
+      addAuditLog("data:update", "사원 일괄 변경", `${label} → ${value} (${changed}명)`);
+      state.selectedEmployeeIds.clear();
+      renderAll();
+      showToast(`${changed}명의 ${label}을(를) 변경했습니다.${field === "status" && value === "퇴직" ? " 퇴직일은 사원 정보에서 입력하세요." : ""}`);
     }
 
     function makePersonCell(employee) {
@@ -10833,6 +10942,10 @@
       body.className = "certificate-body";
       body.textContent = makeCertificateBody(certificateType, employee);
 
+      elements.certificatePreview.append(number, title, grid, body, makeCertificateFooter(issueDate));
+    }
+
+    function makeCertificateFooter(issueDate) {
       const footer = document.createElement("footer");
       footer.className = "certificate-footer";
       const date = document.createElement("div");
@@ -10856,8 +10969,7 @@
         companyInfo.append(labelEl, valueEl);
       });
       footer.append(date, companyInfo);
-
-      elements.certificatePreview.append(number, title, grid, body, footer);
+      return footer;
     }
 
     function personnelRecordValue(value) {
@@ -11200,20 +11312,27 @@
       if (!validateCertificateResidentDisplay()) return;
 
       const employee = state.employees.find((item) => item.id === elements.certificateEmployee.value);
+      const certificateType = elements.certificateType.value || "증명서";
+      const issueDate = elements.certificateIssueDate.value || new Date().toISOString().slice(0, 10);
+      const certificateNumber = makeCertificateNumber(employee, certificateType, issueDate);
       state.certificates.push({
         id: `cert-${Date.now()}`,
         employeeId: elements.certificateEmployee.value,
         employeeName: employee?.name || "",
         employeeNo: employee?.employeeNo || "",
-        type: elements.certificateType.value || "증명서",
+        type: certificateType,
+        number: certificateNumber,
         purpose: elements.certificatePurpose.value.trim(),
         destination: elements.certificateDestination.value.trim(),
-        issueDate: elements.certificateIssueDate.value || new Date().toISOString().slice(0, 10),
+        issueDate,
         issuedByEmail: state.user?.email || "",
+        issuedByName: state.user?.displayName || "",
         createdAt: new Date().toISOString()
       });
       saveCertificates();
+      addAuditLog("certificate:issue", employee?.name || "", `${certificateType} ${certificateNumber}`);
       renderCertificates();
+      renderCertificateRegister();
       if (drawerIsOpen()) renderEmployeeDrawer();
       showToast("증명서를 생성하고 발급 이력에 기록했습니다. 출력 버튼으로 인쇄하세요.");
     }
@@ -11249,7 +11368,290 @@
       window.addEventListener("focus", restoreTitle, { once: true });
       renderCertificatePreview();
       await waitForCertificateImages();
+      addAuditLog("certificate:print", employee.name, `${certificateType} 출력`);
       window.print();
+    }
+
+    // ---------- 증명서 발급 대장 ----------
+    function certificateRecordNumber(record) {
+      return record.number || makeCertificateNumber({ employeeNo: text(record.employeeNo, "") }, record.type, record.issueDate);
+    }
+
+    function certificateRegisterRows() {
+      const from = document.querySelector("#registerFrom")?.value || "";
+      const to = document.querySelector("#registerTo")?.value || "";
+      const type = document.querySelector("#registerType")?.value || "";
+      const query = (document.querySelector("#registerSearch")?.value || "").trim().toLowerCase();
+      return state.certificates
+        .filter((record) => (!from || text(record.issueDate, "") >= from)
+          && (!to || text(record.issueDate, "") <= to)
+          && (!type || record.type === type)
+          && (!query || [record.employeeName, record.employeeNo, certificateRecordNumber(record), record.destination]
+            .some((value) => text(value, "").toLowerCase().includes(query))))
+        .sort((a, b) => text(b.issueDate, "").localeCompare(text(a.issueDate, "")) || text(b.createdAt, "").localeCompare(text(a.createdAt, "")));
+    }
+
+    function renderCertificateRegister() {
+      const tbody = document.querySelector("#certificateRegisterTable");
+      if (!tbody) return;
+      const rows = certificateRegisterRows();
+      const count = document.querySelector("#certificateRegisterCount");
+      if (count) count.textContent = `${rows.length}건`;
+      renderTableRows(tbody, rows, 7, (record) => {
+        const tr = document.createElement("tr");
+        tr.append(
+          makeCell(certificateRecordNumber(record)),
+          makeCell(record.type),
+          makeCell(`${text(record.employeeName, "")} (${text(record.employeeNo, "사번없음")})`),
+          makeCell(formatDate(record.issueDate)),
+          makeCell([text(record.purpose, ""), text(record.destination, "")].filter(Boolean).join(" / ") || "-"),
+          makeCell(text(record.issuedByName, "") || text(record.issuedByEmail, "-"))
+        );
+        const td = document.createElement("td");
+        const reprint = document.createElement("button");
+        reprint.type = "button";
+        reprint.className = "button ghost";
+        reprint.textContent = "재출력";
+        reprint.addEventListener("click", () => reprintCertificate(record));
+        td.append(reprint);
+        tr.append(td);
+        return tr;
+      }, "발급 기록이 없습니다.", "증명서를 생성하면 대장에 기록됩니다.");
+    }
+
+    function reprintCertificate(record) {
+      const employee = state.employees.find((item) => item.id === record.employeeId);
+      if (!employee) {
+        showToast("대상 사원이 휴지통에 있거나 삭제되어 재출력할 수 없습니다.");
+        return;
+      }
+      ensureCertificateEmployeeOption(employee);
+      elements.certificateEmployee.value = employee.id;
+      elements.certificateType.value = record.type;
+      elements.certificatePurpose.value = text(record.purpose, "");
+      elements.certificateDestination.value = text(record.destination, "");
+      elements.certificateIssueDate.value = text(record.issueDate, "");
+      if (elements.certificateResidentFullToggle) elements.certificateResidentFullToggle.checked = false;
+      printCertificate();
+    }
+
+    async function exportCertificateRegister() {
+      await ensureXlsx();
+      if (!xlsxReady()) return;
+      const headers = ["발급번호", "종류", "이름", "사번", "발급일", "용도", "제출처", "발급자", "생성일시"];
+      const rows = certificateRegisterRows().map((record) => [
+        certificateRecordNumber(record),
+        record.type,
+        record.employeeName,
+        record.employeeNo,
+        record.issueDate,
+        record.purpose,
+        record.destination,
+        text(record.issuedByName, "") || text(record.issuedByEmail, ""),
+        formatDateTime(record.createdAt)
+      ]);
+      const workbook = window.XLSX.utils.book_new();
+      const sheet = window.XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      sheet["!cols"] = headers.map((header) => ({ wch: Math.max(12, header.length + 8) }));
+      window.XLSX.utils.book_append_sheet(workbook, sheet, "발급대장");
+      window.XLSX.writeFile(workbook, `증명서발급대장_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      addAuditLog("data:export", "증명서 발급대장", `${rows.length}건 엑셀 내보내기`);
+    }
+
+    // ---------- 입사·퇴사 체크리스트 (사원별 완료 상태를 사원 문서에 저장) ----------
+    function checklistItems(kind) {
+      const key = kind === "onboarding" ? "onboardingChecklist" : "offboardingChecklist";
+      const list = state.settings[key];
+      return Array.isArray(list) && list.length ? list : defaultSettings[key];
+    }
+
+    function checklistState(employee, kind) {
+      const key = kind === "onboarding" ? "onboardingChecks" : "offboardingChecks";
+      return employee[key] && typeof employee[key] === "object" ? employee[key] : {};
+    }
+
+    function checklistProgress(employee, kind) {
+      const items = checklistItems(kind);
+      const checks = checklistState(employee, kind);
+      const remaining = items.filter((item) => !checks[item]);
+      return { done: items.length - remaining.length, total: items.length, complete: items.length > 0 && remaining.length === 0, remaining };
+    }
+
+    function needsOffboarding(employee) {
+      return employee.status === "퇴직" || Boolean(employee.retirementDate) || isDateWithinDays(employee.contractEndDate, 120);
+    }
+
+    function toggleChecklistItem(employeeId, kind, item, checked) {
+      if (!requireWritePermission()) return;
+      const employee = state.employees.find((entry) => entry.id === employeeId);
+      if (!employee) return;
+      const key = kind === "onboarding" ? "onboardingChecks" : "offboardingChecks";
+      const checks = { ...checklistState(employee, kind) };
+      if (checked) checks[item] = new Date().toISOString().slice(0, 10);
+      else delete checks[item];
+      employee[key] = checks;
+      recordEmployeeHistory(employee, kind === "onboarding" ? "입사 체크리스트" : "퇴사 체크리스트", [], `${item}: ${checked ? "완료" : "완료 취소"}`);
+      saveEmployees();
+      renderAll();
+    }
+
+    function makeChecklistProgressCell(employee, kind) {
+      const td = document.createElement("td");
+      const progress = checklistProgress(employee, kind);
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `badge ${progress.complete ? "success" : progress.done ? "warning" : "danger"}`;
+      button.style.cursor = "pointer";
+      button.textContent = `${progress.done}/${progress.total} 완료`;
+      button.setAttribute("aria-label", `${employee.name} ${kind === "onboarding" ? "입사" : "퇴사"} 체크리스트 열기`);
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        openEmployeeDrawer(employee.id, "lifecycle");
+      });
+      td.append(button);
+      return td;
+    }
+
+    function renderChecklistGroup(body, employee, kind, titleText) {
+      const items = checklistItems(kind);
+      const checks = checklistState(employee, kind);
+      const progress = checklistProgress(employee, kind);
+      const heading = document.createElement("p");
+      heading.className = "kv-group-title";
+      heading.textContent = `${titleText} ${progress.done}/${progress.total}`;
+      const list = document.createElement("ul");
+      list.className = "checklist";
+      items.forEach((item) => {
+        const li = document.createElement("li");
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.checked = Boolean(checks[item]);
+        input.disabled = !canWriteData();
+        input.addEventListener("change", () => toggleChecklistItem(employee.id, kind, item, input.checked));
+        const name = document.createElement("span");
+        name.textContent = item;
+        label.append(input, name);
+        li.append(label);
+        if (checks[item]) {
+          const when = document.createElement("time");
+          when.textContent = formatDate(checks[item]);
+          li.append(when);
+        }
+        list.append(li);
+      });
+      body.append(heading, list);
+    }
+
+    // ---------- 처리 기한 알림 ----------
+    function collectDeadlineAlerts() {
+      const alerts = [];
+      const push = (days, title, body, view, employeeId = "", tab = "basic") => alerts.push({ days, title, body, view, employeeId, tab });
+      const retentionYears = Number(state.settings.privacyRetentionYears) || 3;
+
+      activeEmployees().forEach((employee) => {
+        const name = employee.name;
+        if (employee.probationEndDate) {
+          const days = daysFromToday(employee.probationEndDate);
+          if (days <= 30 && days >= -30) push(days, `${name} 수습 종료 ${describeDaysFromToday(employee.probationEndDate)}`, "수습 평가와 정규 전환 여부를 확정하세요.", "lifecycle", employee.id);
+        }
+        if (employee.contractEndDate) {
+          const days = daysFromToday(employee.contractEndDate);
+          if (days <= 60 && days >= -30) push(days, `${name} 계약 만료 ${describeDaysFromToday(employee.contractEndDate)}`, "갱신·종료·전환을 결정하고 발령을 등록하세요.", "assignments", employee.id, "assignment");
+        }
+        if (employee.retirementDate) {
+          const days = daysFromToday(employee.retirementDate);
+          if (days <= 30 && days >= -30) push(days, `${name} 퇴직 예정 ${describeDaysFromToday(employee.retirementDate)}`, "퇴사 체크리스트를 진행하세요.", "lifecycle", employee.id, "lifecycle");
+        }
+        if (employee.joinDate) {
+          const days = daysFromToday(employee.joinDate);
+          const progress = checklistProgress(employee, "onboarding");
+          if (days <= 0 && days >= -60 && !progress.complete) push(days, `${name} 입사 체크리스트 ${progress.done}/${progress.total}`, `남은 항목: ${progress.remaining.slice(0, 3).join(", ")}`, "lifecycle", employee.id, "lifecycle");
+        }
+      });
+
+      state.employees.filter((employee) => employee.status === "퇴직" || employee.retirementDate).forEach((employee) => {
+        const progress = checklistProgress(employee, "offboarding");
+        const baseDate = employee.retirementDate || employee.contractEndDate;
+        if (!progress.complete && baseDate && daysFromToday(baseDate) >= -60 && employee.status === "퇴직") {
+          push(daysFromToday(baseDate), `${employee.name} 퇴사 체크리스트 ${progress.done}/${progress.total}`, `남은 항목: ${progress.remaining.slice(0, 3).join(", ")}`, "lifecycle", employee.id, "lifecycle");
+        }
+        if (employee.retirementDate && employee.status === "퇴직") {
+          const expiry = parseLocalDate(employee.retirementDate);
+          if (expiry) {
+            expiry.setFullYear(expiry.getFullYear() + retentionYears);
+            const expiryDate = formatDateObject(expiry);
+            const days = daysFromToday(expiryDate);
+            if (days <= 60) push(days, `${employee.name} 개인정보 보유기간 ${days < 0 ? "경과" : describeDaysFromToday(expiryDate)}`, `퇴직일 기준 ${retentionYears}년. 파기 또는 보유 근거를 확인하세요.`, "employees", employee.id);
+          }
+        }
+      });
+
+      assignmentRecords().forEach((record) => {
+        const employee = state.employees.find((entry) => entry.id === record.employeeId);
+        const name = employee ? employee.name : "삭제된 사원";
+        if (record.status === "적용완료" && !record.appliedToEmployee) {
+          push(0, `${name} 발령 사원정보 미반영`, `${text(record.type)} · 적용일 ${formatDate(record.effectiveDate)}`, "assignments", record.employeeId, "assignment");
+        } else if (record.dueDate && !["적용완료", "보류"].includes(record.status)) {
+          const days = daysFromToday(record.dueDate);
+          if (days <= 14) push(days, `${name} 발령 처리 기한 ${describeDaysFromToday(record.dueDate)}`, `${text(record.type)} · ${text(record.status)}`, "assignments", record.employeeId, "assignment");
+        }
+      });
+
+      [["training", "교육", ["대상", "진행중", "미이수"]], ["reviews", "평가", ["예정", "진행중"]]].forEach(([key, label, openStatuses]) => {
+        (state.operationRecords[key] || []).forEach((record) => {
+          if (!record.dateEnd || !openStatuses.includes(record.status)) return;
+          const days = daysFromToday(record.dateEnd);
+          if (days > 30) return;
+          const employee = state.employees.find((entry) => entry.id === record.employeeId);
+          const name = employee ? employee.name : "삭제된 사원";
+          push(days, `${name} ${text(record.category, label)} ${days < 0 ? "기한 경과" : describeDaysFromToday(record.dateEnd)}`, `${text(record.subject, "")} · ${text(record.status)}`, key, record.employeeId);
+        });
+      });
+
+      return alerts.sort((a, b) => a.days - b.days);
+    }
+
+    function renderDeadlineAlerts() {
+      const list = document.querySelector("#deadlineList");
+      if (!list) return;
+      const alerts = collectDeadlineAlerts();
+      const count = document.querySelector("#deadlineCount");
+      if (count) count.textContent = String(alerts.length);
+      if (!alerts.length) {
+        renderInsightItems(list, [], "처리 기한이 임박한 항목이 없습니다.", "60일 이내 기한이 없습니다.");
+        return;
+      }
+      list.replaceChildren();
+      alerts.slice(0, 12).forEach((alert) => {
+        const li = document.createElement("li");
+        li.className = "insight-item";
+        const badge = document.createElement("span");
+        badge.className = `badge ${alert.days < 0 ? "danger" : alert.days <= 7 ? "warning" : "neutral"}`;
+        badge.textContent = alert.days < 0 ? `D+${Math.abs(alert.days)}` : alert.days === 0 ? "D-Day" : `D-${alert.days}`;
+        const wrap = document.createElement("div");
+        const title = document.createElement("strong");
+        title.textContent = alert.title;
+        const body = document.createElement("span");
+        body.textContent = alert.body;
+        wrap.append(title, body);
+        const go = document.createElement("button");
+        go.type = "button";
+        go.className = "button ghost";
+        go.textContent = "이동";
+        go.addEventListener("click", () => {
+          switchView(alert.view);
+          if (alert.employeeId && ["lifecycle", "employees", "assignments"].includes(alert.view)) openEmployeeDrawer(alert.employeeId, alert.tab);
+        });
+        li.append(badge, wrap, go);
+        list.append(li);
+      });
+      if (alerts.length > 12) {
+        const more = document.createElement("li");
+        more.className = "insight-item";
+        more.textContent = `외 ${alerts.length - 12}건은 각 화면에서 확인하세요.`;
+        list.append(more);
+      }
     }
 
     function renderLifecycle() {
@@ -11344,7 +11746,8 @@
           Boolean(employee.email && employee.phone && employee.emergencyPhone)
         ];
         const completed = checks.filter(Boolean).length;
-        const status = completed === checks.length ? ["진행 양호", "success"] : ["보완 필요", "warning"];
+        const onboarding = checklistProgress(employee, "onboarding");
+        const status = completed === checks.length && onboarding.complete ? ["처리 완료", "success"] : ["보완 필요", "warning"];
         const tr = document.createElement("tr");
         tr.append(
           makePersonCell(employee),
@@ -11353,7 +11756,7 @@
           makeStatusCell(checks[1] ? "확인" : "누락", checks[1] ? "success" : "warning"),
           makeStatusCell(checks[2] ? formatDate(employee.privacyConsentDate) : "누락", checks[2] ? "success" : "danger"),
           makeStatusCell(checks[3] ? "확인" : "보완 필요", checks[3] ? "success" : "warning"),
-          makeStatusCell(employee.joinDate && daysFromToday(employee.joinDate) <= 7 ? "수기 확인" : "예정", "warning"),
+          makeChecklistProgressCell(employee, "onboarding"),
           makeStatusCell(status[0], status[1])
         );
         return tr;
@@ -11382,15 +11785,17 @@
         const baseDate = employee.retirementDate || employee.contractEndDate;
         const type = employee.status === "퇴직" || employee.retirementDate ? "퇴직 처리" : "계약 종료 예정";
         const datePassed = daysFromToday(baseDate) < 0;
+        const offboarding = checklistProgress(employee, "offboarding");
+        const remainingLabel = offboarding.remaining.slice(0, 3).join(", ") + (offboarding.remaining.length > 3 ? ` 외 ${offboarding.remaining.length - 3}` : "");
         const tr = document.createElement("tr");
         tr.append(
           makePersonCell(employee),
           makeCell(formatDate(baseDate)),
           makeStatusCell(type, datePassed ? "danger" : "warning"),
-          makeStatusCell("회수 확인", "warning"),
-          makeStatusCell("14일 내 정산 확인", "warning"),
-          makeStatusCell("발급 여부 확인", "warning"),
-          makeStatusCell("보관/파기 일정 확인", "warning")
+          makeChecklistProgressCell(employee, "offboarding"),
+          makeCell(`${employeeCertificates(employee).length}건`),
+          makeCell(remainingLabel || "없음"),
+          makeStatusCell(offboarding.complete ? "처리 완료" : datePassed ? "기한 경과" : "진행 중", offboarding.complete ? "success" : datePassed ? "danger" : "warning")
         );
         return tr;
       }, "퇴사 또는 계약 종료 대상이 없습니다.", "퇴직일 또는 계약 종료일을 입력하면 표시됩니다.");
@@ -11407,8 +11812,17 @@
         const days = daysFromToday(employee.probationEndDate);
         if (days <= 30) issues.push({ title: `${employee.name} 수습 종료 ${describeDaysFromToday(employee.probationEndDate)}`, body: "평가, 전환 여부, 계약 변경 필요 여부를 확인하세요." });
       });
+      onboardingRows.forEach((employee) => {
+        const progress = checklistProgress(employee, "onboarding");
+        if (!progress.complete && employee.joinDate && daysFromToday(employee.joinDate) <= -14) {
+          issues.push({ title: `${employee.name} 입사 체크리스트 ${progress.done}/${progress.total}`, body: `입사 2주 경과. 남은 항목: ${progress.remaining.slice(0, 3).join(", ")}` });
+        }
+      });
       offboardingRows.forEach((employee) => {
-        issues.push({ title: `${employee.name} ${employee.retirementDate ? "퇴직 처리" : "계약 종료"} 확인`, body: "계정/장비 회수, 정산, 4대보험 상실 신고, 증명서 발급 여부를 확인하세요." });
+        const progress = checklistProgress(employee, "offboarding");
+        if (!progress.complete) {
+          issues.push({ title: `${employee.name} 퇴사 체크리스트 ${progress.done}/${progress.total}`, body: `남은 항목: ${progress.remaining.slice(0, 3).join(", ")}` });
+        }
       });
       return issues;
     }
@@ -11930,6 +12344,19 @@
       apply.append(makeIcon("check"));
       apply.disabled = record.appliedToEmployee || !canWriteData();
       apply.addEventListener("click", () => applyAssignmentRecord(record.id));
+      const revert = document.createElement("button");
+      revert.className = "icon-button";
+      revert.type = "button";
+      revert.setAttribute("aria-label", "발령 반영 취소");
+      revert.append(makeIcon("undo-2"));
+      revert.disabled = !record.appliedToEmployee || !canWriteData();
+      revert.addEventListener("click", () => revertAssignmentRecord(record.id));
+      const letter = document.createElement("button");
+      letter.className = "icon-button";
+      letter.type = "button";
+      letter.setAttribute("aria-label", "발령장 출력");
+      letter.append(makeIcon("printer"));
+      letter.addEventListener("click", () => printAssignmentLetter(record.id));
       const remove = document.createElement("button");
       remove.className = "icon-button";
       remove.type = "button";
@@ -11937,7 +12364,7 @@
       remove.append(makeIcon("trash-2"));
       remove.disabled = !canWriteData();
       remove.addEventListener("click", () => deleteAssignmentRecord(record.id));
-      wrap.append(apply, remove);
+      wrap.append(apply, revert, letter, remove);
       td.append(wrap);
       return td;
     }
@@ -11950,7 +12377,8 @@
         if (!options.silent) showToast("반영할 발령 이력을 찾을 수 없습니다.");
         return;
       }
-      ["department", "team", "part", "position", "gradeLevel", "employmentType", "location", "contractEndDate"].forEach((key) => {
+      const before = { ...employee };
+      ASSIGNMENT_KEYS.forEach((key) => {
         if (record.to && record.to[key] !== undefined && record.to[key] !== "") {
           employee[key] = record.to[key];
         }
@@ -11958,11 +12386,129 @@
       record.status = "적용완료";
       record.appliedToEmployee = true;
       record.appliedAt = new Date().toISOString().slice(0, 10);
+      recordEmployeeHistory(employee, `발령 반영 · ${text(record.type, "발령")}`, employeeChanges(before, employee));
       saveEmployees();
       saveOperationRecords();
       if (!options.silent) {
         renderAll();
         showToast("발령 변경값을 사원정보에 반영했습니다.");
+      }
+    }
+
+    const ASSIGNMENT_KEYS = ["department", "team", "part", "position", "gradeLevel", "employmentType", "location", "contractEndDate"];
+    const ASSIGNMENT_KEY_LABELS = {
+      department: "부서",
+      team: "팀",
+      part: "파트",
+      position: "직책",
+      gradeLevel: "직급/레벨",
+      employmentType: "고용형태",
+      location: "근무지",
+      contractEndDate: "계약 종료일"
+    };
+
+    function revertAssignmentRecord(id) {
+      if (!requireWritePermission()) return;
+      const record = assignmentRecords().find((item) => item.id === id);
+      const employee = record ? state.employees.find((item) => item.id === record.employeeId) : null;
+      if (!record || !record.appliedToEmployee || !employee) {
+        showToast("사원정보에 반영된 발령만 취소할 수 있습니다.");
+        return;
+      }
+      const ok = window.confirm(`${employee.name} ${text(record.type, "발령")} 반영을 취소하고 변경 전 값으로 되돌릴까요?`);
+      if (!ok) return;
+      const before = { ...employee };
+      ASSIGNMENT_KEYS.forEach((key) => {
+        if (record.to && record.to[key] !== undefined && record.to[key] !== "") {
+          employee[key] = record.from?.[key] ?? "";
+        }
+      });
+      record.appliedToEmployee = false;
+      record.appliedAt = "";
+      record.status = "검토";
+      recordEmployeeHistory(employee, `발령 취소 · ${text(record.type, "발령")}`, employeeChanges(before, employee));
+      saveEmployees();
+      saveOperationRecords();
+      renderAll();
+      showToast("발령 반영을 취소하고 변경 전 값으로 되돌렸습니다.");
+    }
+
+    function renderAssignmentLetter(record, employee) {
+      const preview = elements.certificatePreview;
+      preview.classList.remove("personnel-record-document");
+      preview.replaceChildren();
+      const effectiveDate = record.effectiveDate || new Date().toISOString().slice(0, 10);
+
+      const number = document.createElement("div");
+      number.className = "certificate-number";
+      number.textContent = `발령번호: ${makeCertificateNumber(employee, "발령장", effectiveDate)}`;
+
+      const title = document.createElement("h3");
+      title.textContent = "인 사 발 령 장";
+
+      const from = record.from || {};
+      const to = record.to || {};
+      const rows = [
+        ["성명", text(employee.name, "")],
+        ["사번", text(employee.employeeNo, "")],
+        ["발령구분", text(record.type, "발령")],
+        ["발령일", formatKoreanDate(effectiveDate)]
+      ];
+      ASSIGNMENT_KEYS.forEach((key) => {
+        if (!to[key] || to[key] === from[key]) return;
+        const format = key === "contractEndDate" ? formatKoreanDate : (value) => text(value, "");
+        rows.push([ASSIGNMENT_KEY_LABELS[key], `${format(from[key]) || "(없음)"}  →  ${format(to[key])}`]);
+      });
+      if (text(record.memo, "")) rows.push(["사유", record.memo]);
+
+      const grid = document.createElement("table");
+      grid.className = "certificate-grid";
+      const tbody = document.createElement("tbody");
+      rows.forEach(([label, value]) => {
+        const tr = document.createElement("tr");
+        const th = document.createElement("th");
+        th.scope = "row";
+        th.textContent = label;
+        const td = document.createElement("td");
+        td.textContent = value;
+        tr.append(th, td);
+        tbody.append(tr);
+      });
+      grid.append(tbody);
+
+      const body = document.createElement("p");
+      body.className = "certificate-body";
+      body.textContent = "위와 같이 발령합니다.";
+
+      preview.append(number, title, grid, body, makeCertificateFooter(effectiveDate));
+    }
+
+    async function printAssignmentLetter(id) {
+      const record = assignmentRecords().find((item) => item.id === id);
+      const employee = record ? state.employees.find((item) => item.id === record.employeeId) : null;
+      if (!record || !employee) {
+        showToast("발령장을 출력할 사원을 찾지 못했습니다.");
+        return;
+      }
+      await prepareCertificateSealImage(text(state.settings.companySealImage, ""));
+      renderAssignmentLetter(record, employee);
+      const originalTitle = document.title;
+      document.title = certificatePrintFileName(employee, "발령장");
+      const restore = () => {
+        document.title = originalTitle;
+        renderCertificatePreview();
+        window.removeEventListener("afterprint", restore);
+        window.removeEventListener("focus", restore);
+      };
+      window.addEventListener("afterprint", restore, { once: true });
+      window.addEventListener("focus", restore, { once: true });
+      await waitForCertificateImages();
+      addAuditLog("assignment:print", employee.name, `${text(record.type, "발령")} 발령장 출력`);
+      window.print();
+      if (canWriteData() && (!record.documentStatus || record.documentStatus === "미확인")) {
+        record.documentStatus = "발령장 준비";
+        saveOperationRecords();
+        renderAssignments();
       }
     }
 
@@ -12918,6 +13464,7 @@
           button.hidden = !canManage;
         }
       });
+      document.querySelectorAll("#restoreBackup").forEach((button) => { button.hidden = !canManage; });
       document.querySelectorAll([
         "[data-open-employee]",
         "#loadSample",
@@ -15005,11 +15552,16 @@
       const index = state.employees.findIndex((item) => item.id === employee.id);
       const isNew = index < 0;
       if (index >= 0) {
-        state.employees.splice(index, 1, normalizeEmployee(employee));
+        const before = state.employees[index];
+        const after = normalizeEmployee(employee);
+        state.employees.splice(index, 1, after);
+        recordEmployeeHistory(after, "직접 수정", employeeChanges(before, after));
         showToast("사원 정보가 수정되었습니다.");
       } else {
-        state.employees.push(normalizeEmployee(employee));
+        const created = normalizeEmployee(employee);
+        state.employees.push(created);
         incrementEmployeeSequence();
+        recordEmployeeHistory(created, "신규 등록", [], `사원 등록 (${text(created.employeeNo, "사번없음")})`);
         showToast("신규 사원이 등록되었습니다.");
       }
 
@@ -15023,20 +15575,165 @@
       if (!requireWritePermission()) return;
       const employee = state.employees.find((item) => item.id === id);
       if (!employee) return;
-      const ok = window.confirm(`${employee.name} 사원 정보를 삭제할까요? 이 작업은 Firebase 데이터에서 제거됩니다.`);
+      const ok = window.confirm(`${employee.name} 사원을 휴지통으로 이동할까요? 운영 설정 > 데이터 관리에서 복원할 수 있습니다.`);
       if (!ok) return;
       state.employees = state.employees.filter((item) => item.id !== id);
+      state.deletedEmployees.push({
+        ...employee,
+        deletedAt: new Date().toISOString(),
+        deletedBy: state.user?.email || state.user?.uid || ""
+      });
       if (state.drawerEmployeeId === id) closeEmployeeDrawer();
       saveEmployees();
+      addAuditLog("employee:delete", employee.name, `휴지통 이동 (${text(employee.employeeNo, "사번없음")})`);
+      recordEmployeeHistory(employee, "휴지통 이동", [], "사원 정보를 휴지통으로 이동");
       renderAll();
-      showToast("사원 정보가 삭제되었습니다.");
+      showToast("휴지통으로 이동했습니다. 데이터 관리에서 복원할 수 있습니다.");
+    }
+
+    function restoreEmployee(id) {
+      if (!requireWritePermission()) return;
+      const index = state.deletedEmployees.findIndex((item) => item.id === id);
+      if (index < 0) return;
+      const { deletedAt, deletedBy, ...employee } = state.deletedEmployees[index];
+      state.deletedEmployees.splice(index, 1);
+      state.employees.push(normalizeEmployee(employee));
+      saveEmployees();
+      addAuditLog("employee:restore", employee.name, `휴지통 복원 (${text(employee.employeeNo, "사번없음")})`);
+      recordEmployeeHistory(employee, "휴지통 복원", [], "휴지통에서 복원");
+      renderAll();
+      showToast(`${employee.name} 사원을 복원했습니다.`);
+    }
+
+    function purgeEmployee(id) {
+      if (!canManageUsers()) {
+        showToast("영구 삭제는 소유자만 할 수 있습니다.");
+        return;
+      }
+      const employee = state.deletedEmployees.find((item) => item.id === id);
+      if (!employee) return;
+      const ok = window.confirm(`${employee.name} 사원을 영구 삭제할까요? 복구할 수 없습니다.`);
+      if (!ok) return;
+      state.deletedEmployees = state.deletedEmployees.filter((item) => item.id !== id);
+      saveEmployees();
+      addAuditLog("employee:purge", employee.name, `영구 삭제 (${text(employee.employeeNo, "사번없음")})`);
+      renderAll();
+      showToast("영구 삭제했습니다.");
+    }
+
+    function renderTrash() {
+      const body = document.querySelector("#trashTableBody");
+      const count = document.querySelector("#trashCount");
+      if (!body) return;
+      if (count) count.textContent = String(state.deletedEmployees.length);
+      const rows = [...state.deletedEmployees].sort((a, b) => String(b.deletedAt).localeCompare(String(a.deletedAt)));
+      renderTableRows(body, rows, 6, (employee) => {
+          const tr = document.createElement("tr");
+          tr.append(
+            makeCell(employee.employeeNo),
+            makeCell(employee.name),
+            makeCell([text(employee.department, ""), text(employee.team, "")].filter(Boolean).join(" · ") || "-"),
+            makeCell(formatDateTime(employee.deletedAt)),
+            makeCell(employee.deletedBy)
+          );
+          const actions = document.createElement("td");
+          const restore = document.createElement("button");
+          restore.type = "button";
+          restore.className = "button ghost";
+          restore.textContent = "복원";
+          restore.addEventListener("click", () => restoreEmployee(employee.id));
+          actions.append(restore);
+          if (canManageUsers()) {
+            const purge = document.createElement("button");
+            purge.type = "button";
+            purge.className = "button danger";
+            purge.style.marginLeft = "6px";
+            purge.textContent = "영구 삭제";
+            purge.addEventListener("click", () => purgeEmployee(employee.id));
+            actions.append(purge);
+          }
+          tr.append(actions);
+          return tr;
+        }, "휴지통이 비어 있습니다.", "삭제한 사원이 여기에 표시됩니다.");
+    }
+
+    // ---------- 전체 백업 / 복원 (JSON) ----------
+    function downloadJsonFile(filename, payload) {
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function backupAllData() {
+      if (!canReadData()) return;
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, "").replace("T", "_");
+      const payload = {
+        app: "PeopleOps Hub",
+        format: 1,
+        exportedAt: new Date().toISOString(),
+        exportedBy: state.user?.email || "",
+        settings: state.settings,
+        employees: [...state.employees, ...state.deletedEmployees],
+        certificates: state.certificates,
+        operationRecords: state.operationRecords
+      };
+      downloadJsonFile(`peopleops_backup_${stamp}.json`, payload);
+      addAuditLog("data:backup", "전체 백업", `사원 ${state.employees.length}명, 증명서 ${state.certificates.length}건`);
+      showToast("전체 백업 파일을 내려받았습니다.");
+    }
+
+    async function restoreFromBackup(event) {
+      const file = event.target.files?.[0];
+      event.target.value = "";
+      if (!file) return;
+      if (!canManageUsers()) {
+        showToast("백업 복원은 소유자만 할 수 있습니다.");
+        return;
+      }
+      let payload;
+      try {
+        payload = JSON.parse(await file.text());
+      } catch (error) {
+        showToast("백업 파일을 읽을 수 없습니다. JSON 형식인지 확인하세요.");
+        return;
+      }
+      if (payload?.app !== "PeopleOps Hub" || !Array.isArray(payload.employees)) {
+        showToast("PeopleOps Hub 백업 파일이 아닙니다.");
+        return;
+      }
+      const employees = payload.employees.map(normalizeEmployee);
+      const certificates = Array.isArray(payload.certificates) ? payload.certificates : [];
+      const records = payload.operationRecords && typeof payload.operationRecords === "object" ? payload.operationRecords : {};
+      const recordCount = Object.values(records).reduce((sum, list) => sum + (Array.isArray(list) ? list.length : 0), 0);
+      const ok = window.confirm(
+        `백업 시각: ${formatDateTime(payload.exportedAt)}\n사원 ${employees.length}명, 증명서 ${certificates.length}건, 업무 기록 ${recordCount}건\n\n현재 저장된 데이터를 이 백업으로 모두 교체할까요? 되돌릴 수 없으니 먼저 현재 데이터를 백업하세요.`
+      );
+      if (!ok) return;
+      state.settings = normalizeSettings(payload.settings || defaultSettings);
+      state.employees = employees.filter((employee) => !employee.deletedAt);
+      state.deletedEmployees = employees.filter((employee) => employee.deletedAt);
+      state.certificates = certificates;
+      state.operationRecords = { ...emptyOperationRecords(), ...records };
+      saveSettings();
+      saveEmployees();
+      saveCertificates();
+      saveOperationRecords();
+      addAuditLog("data:restore", "백업 복원", `${file.name} (사원 ${employees.length}명)`);
+      renderAll();
+      showToast("백업을 복원했습니다.");
     }
 
 
     const employeeExcelColumns = [
       { header: "사번", key: "employeeNo", aliases: ["사원번호", "직원번호", "근로자번호"] },
       { header: "이름", key: "name", required: true, aliases: ["성명", "직원명", "사원명", "근로자명", "근로자"] },
-      { header: "주민등록번호", key: "residentId", aliases: ["주민번호", "주민(외국인)등록번호", "주민번호 앞6자리+뒤1자리", "주민번호앞7자리", "주민등록번호앞7자리"] },
+      { header: "주민번호 앞7자리", key: "residentId", aliases: ["주민등록번호", "주민번호", "주민(외국인)등록번호", "주민번호 앞6자리+뒤1자리", "주민번호앞7자리", "주민등록번호앞7자리"] },
       { header: "성별", key: "gender" },
       { header: "국적", key: "nationality" },
       { header: "혼인상태", key: "maritalStatus" },
@@ -15375,7 +16072,7 @@
               employee[column.key] = valueFromExcelRow(row, column);
             });
             completeImportedOrganization(employee);
-            // 앞 7자리로 생년월일·성별을 채우고, 번호 자체는 보관한다
+            // 앞 7자리로 생년월일·성별을 채우고, 앞 7자리만 보관한다 (뒤 6자리는 저장하지 않음)
             employee.residentId = normalizeResidentId(employee.residentId);
             const residentInfo = residentInfoFromPartial(employee.residentId);
             if (residentInfo && !residentInfo.error) {
@@ -15414,9 +16111,9 @@
         showToast("엑셀 파일을 읽지 못했습니다. 양식을 확인하세요.");
       }
     }
-    function exportCsvFile() {
+    function exportCsvFile(list) {
       const headers = ["사번", "이름", "성별", "국적", "혼인상태", "부서", "팀", "파트", "직책", "직군", "직급/레벨", "고용형태", "근무형태", "상태", "입사일", "수습 종료일", "계약 종료일", "퇴직일", "생년월일", "이메일", "연락처", "주소", "비상연락 이름", "비상연락 관계", "비상연락 번호", "근무지", "코스트센터", "상위 관리자", "최종학력", "전공", "입사 전 경력연수", "병역", "보훈 여부", "장애 여부", "장애 정도", "개인정보 동의일", "자격/면허", "언어 역량", "정보완성도", "메모"];
-      const rows = state.employees.map((employee) => [
+      const rows = (Array.isArray(list) ? list : state.employees).map((employee) => [
         employee.employeeNo,
         employee.name,
         employee.gender,
@@ -15484,6 +16181,7 @@
       const ok = window.confirm("현재 저장된 사원 데이터, 운영 설정, 발급 이력, 업무 기록을 빈 운영 데이터로 초기화할까요?");
       if (!ok) return;
       state.employees = [];
+      state.deletedEmployees = [];
       state.settings = normalizeSettings(defaultSettings);
       state.certificates = [];
       state.operationRecords = emptyOperationRecords();
@@ -15501,6 +16199,7 @@
       const ok = window.confirm("등록된 사원 데이터만 모두 초기화할까요? 운영 설정, 조직도, 기준코드, 증명서/업무 기록은 유지됩니다.");
       if (!ok) return;
       state.employees = [];
+      state.deletedEmployees = [];
       saveEmployees();
       resetEmployeePage();
       renderAll();
@@ -15511,6 +16210,7 @@
       const ok = window.confirm("저장된 사원 데이터, 운영 설정, 증명서 발급 이력, 업무 기록을 모두 초기화할까요?");
       if (!ok) return;
       state.employees = [];
+      state.deletedEmployees = [];
       state.settings = normalizeSettings(defaultSettings);
       state.certificates = [];
       state.operationRecords = emptyOperationRecords();
@@ -15533,6 +16233,29 @@
 
       document.querySelectorAll("[data-view-shortcut]").forEach((button) => {
         button.addEventListener("click", () => switchView(button.dataset.viewShortcut));
+      });
+      window.addEventListener("hashchange", () => {
+        const viewId = viewFromHash();
+        if (viewId && viewId !== state.currentView) switchView(viewId);
+      });
+
+      // 전역 검색
+      const globalSearch = document.querySelector("#globalSearch");
+      const globalResults = document.querySelector("#globalSearchResults");
+      on(globalSearch, "input", renderGlobalSearchResults);
+      on(globalSearch, "focus", renderGlobalSearchResults);
+      on(globalSearch, "keydown", (event) => {
+        if (event.key === "Escape") {
+          globalSearch.value = "";
+          if (globalResults) globalResults.hidden = true;
+        }
+        if (event.key === "Enter") {
+          event.preventDefault();
+          globalResults?.querySelector("button")?.click();
+        }
+      });
+      document.addEventListener("click", (event) => {
+        if (globalResults && !event.target.closest(".topbar-search")) globalResults.hidden = true;
       });
 
       document.querySelectorAll("[data-foreign-detail-filter]").forEach((button) => {
@@ -15673,6 +16396,11 @@
       on(elements.assignmentReset, "click", () => clearAssignmentForm(true));
       on(elements.certificateForm, "submit", createCertificateRecord);
       on(elements.certificatePrintButton, "click", printCertificate);
+      ["#registerFrom", "#registerTo", "#registerType", "#registerSearch"].forEach((selector) => {
+        on(document.querySelector(selector), "input", renderCertificateRegister);
+        on(document.querySelector(selector), "change", renderCertificateRegister);
+      });
+      on(document.querySelector("#exportCertificateRegister"), "click", exportCertificateRegister);
       on(elements.certificateEmployeeSearch, "input", renderCertificates);
       on(elements.certificateEmployee, "input", renderCertificatePreview);
       on(elements.certificateEmployee, "change", () => {
@@ -15775,6 +16503,20 @@
         if (requireWritePermission()) elements.employeeExcelInput?.click();
       });
       on(elements.employeeExcelInput, "change", importEmployeesFromExcel);
+      on(document.querySelector("#employeeSelectAll"), "change", (event) => {
+        visibleEmployeeIds().forEach((id) => {
+          if (event.target.checked) state.selectedEmployeeIds.add(id);
+          else state.selectedEmployeeIds.delete(id);
+        });
+        renderEmployeeTable();
+      });
+      on(document.querySelector("#bulkField"), "change", renderBulkValueOptions);
+      on(document.querySelector("#bulkApply"), "click", applyBulkChange);
+      on(document.querySelector("#bulkExport"), "click", () => exportCsvFile(state.employees.filter((employee) => state.selectedEmployeeIds.has(employee.id))));
+      on(document.querySelector("#bulkClear"), "click", () => {
+        state.selectedEmployeeIds.clear();
+        renderEmployeeTable();
+      });
       on(elements.downloadMonthlyReportMapping, "click", downloadMonthlyReportMappingExcel);
       on(elements.uploadMonthlyReportMapping, "click", () => {
         if (requireWritePermission()) elements.monthlyReportMappingInput?.click();
@@ -15782,11 +16524,17 @@
       on(elements.monthlyReportMappingInput, "change", importMonthlyReportMappingExcel);
       on(elements.clearEmployees, "click", clearEmployeeDataOnly);
       [elements.exportCsv, elements.exportSettings].forEach((button) => {
-        on(button, "click", exportCsvFile);
+        on(button, "click", () => exportCsvFile());
       });
 
       on(elements.loadSample, "click", resetWithSampleData);
       on(elements.clearData, "click", clearSavedData);
+      on(document.querySelector("#backupAll"), "click", backupAllData);
+      on(document.querySelector("#restoreBackup"), "click", () => {
+        if (canManageUsers()) document.querySelector("#restoreBackupInput")?.click();
+        else showToast("백업 복원은 소유자만 할 수 있습니다.");
+      });
+      on(document.querySelector("#restoreBackupInput"), "change", restoreFromBackup);
     }
 
     function setAuthStatus(message) {
