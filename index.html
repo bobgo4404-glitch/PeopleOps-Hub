@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f7f8fa" />
   <title>PeopleOps Hub - PeopleOps 플랫폼</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
@@ -3998,6 +3999,79 @@
       box-shadow: var(--shadow);
     }
 
+    /* ===== 2026-09-28 화면 정리 =====
+       강조색은 남색 하나로 통일하고, 빨강은 로고·경고·삭제에만 쓴다. */
+    :root {
+      --primary: #1f3b64;
+      --primary-strong: #152a48;
+      --primary-soft: #eef2f8;
+      --primary-line: #c9d4e5;
+      --subtle: #6b7280;
+    }
+
+    .brand-mark { background: var(--seal); }
+    .nav-section-label { color: var(--muted); }
+    .avatar { background: var(--surface-muted); color: var(--text); }
+    .button.danger:hover { color: var(--danger); border-color: var(--danger); }
+
+    /* 제목은 화면 안 제목 하나만: 상단바 제목은 보조기기용으로만 남긴다 */
+    .topbar #pageTitle {
+      position: absolute; width: 1px; height: 1px; overflow: hidden;
+      clip: rect(0 0 0 0); white-space: nowrap;
+    }
+    .view > .section-head:first-child h2,
+    #dashboard-title,
+    .analytics-hero h2 { font-size: 1.35rem; margin: 0; line-height: 1.3; }
+    .dashboard-head .hero-actions { margin-top: 0; }
+
+    /* 막대·아이콘·장식 정리 */
+    .bar-fill { background: var(--primary); }
+    .yearly-lifecycle-fill.hire { background: var(--primary); }
+    .metric-icon,
+    .metric-card:nth-child(n) .metric-icon { background: var(--surface-muted); color: var(--muted); }
+    .analytics-kpi-grid .metric-card::after { display: none; }
+    .analytics-hero { background: var(--surface); padding: 20px 24px; }
+    .analytics-hero .filter-token { min-height: 0; }
+    .analytics-hero .analytics-tabs { margin-top: 14px; }
+    .empty-state { min-height: 120px; }
+
+    /* ⓘ 설명: 눌러서 펼친다 (키보드·터치 지원) */
+    .head-info {
+      width: 20px; height: 20px; padding: 0; margin-left: 6px;
+      font: 700 0.7rem/1 inherit; cursor: pointer; background: transparent;
+    }
+    .head-info[aria-expanded="true"] { color: var(--primary); border-color: var(--primary); }
+
+    .topbar { justify-content: flex-start; }
+
+    /* 전역 검색 포커스 표시 */
+    .topbar-search:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+
+    /* 사원 관리 검색줄: 검색·필터 한 줄, 엑셀 작업은 메뉴 하나로 */
+    .toolbar > .filters { flex: 1 1 auto; flex-wrap: nowrap; }
+    .toolbar .search-field { flex: 1 1 280px; min-width: 0; }
+    .menu-dropdown { position: relative; }
+    .menu-dropdown > summary { list-style: none; cursor: pointer; }
+    .menu-dropdown > summary::-webkit-details-marker { display: none; }
+    .menu-list {
+      position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; min-width: 210px;
+      display: grid; gap: 2px; padding: 6px;
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius-sm); box-shadow: var(--shadow-lift);
+    }
+    .menu-list .button { justify-content: flex-start; width: 100%; background: transparent; }
+    .menu-list .button:hover { background: var(--surface-muted); }
+
+    @media (max-width: 820px) {
+      .topbar { flex-direction: row; align-items: center; padding: 10px 16px; gap: 10px; }
+      .topbar-search { display: flex; flex: 1 1 auto; }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .metric-value { font-size: 1.5rem; }
+      .toolbar > .filters { flex-wrap: wrap; }
+      .menu-dropdown > summary { width: 100%; }
+      .menu-list { left: 0; right: 0; }
+    }
+
   </style>
 </head>
 <body class="is-auth-loading">
@@ -4113,30 +4187,26 @@
           <input id="globalSearch" type="search" placeholder="사원 이름, 사번, 부서, 연락처 검색" autocomplete="off" aria-label="사원 검색" />
           <ul class="global-search-results" id="globalSearchResults" hidden></ul>
         </div>
-        <div class="topbar-actions">
-          <button class="button ghost" type="button" data-view-shortcut="statistics">
-            <i data-lucide="download"></i>
-            리포트
-          </button>
-        </div>
       </header>
 
       <main class="content">
         <section class="view is-active" id="dashboard" aria-labelledby="dashboard-title">
-          <h2 id="dashboard-title" class="sr-only">대시보드</h2>
-          <div class="hero-actions">
-            <button class="button primary" type="button" data-open-employee>
-              <i data-lucide="user-plus"></i>
-              신규 사원 등록
-            </button>
-            <button class="button ghost" type="button" data-view-shortcut="statistics">
-              <i data-lucide="chart-no-axes-combined"></i>
-              인사 통계 보기
-            </button>
-            <button class="button ghost" type="button" data-view-shortcut="organization">
-              <i data-lucide="network"></i>
-              조직 구조 점검
-            </button>
+          <div class="section-head dashboard-head">
+            <h2 id="dashboard-title">대시보드</h2>
+            <div class="hero-actions">
+              <button class="button primary" type="button" data-open-employee>
+                <i data-lucide="user-plus"></i>
+                신규 사원 등록
+              </button>
+              <button class="button ghost" type="button" data-view-shortcut="statistics">
+                <i data-lucide="chart-no-axes-combined"></i>
+                인사 통계 보기
+              </button>
+              <button class="button ghost" type="button" data-view-shortcut="organization">
+                <i data-lucide="network"></i>
+                조직 구조 점검
+              </button>
+            </div>
           </div>
 
           <div class="grid kpi-grid" aria-label="핵심 인사 지표">
@@ -4255,19 +4325,28 @@
                   </select>
                 </div>
               </div>
-              <button class="button ghost" type="button" id="downloadEmployeeTemplate">
-                <i data-lucide="file-spreadsheet"></i>
-                엑셀양식 다운로드
-              </button>
-              <button class="button ghost" type="button" id="uploadEmployeeExcel">
-                <i data-lucide="upload"></i>
-                엑셀 업로드
-              </button>
+              <details class="menu-dropdown">
+                <summary class="button ghost">
+                  <i data-lucide="file-spreadsheet"></i>
+                  엑셀
+                  <i data-lucide="chevron-down"></i>
+                </summary>
+                <div class="menu-list">
+                  <button class="button ghost" type="button" id="downloadEmployeeTemplate">
+                    <i data-lucide="file-spreadsheet"></i>
+                    엑셀양식 다운로드
+                  </button>
+                  <button class="button ghost" type="button" id="uploadEmployeeExcel">
+                    <i data-lucide="upload"></i>
+                    엑셀 업로드
+                  </button>
+                  <button class="button ghost" type="button" id="exportCsv">
+                    <i data-lucide="download"></i>
+                    CSV 내보내기
+                  </button>
+                </div>
+              </details>
               <input id="employeeExcelInput" type="file" accept=".xlsx,.xls" hidden />
-              <button class="button ghost" type="button" id="exportCsv">
-                <i data-lucide="download"></i>
-                CSV 내보내기
-              </button>
             </div>
 
             <div class="bulk-bar" id="bulkBar" hidden>
@@ -5045,7 +5124,8 @@
         <section class="view" id="statistics" aria-labelledby="statistics-title">
           <div class="analytics-hero">
             <div>
-              <h2 id="statistics-title">인사 통계<span class="head-info" title="법정 제출 여부와 서식은 사업장 규모, 업종, 관할 기관, 최신 법령에 따라 달라질 수 있습니다. 아래 통계는 제출 전 검토용 운영 지표이며, 실제 신고·제출은 추가 확인이 필요합니다." aria-label="법정 제출 여부와 서식은 사업장 규모, 업종, 관할 기관, 최신 법령에 따라 달라질 수 있습니다. 아래 통계는 제출 전 검토용 운영 지표이며, 실제 신고·제출은 추가 확인이 필요합니다.">i</span></h2>
+              <h2 id="statistics-title">인사 통계</h2>
+              <p>법정 제출 여부와 서식은 사업장 규모, 업종, 관할 기관, 최신 법령에 따라 달라질 수 있습니다. 아래 통계는 제출 전 검토용 운영 지표이며, 실제 신고·제출은 추가 확인이 필요합니다.</p>
               <div class="analytics-tabs" role="tablist" aria-label="통계 영역">
                 <button type="button" role="tab" data-analytics-tab="summary" class="is-active">요약</button>
                 <button type="button" role="tab" data-analytics-tab="legal">장애인·외국인</button>
@@ -8884,18 +8964,24 @@
 
     // 설명문은 처음 한 번만 필요하다. 제목 옆 ⓘ 로 옮겨 데이터가 위로 올라오게 한다.
     function collapseSectionDescriptions() {
-      document.querySelectorAll(".section-head > div > p, .org-tree-title > div > p").forEach((paragraph) => {
+      document.querySelectorAll(".section-head > div > p, .org-tree-title > div > p, .analytics-hero > div > p").forEach((paragraph) => {
         if (paragraph.dataset.collapsed === "true") return;
         const description = paragraph.textContent.trim();
         const heading = paragraph.parentElement.querySelector("h1, h2, h3");
         if (!description || !heading) return;
         paragraph.dataset.collapsed = "true";
         paragraph.hidden = true;
-        const info = document.createElement("span");
+        const info = document.createElement("button");
+        info.type = "button";
         info.className = "head-info";
         info.textContent = "i";
         info.title = description;
-        info.setAttribute("aria-label", description);
+        info.setAttribute("aria-label", `${heading.textContent.trim()} 설명 보기`);
+        info.setAttribute("aria-expanded", "false");
+        info.addEventListener("click", () => {
+          paragraph.hidden = !paragraph.hidden;
+          info.setAttribute("aria-expanded", String(!paragraph.hidden));
+        });
         heading.append(info);
       });
     }
@@ -14888,12 +14974,25 @@
         });
         view.querySelectorAll("[data-analytics-group]").forEach((el) => { el.hidden = el.dataset.analyticsGroup !== name; });
       };
-      tabs.forEach((tab) => tab.addEventListener("click", () => show(tab.dataset.analyticsTab)));
+      tabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => show(tab.dataset.analyticsTab));
+        tab.addEventListener("keydown", (event) => {
+          if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+          const next = tabs[(index + (event.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+          next.focus();
+          show(next.dataset.analyticsTab);
+        });
+      });
       show("summary");
     }
 
     function bindEvents() {
       setupAnalyticsTabs();
+      document.addEventListener("click", (event) => {
+        document.querySelectorAll(".menu-dropdown[open]").forEach((menu) => {
+          if (!menu.contains(event.target) || event.target.closest(".menu-list button")) menu.open = false;
+        });
+      });
       const on = (element, eventName, handler) => {
         if (element) element.addEventListener(eventName, handler);
       };
