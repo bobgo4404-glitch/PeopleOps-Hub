@@ -806,6 +806,8 @@
       font-size: 0.95rem;
     }
 
+    [data-analytics-group][hidden] { display: none !important; }
+
     .analytics-hero-side {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -850,7 +852,7 @@
       padding-bottom: 2px;
     }
 
-    .analytics-tabs a {
+    .analytics-tabs button {
       min-height: 34px;
       border: 1px solid var(--line);
       border-radius: 999px;
@@ -865,7 +867,7 @@
       white-space: nowrap;
     }
 
-    .analytics-tabs a:first-child {
+    .analytics-tabs button.is-active {
       background: var(--primary);
       color: #ffffff;
       border-color: var(--primary);
@@ -1649,6 +1651,11 @@
 
     /* 열이 많아 실제로 넓이가 필요한 표만 가로 스크롤을 허용한다 */
     #employeeTableWrap table { min-width: 940px; }
+    #employeeTableWrap th, #employeeTableWrap td { padding-left: 10px; padding-right: 10px; }
+    #employeeTableWrap td { word-break: keep-all; }
+    #employeeTable .person-cell { min-width: 140px; }
+    #employeeTable td:nth-child(6) { white-space: pre-line; font-size: 0.84rem; }
+    #employeeTable td:nth-child(7) { white-space: nowrap; }
     .monthly-headcount-wrap table { min-width: 880px; }
     #onboardingTable, #offboardingTable, #annualLeaveTable { min-width: 760px; }
 
@@ -1810,89 +1817,6 @@
 
     .analytics-month-field {
       min-width: 160px;
-    }
-
-    .monthly-report-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-
-    .monthly-report-wrap {
-      border-color: var(--subtle);
-    }
-
-    .monthly-report-table {
-      min-width: 980px;
-      table-layout: fixed;
-    }
-
-    .monthly-report-table th,
-    .monthly-report-table td {
-      border-color: #bcc6d6;
-      padding: 10px 12px;
-    }
-
-    .monthly-report-table th {
-      background: #0f315f;
-      color: #ffffff;
-      text-align: center;
-      letter-spacing: 0;
-      text-transform: none;
-    }
-
-    .monthly-report-table th:nth-child(1) {
-      width: 124px;
-    }
-
-    .monthly-report-table th:nth-child(2) {
-      width: 170px;
-    }
-
-    .monthly-report-table th:nth-child(3),
-    .monthly-report-table th:nth-child(4),
-    .monthly-report-table th:nth-child(5),
-    .monthly-report-table th:nth-child(6) {
-      width: 116px;
-    }
-
-    .monthly-report-table th:nth-child(7) {
-      width: 250px;
-    }
-
-    .monthly-report-table td {
-      text-align: center;
-      font-variant-numeric: tabular-nums;
-      word-break: keep-all;
-    }
-
-    .monthly-report-table td.monthly-report-label,
-    .monthly-report-table td.monthly-report-note {
-      text-align: left;
-    }
-
-    .monthly-report-table td.monthly-report-group {
-      background: var(--bg);
-      color: #31405a;
-      font-weight: 700;
-    }
-
-    .monthly-report-table tr.is-subtotal td {
-      background: #e7edf8;
-      color: #526174;
-      font-weight: 600;
-    }
-
-    .monthly-report-table tr.is-total td {
-      background: #d7e0f2;
-      color: #2e394f;
-      font-weight: 700;
-    }
-
-    .monthly-report-note {
-      color: var(--muted);
-      font-size: 0.82rem;
     }
 
     .table-actions {
@@ -3536,7 +3460,7 @@
 
       /* ---- 통계 바로가기: 줄바꿈 ---- */
       .analytics-tabs { flex-wrap: wrap; }
-      .analytics-tabs a { flex: 0 0 auto; }
+      .analytics-tabs button { flex: 0 0 auto; }
 
       /* ---- 증명서 미리보기: 화면에서만 여백 축소 (인쇄는 그대로) ---- */
       .certificate-document {
@@ -3833,6 +3757,15 @@
 
     .head-count.is-alert { background: var(--danger-soft); color: var(--danger); }
     .head-count.is-warn { background: var(--warning-soft); color: var(--warning); }
+
+    .danger-zone {
+      margin-top: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+    }
+    .danger-zone summary { cursor: pointer; color: var(--danger); font-weight: 700; font-size: 0.9rem; }
+    .danger-zone p { margin: 8px 0 10px; color: var(--muted); font-size: 0.85rem; }
 
     .head-info {
       display: inline-grid;
@@ -4144,7 +4077,7 @@
         </button>
         <button class="nav-button" type="button" data-view-target="statistics">
           <i data-lucide="chart-no-axes-combined"></i>
-          <span>People Analytics</span>
+          <span>인사 통계</span>
         </button>
         <div class="nav-section-label">관리</div>
         <button class="nav-button" type="button" data-view-target="administration" data-permission="manage-users" hidden>
@@ -4173,8 +4106,7 @@
           <i data-lucide="menu"></i>
         </button>
         <div>
-          <div class="page-kicker" id="pageKicker">Overview</div>
-          <h1 id="pageTitle">전사 PeopleOps 대시보드</h1>
+          <h1 id="pageTitle">대시보드</h1>
         </div>
         <div class="topbar-search" aria-label="전역 검색">
           <i data-lucide="search"></i>
@@ -4199,7 +4131,7 @@
             </button>
             <button class="button ghost" type="button" data-view-shortcut="statistics">
               <i data-lucide="chart-no-axes-combined"></i>
-              People Analytics 보기
+              인사 통계 보기
             </button>
             <button class="button ghost" type="button" data-view-shortcut="organization">
               <i data-lucide="network"></i>
@@ -4690,14 +4622,7 @@
           <div class="section-head">
             <div>
               <h2 id="lifecycle-title">입사·퇴사 처리</h2>
-              <p>입사, 수습, 퇴사 단계별 필수 확인사항과 처리 누락 위험을 점검합니다.</p>
-            </div>
-          </div>
-
-          <div class="notice">
-            <i data-lucide="shield-alert"></i>
-            <div>
-              근로계약, 4대보험, 퇴직 정산은 외부 신고·급여 시스템 확인이 필요합니다. 이 화면은 누락 방지를 위한 운영 체크리스트입니다.
+              <p>입사, 수습, 퇴사 단계별 필수 확인사항과 처리 누락 위험을 점검합니다. 근로계약, 4대보험, 퇴직 정산은 외부 신고·급여 시스템 확인이 필요합니다.</p>
             </div>
           </div>
 
@@ -4797,38 +4722,20 @@
         <section class="view" id="attendance" aria-labelledby="attendance-title">
           <div class="section-head">
             <div>
-              <h2 id="attendance-title">연차 부여 예상 (참고)</h2>
-              <p>입사일과 근로기준법 제60조 기본 구조로 계산한 참고값입니다. 실제 연차 부여·사용·잔여 관리와 급여는 이 시스템에서 하지 않습니다.</p>
+              <h2 id="attendance-title">연차 부여 예상</h2>
+              <p>입사일과 근로기준법 제60조 기본 구조로 계산한 참고값입니다. 실제 부여일수는 출근율, 휴직, 단시간 근로, 취업규칙에 따라 달라질 수 있으며, 연차 사용·잔여 관리와 급여는 이 시스템에서 하지 않습니다.</p>
             </div>
           </div>
 
-          <div class="notice">
-            <i data-lucide="info"></i>
-            <div>
-              연차 계산은 근로기준법 제60조의 기본 구조를 단순 반영한 추정값입니다. 실제 부여일수는 출근율, 휴직, 단시간 근로, 회사 취업규칙에 따라 달라질 수 있습니다.
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>연차 산정 기준</h2>
+                <p>1년 미만: 1개월 개근 시 1일(최대 11일). 1년 이상: 15일, 3년 이상부터 2년마다 1일 가산(최대 25일). 회계연도 기준은 시작일 현재 근속으로 표시하며 중도입사자 비례부여는 회사 규정에 따라 별도 확정합니다. 기준 선택은 운영 설정에서 합니다.</p>
+              </div>
             </div>
-          </div>
-
-          <div class="grid two-column">
-            <section class="panel">
-              <div class="section-head">
-                <div>
-                  <h2>연차 산정 기준</h2>
-                  <p>운영 설정에서 입사일 기준 또는 회계연도 기준을 선택합니다.</p>
-                </div>
-              </div>
-              <div class="mini-metrics" id="annualLeaveSummary"></div>
-            </section>
-            <section class="panel">
-              <div class="section-head">
-                <div>
-                  <h2>산정 기준 안내</h2>
-                  <p id="annualLeaveBasisLabel">-</p>
-                </div>
-              </div>
-              <ul class="insight-list" id="annualLeaveNotes"></ul>
-            </section>
-          </div>
+            <div class="mini-metrics" id="annualLeaveSummary"></div>
+          </section>
 
           <section class="panel" aria-labelledby="annual-leave-table-title">
             <div class="section-head">
@@ -4861,7 +4768,7 @@
         <section class="view" id="assignments" aria-labelledby="assignments-title">
           <div class="section-head">
             <div>
-              <h2 id="assignments-title">계약/발령 관리</h2>
+              <h2 id="assignments-title">계약·발령</h2>
               <p>계약 갱신, 전보, 승진, 직책 변경을 등록하고 변경 전후 정보와 적용 여부를 관리합니다.</p>
             </div>
           </div>
@@ -5063,7 +4970,7 @@
         <section class="view" id="training" aria-labelledby="training-title">
           <div class="section-head">
             <div>
-              <h2 id="training-title">교육/자격 관리</h2>
+              <h2 id="training-title">교육·자격</h2>
               <p>법정의무교육, 직무교육, 자격/면허 보유 현황을 관리합니다.</p>
             </div>
           </div>
@@ -5120,7 +5027,7 @@
         <section class="view" id="reviews" aria-labelledby="reviews-title">
           <div class="section-head">
             <div>
-              <h2 id="reviews-title">평가/보상</h2>
+              <h2 id="reviews-title">평가·면담</h2>
               <p>평가, 승진, 보상 변경 전 검토할 인사 운영 지표입니다.</p>
             </div>
           </div>
@@ -5138,22 +5045,18 @@
         <section class="view" id="statistics" aria-labelledby="statistics-title">
           <div class="analytics-hero">
             <div>
-              <p class="page-kicker">People Analytics</p>
-              <h2 id="statistics-title">통계센터</h2>
-              <p>재직자 기준 인력 구성, 입퇴사 흐름, 정부 대응 가능 통계를 한 화면에서 확인합니다. 설계표가 아니라 운영자가 바로 해석할 수 있는 KPI와 차트 중심으로 구성했습니다.</p>
-              <div class="analytics-tabs" aria-label="통계 영역 바로가기">
-                <a href="#analytics-kpi">KPI</a>
-                <a href="#analytics-government">정부 대응</a>
-                <a href="#analytics-disability">장애인 통계</a>
-                <a href="#analytics-foreign-workers">외국인 통계</a>
-                <a href="#analytics-composition">인력 구성</a>
-                <a href="#analytics-lifecycle">입퇴사 추이</a>
-                <a href="#analytics-monthly-headcount">월별인원현황</a>
-                <a href="#analytics-organization">조직별 현황</a>
-                <a href="#analytics-detail">상세 명부</a>
+              <h2 id="statistics-title">인사 통계<span class="head-info" title="법정 제출 여부와 서식은 사업장 규모, 업종, 관할 기관, 최신 법령에 따라 달라질 수 있습니다. 아래 통계는 제출 전 검토용 운영 지표이며, 실제 신고·제출은 추가 확인이 필요합니다." aria-label="법정 제출 여부와 서식은 사업장 규모, 업종, 관할 기관, 최신 법령에 따라 달라질 수 있습니다. 아래 통계는 제출 전 검토용 운영 지표이며, 실제 신고·제출은 추가 확인이 필요합니다.">i</span></h2>
+              <div class="analytics-tabs" role="tablist" aria-label="통계 영역">
+                <button type="button" role="tab" data-analytics-tab="summary" class="is-active">요약</button>
+                <button type="button" role="tab" data-analytics-tab="legal">장애인·외국인</button>
+                <button type="button" role="tab" data-analytics-tab="composition">인력 구성</button>
+                <button type="button" role="tab" data-analytics-tab="lifecycle">입퇴사 추이</button>
+                <button type="button" role="tab" data-analytics-tab="monthly">월별인원현황</button>
+                <button type="button" role="tab" data-analytics-tab="organization">조직별 현황</button>
+                <button type="button" role="tab" data-analytics-tab="detail">상세 명부</button>
               </div>
             </div>
-            <div class="analytics-hero-side" aria-label="통계 운영 기준">
+            <div class="analytics-hero-side" aria-label="통계 기준">
               <label class="field month-select-field analytics-month-field" for="statisticsMonth">
                 <span>분석월</span>
                 <select id="statisticsMonth" aria-label="통계 분석월"></select>
@@ -5162,26 +5065,7 @@
                 <span>기준일</span>
                 <strong id="analyticsAsOfDate">오늘</strong>
               </div>
-              <div class="filter-token">
-                <span>대상</span>
-                <strong>재직·휴직 인원</strong>
-              </div>
-              <div class="filter-token">
-                <span>분석 단위</span>
-                <strong>조직 · 직급 · 고용형태 · 사업장</strong>
-              </div>
-              <div class="filter-token">
-                <span>원천 데이터</span>
-                <strong>사원관리 · 조직도 · 업무기록</strong>
-              </div>
             </div>
-          </div>
-
-          <div class="notice">
-            <i data-lucide="shield-alert"></i>
-            <span>
-              법정 제출 여부와 서식은 사업장 규모, 업종, 관할 기관, 최신 법령에 따라 달라질 수 있습니다. 아래 통계는 제출 전 검토용 운영 지표이며, 실제 신고·제출은 추가 확인이 필요합니다.
-            </span>
           </div>
 
           <h2 class="analytics-section-title" id="analytics-kpi">핵심 KPI</h2>
@@ -5803,118 +5687,6 @@
           </section>
         </section>
 
-        <section class="view" id="monthly-report" aria-labelledby="monthly-report-title">
-          <div class="section-head">
-            <div>
-              <h2 id="monthly-report-title">월간업무보고</h2>
-              <p>조직도 매칭 기준으로 선택 월의 현재 인원수, 입사, 퇴사, 기타 변동을 확인합니다.</p>
-            </div>
-            <div class="monthly-report-actions">
-              <button class="button ghost" type="button" id="downloadMonthlyReportMapping">
-                <i data-lucide="file-spreadsheet"></i>
-                매핑 엑셀 다운로드
-              </button>
-              <button class="button ghost" type="button" id="uploadMonthlyReportMapping">
-                <i data-lucide="upload"></i>
-                매핑 엑셀 업로드
-              </button>
-              <input id="monthlyReportMappingInput" type="file" accept=".xlsx,.xls" hidden />
-              <label class="field month-select-field" for="monthlyReportMonth">
-                <span>해당월</span>
-                <select id="monthlyReportMonth" aria-label="월간업무보고 해당월"></select>
-              </label>
-            </div>
-          </div>
-
-          <div class="grid kpi-grid" id="monthlyReportSummary" aria-label="월간업무보고 요약"></div>
-
-          <section class="panel monthly-report-gap-panel" aria-labelledby="monthly-report-gap-title">
-            <div class="section-head">
-              <div>
-                <h2 id="monthly-report-gap-title">차이 원인</h2>
-                <p id="monthlyReportGapSummary">조직도와 월간업무보고 집계 차이를 확인합니다.</p>
-              </div>
-            </div>
-            <ul class="insight-list" id="monthlyReportGapList"></ul>
-          </section>
-
-          <section class="panel" aria-labelledby="monthly-report-table-title">
-            <div class="section-head">
-              <div>
-                <h2 id="monthly-report-table-title">월간 인원 현황</h2>
-                <p id="monthlyReportPeriodLabel">선택 월 기준</p>
-              </div>
-            </div>
-            <div class="table-wrap monthly-report-wrap">
-              <table class="monthly-report-table">
-                <caption class="sr-only">월간업무보고 인원 현황</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">본부</th>
-                    <th scope="col">부서</th>
-                    <th scope="col" id="monthlyReportHeadcountHeader">현재 인원수</th>
-                    <th scope="col">입사</th>
-                    <th scope="col">퇴사</th>
-                    <th scope="col">기타</th>
-                    <th scope="col">비고</th>
-                  </tr>
-                </thead>
-                <tbody id="monthlyReportTable"></tbody>
-              </table>
-            </div>
-          </section>
-
-          <section class="panel" aria-labelledby="monthly-report-match-title">
-            <div class="section-head">
-              <div>
-                <h2 id="monthly-report-match-title">매칭 점검</h2>
-                <p id="monthlyReportMatchSummary">조직도와 엑셀 매칭 기준을 대조합니다.</p>
-              </div>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <caption class="sr-only">월간업무보고 조직도 매칭 점검</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">본부</th>
-                    <th scope="col">부서</th>
-                    <th scope="col">엑셀 매칭 기준</th>
-                    <th scope="col">매칭 여부</th>
-                    <th scope="col">확인 내용</th>
-                  </tr>
-                </thead>
-                <tbody id="monthlyReportMatchTable"></tbody>
-              </table>
-            </div>
-          </section>
-
-          <section class="panel" aria-labelledby="monthly-report-reconcile-title">
-            <div class="section-head">
-              <div>
-                <h2 id="monthly-report-reconcile-title">차이 점검</h2>
-                <p id="monthlyReportReconcileSummary">조직도 집계와 월간업무보고 합계의 차이를 확인합니다.</p>
-              </div>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <caption class="sr-only">월간업무보고 차이 점검</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">구분</th>
-                    <th scope="col">사원</th>
-                    <th scope="col">상태</th>
-                    <th scope="col">조직</th>
-                    <th scope="col">입사일</th>
-                    <th scope="col">퇴직일</th>
-                    <th scope="col">확인 내용</th>
-                  </tr>
-                </thead>
-                <tbody id="monthlyReportReconcileTable"></tbody>
-              </table>
-            </div>
-          </section>
-        </section>
-
         <section class="view" id="administration" aria-labelledby="administration-title">
           <div class="section-head">
             <div>
@@ -6047,13 +5819,6 @@
             <div>
               <h2 id="settings-title">운영 설정</h2>
               <p>회사 기본정보, 사번 규칙, 조직 기준값, 통계 기준을 회사 실정에 맞게 관리합니다.</p>
-            </div>
-          </div>
-
-          <div class="notice">
-            <i data-lucide="shield-alert"></i>
-            <div>
-              이 파일은 관리자 1인 사용 기준의 Firebase 연동 프론트엔드입니다. 실제 전사 인적정보 운영에는 Firestore 보안 규칙, 정기 백업, 변경 이력, 개인정보 보유기간 정책이 필요합니다.
             </div>
           </div>
 
@@ -6280,27 +6045,13 @@
               </div>
             </div>
             <div class="filters">
-              <button class="button ghost" type="button" id="loadSample">
-                <i data-lucide="database"></i>
-                운영 데이터 초기화
+              <button class="button primary" type="button" id="backupAll">
+                <i data-lucide="archive"></i>
+                전체 백업 (JSON)
               </button>
               <button class="button ghost" type="button" id="exportSettings">
                 <i data-lucide="download"></i>
                 CSV 내보내기
-              </button>
-              <button class="button danger" type="button" id="clearEmployees">
-                <i data-lucide="user-x"></i>
-                사원 데이터 초기화
-              </button>
-              <button class="button danger" type="button" id="clearData">
-                <i data-lucide="trash-2"></i>
-                저장 데이터 초기화
-              </button>
-            </div>
-            <div class="filters" style="margin-top: 10px;">
-              <button class="button primary" type="button" id="backupAll">
-                <i data-lucide="archive"></i>
-                전체 백업 (JSON)
               </button>
               <button class="button ghost" type="button" id="restoreBackup" data-permission="manage-users">
                 <i data-lucide="archive-restore"></i>
@@ -6308,6 +6059,24 @@
               </button>
               <input type="file" id="restoreBackupInput" accept=".json,application/json" hidden />
             </div>
+            <details class="danger-zone">
+              <summary>위험 작업 (초기화)</summary>
+              <p>되돌릴 수 없습니다. 실행 전에 전체 백업을 받아 두세요.</p>
+              <div class="filters">
+                <button class="button ghost" type="button" id="loadSample">
+                  <i data-lucide="database"></i>
+                  운영 데이터 초기화
+                </button>
+                <button class="button danger" type="button" id="clearEmployees">
+                  <i data-lucide="user-x"></i>
+                  사원 데이터 초기화
+                </button>
+                <button class="button danger" type="button" id="clearData">
+                  <i data-lucide="trash-2"></i>
+                  저장 데이터 초기화
+                </button>
+              </div>
+            </details>
           </section>
 
           <section class="panel" aria-labelledby="trash-title">
@@ -7228,7 +6997,6 @@
       selectedOrgNodeId: ROOT_ORG_ID,
       draggedOrgNodeId: "",
       statisticsMonth: new Date().toISOString().slice(0, 7),
-      monthlyReportMonth: new Date().toISOString().slice(0, 7),
       employeePage: 1,
       employeePageSize: 10,
       employeeSort: {
@@ -7251,53 +7019,19 @@
     const certificateSealImageCache = new Map();
 
     const titles = {
-      dashboard: ["Overview", "전사 PeopleOps 대시보드"],
-      employees: ["People Directory", "사원 정보 관리"],
-      organization: ["Organization", "조직도"],
-      certificates: ["Certificates", "증명서 발급"],
-      lifecycle: ["Lifecycle", "입사·퇴사 처리"],
-      attendance: ["Reference", "연차 부여 예상 (참고)"],
-      assignments: ["Contracts", "계약/발령 관리"],
-      training: ["Learning", "교육/자격 관리"],
-      reviews: ["Review", "평가/면담"],
-      statistics: ["People Analytics", "통계센터"],
-      "monthly-report": ["Monthly Report", "월간업무보고"],
-      administration: ["Administration", "운영자 관리"],
-      settings: ["Administration", "운영 설정"]
+      dashboard: ["", "대시보드"],
+      employees: ["", "사원 관리"],
+      organization: ["", "조직도"],
+      certificates: ["", "증명서 발급"],
+      lifecycle: ["", "입사·퇴사 처리"],
+      attendance: ["", "연차 부여 예상"],
+      assignments: ["", "계약·발령"],
+      training: ["", "교육·자격"],
+      reviews: ["", "평가·면담"],
+      statistics: ["", "인사 통계"],
+      administration: ["", "운영자 관리"],
+      settings: ["", "운영 설정"]
     };
-
-    const defaultMonthlyReportRows = [
-      { type: "detail", group: "", label: "대표이사", criteria: ["대표이사"], aliases: ["홍성훈 대표이사", "홍성훈"] },
-      { type: "detail", group: "생산본부", label: "본부장", criteria: ["김종규 본부장", "생산본부 본부장"] },
-      { type: "detail", group: "생산본부", label: "생산관리팀", criteria: ["생산관리팀"], aliases: ["생산관리부", "생산관리부문", "생산관리파트", "생산관리"] },
-      { type: "detail", group: "생산본부", label: "제조팀", criteria: ["원료제조파트"] },
-      { type: "detail", group: "생산본부", label: "품질보증팀", criteria: ["품질보증팀"], aliases: ["품질팀", "품질관리팀", "품질보증부", "품질보증부문", "품질관리부", "품질관리부문", "품질보증", "품질관리", "품질", "QA", "QC"] },
-      { type: "detail", group: "생산본부", label: "구매자재팀", criteria: ["구매자재팀(원료제조파트 제외)"], aliases: ["공급관리팀(원료제조파트 제외)"] },
-      { type: "subtotal", group: "생산본부", label: "소계" },
-      { type: "detail", group: "영업본부", label: "국내영업팀", criteria: ["국내영업부문"], aliases: ["국내영업팀"] },
-      { type: "detail", group: "영업본부", label: "해외영업팀", criteria: ["해외영업부문"], aliases: ["해외영업팀"] },
-      { type: "detail", group: "영업본부", label: "중국법인", criteria: ["중국법인"] },
-      { type: "subtotal", group: "영업본부", label: "소계" },
-      { type: "detail", group: "마케팅본부", label: "본부장", criteria: ["마케팅본부 본부장"] },
-      { type: "detail", group: "마케팅본부", label: "기획팀", criteria: ["상품기획팀", "디자인파트"], aliases: ["기획팀"] },
-      { type: "subtotal", group: "마케팅본부", label: "소계" },
-      { type: "detail", group: "연구소", label: "연구소장", criteria: ["허선행 본부장", "연구소 본부장", "연구소장"] },
-      { type: "detail", group: "연구소", label: "연구 부소장", criteria: ["김한용부장", "김한용 부장", "연구 부소장", "연구소 부소장"] },
-      { type: "detail", group: "연구소", label: "연구1팀", criteria: ["연구1팀"] },
-      { type: "detail", group: "연구소", label: "연구2팀", criteria: ["연구2팀"] },
-      { type: "detail", group: "연구소", label: "연구3팀", criteria: ["연구3팀"] },
-      { type: "detail", group: "연구소", label: "제도협력팀", criteria: ["제도협력팀"] },
-      { type: "detail", group: "연구소", label: "중국법인 연구소", criteria: ["중국법인 연구소"], aliases: ["중국법인_연구소"] },
-      { type: "subtotal", group: "연구소", label: "소계" },
-      { type: "detail", group: "경영지원본부", label: "본부장", criteria: ["강준석 본부장", "경영지원본부 본부장"] },
-      { type: "detail", group: "경영지원본부", label: "경영지원팀", criteria: ["경영지원본부(본부장/IT팀/기타비상근 제외)", "경영지원팀", "재무기획팀"] },
-      { type: "detail", group: "경영지원본부", label: "IT팀", criteria: ["IT팀"] },
-      { type: "detail", group: "경영지원본부", label: "기타비상근", criteria: ["기타비상근"] },
-      { type: "subtotal", group: "경영지원본부", label: "소계" },
-      { type: "total", group: "", label: "전체합계" }
-    ];
-    let monthlyReportRows = defaultMonthlyReportRows.map(cloneMonthlyReportRow);
-    defaultSettings.monthlyReportRows = defaultMonthlyReportRows.map(cloneMonthlyReportRow);
 
     const monthlyHeadcountGrades = ["부장", "차장", "과장", "대리", "주임", "사원"];
     const monthlyHeadcountExecutiveRanks = ["부대표", "전무", "상무", "이사"];
@@ -7390,7 +7124,6 @@
       sidebar: document.querySelector("#sidebar"),
       brandCompany: document.querySelector("#brandCompany"),
       menuToggle: document.querySelector("#menuToggle"),
-      pageKicker: document.querySelector("#pageKicker"),
       pageTitle: document.querySelector("#pageTitle"),
       navButtons: document.querySelectorAll("[data-view-target]"),
       views: document.querySelectorAll(".view"),
@@ -7482,8 +7215,6 @@
       offboardingTable: document.querySelector("#offboardingTable"),
       lifecycleIssueList: document.querySelector("#lifecycleIssueList"),
       annualLeaveSummary: document.querySelector("#annualLeaveSummary"),
-      annualLeaveBasisLabel: document.querySelector("#annualLeaveBasisLabel"),
-      annualLeaveNotes: document.querySelector("#annualLeaveNotes"),
       annualLeaveTable: document.querySelector("#annualLeaveTable"),
       assignmentSummary: document.querySelector("#assignmentSummary"),
       assignmentForm: document.querySelector("#assignmentForm"),
@@ -7614,20 +7345,6 @@
       retirementPrevPage: document.querySelector("#retirementPrevPage"),
       retirementNextPage: document.querySelector("#retirementNextPage"),
       retirementPageButtons: document.querySelector("#retirementPageButtons"),
-      monthlyReportMonth: document.querySelector("#monthlyReportMonth"),
-      monthlyReportSummary: document.querySelector("#monthlyReportSummary"),
-      downloadMonthlyReportMapping: document.querySelector("#downloadMonthlyReportMapping"),
-      uploadMonthlyReportMapping: document.querySelector("#uploadMonthlyReportMapping"),
-      monthlyReportMappingInput: document.querySelector("#monthlyReportMappingInput"),
-      monthlyReportPeriodLabel: document.querySelector("#monthlyReportPeriodLabel"),
-      monthlyReportHeadcountHeader: document.querySelector("#monthlyReportHeadcountHeader"),
-      monthlyReportTable: document.querySelector("#monthlyReportTable"),
-      monthlyReportGapSummary: document.querySelector("#monthlyReportGapSummary"),
-      monthlyReportGapList: document.querySelector("#monthlyReportGapList"),
-      monthlyReportMatchSummary: document.querySelector("#monthlyReportMatchSummary"),
-      monthlyReportMatchTable: document.querySelector("#monthlyReportMatchTable"),
-      monthlyReportReconcileSummary: document.querySelector("#monthlyReportReconcileSummary"),
-      monthlyReportReconcileTable: document.querySelector("#monthlyReportReconcileTable"),
       adminOwnerCount: document.querySelector("#adminOwnerCount"),
       adminOwnerLabel: document.querySelector("#adminOwnerLabel"),
       adminActiveUsers: document.querySelector("#adminActiveUsers"),
@@ -7769,37 +7486,6 @@
       return settings;
     }
 
-    function listFromMappingCell(value) {
-      return [...new Set(text(value, "")
-        .split(/[\n,;]+/)
-        .map((item) => item.trim())
-        .filter(Boolean))];
-    }
-
-    function mappingCellFromList(values = []) {
-      return Array.isArray(values) ? values.map((value) => text(value, "")).filter(Boolean).join("\n") : "";
-    }
-
-    function cloneMonthlyReportRow(row = {}) {
-      const cloned = {
-        type: ["detail", "subtotal", "total"].includes(row.type) ? row.type : "detail",
-        group: text(row.group, ""),
-        label: text(row.label, ""),
-        criteria: Array.isArray(row.criteria) ? row.criteria.map((value) => text(value, "")).filter(Boolean) : listFromMappingCell(row.criteria),
-        aliases: Array.isArray(row.aliases) ? row.aliases.map((value) => text(value, "")).filter(Boolean) : listFromMappingCell(row.aliases)
-      };
-      return cloned;
-    }
-
-    function normalizeMonthlyReportRows(rows = []) {
-      const source = Array.isArray(rows) && rows.length ? rows : defaultMonthlyReportRows;
-      const normalized = source
-        .map(cloneMonthlyReportRow)
-        .filter((row) => row.type !== "detail" || row.label || row.criteria.length || row.aliases.length);
-      if (!normalized.some((row) => row.type === "total")) normalized.push(cloneMonthlyReportRow({ type: "total", label: "전체합계" }));
-      return normalized;
-    }
-
     function normalizeSettings(settings = {}) {
       const merged = { ...defaultSettings, ...settings };
       merged.employeeNoUseDeptCode = "false";
@@ -7810,8 +7496,7 @@
       merged.teams = translateList(merged.teams, legacyTeamLabels);
       merged.jobGroups = translateList(merged.jobGroups, legacyJobGroupLabels);
       merged.organizationNodes = normalizeOrganizationNodes(merged.organizationNodes, text(merged.companyName, defaultSettings.companyName));
-      merged.monthlyReportRows = normalizeMonthlyReportRows(merged.monthlyReportRows);
-      monthlyReportRows = merged.monthlyReportRows;
+      delete merged.monthlyReportRows;
       return syncOrganizationCodeLists(merged);
     }
 
@@ -9087,7 +8772,6 @@
       }
       state.currentView = viewId;
       const title = titles[viewId] || titles.dashboard;
-      elements.pageKicker.textContent = title[0];
       elements.pageTitle.textContent = title[1];
 
       elements.views.forEach((view) => {
@@ -9234,7 +8918,6 @@
         ["training", renderTraining],
         ["reviews", renderReviews],
         ["statistics", renderStatistics],
-        ["monthly report", renderMonthlyReport],
         ["operation records", renderOperationRecords],
         ["administration", renderAdministration],
         ["settings", renderSettings],
@@ -11581,17 +11264,6 @@
         elements.annualLeaveSummary.append(card);
       });
 
-      const fiscalMonth = `${state.settings.fiscalStartMonth || 1}월`;
-      elements.annualLeaveBasisLabel.textContent = state.settings.annualLeaveBasis === "fiscal"
-        ? `현재 설정: 회계연도 기준 / 회계연도 시작월 ${fiscalMonth}`
-        : "현재 설정: 입사일 기준 / 각 사원의 입사일을 기준으로 부여 예상일수를 산정";
-
-      renderInsightItems(elements.annualLeaveNotes, [
-        { title: "1년 미만", body: "계속 근로 1년 미만은 1개월 개근 시 1일, 최대 11일 기준으로 표시합니다." },
-        { title: "1년 이상", body: "1년 이상은 15일을 기본으로, 3년 이상부터 2년마다 1일을 가산하고 최대 25일로 제한합니다." },
-        { title: "회계연도 기준", body: "회계연도 기준은 회계연도 시작일 현재 근속 기준으로 표시합니다. 중도입사자 비례부여는 회사 규정에 맞춰 별도 확정이 필요합니다." }
-      ]);
-
       elements.annualLeaveTable.replaceChildren();
       rows.forEach((row) => {
         const tr = document.createElement("tr");
@@ -12366,125 +12038,6 @@
       renderInsightItems(elements.reviewCandidateList, candidates, "검토 후보가 없습니다.", "근속 3년 이상 기준 후보가 없습니다.");
     }
 
-    function renderMonthlyReport() {
-      if (!elements.monthlyReportMonth || !elements.monthlyReportTable) return;
-      refreshMonthlyReportMonthOptions();
-      const range = monthlyReportRange(state.monthlyReportMonth);
-      const detailStats = new Map();
-      const matchRows = monthlyReportRows
-        .filter((row) => row.type === "detail")
-        .map((row) => monthlyReportMatchInfo(row));
-
-      monthlyReportRows
-        .filter((row) => row.type === "detail")
-        .forEach((row) => detailStats.set(row, monthlyReportStatsForRow(row, range)));
-
-      const displayDetailStats = monthlyReportDisplayDetailStats(detailStats, range);
-      const subtotalStats = new Map();
-      [...new Set(monthlyReportRows.filter((row) => row.type === "subtotal").map((row) => row.group))].forEach((group) => {
-        const rows = monthlyReportRows.filter((row) => row.type === "detail" && row.group === group);
-        subtotalStats.set(group, sumMonthlyStats(rows.map((row) => displayDetailStats.get(row))));
-      });
-
-      const totalStats = monthlyReportUniqueTotalStats(displayDetailStats);
-      renderMonthlyReportSummary(totalStats, range);
-      renderMonthlyReportTable(displayDetailStats, subtotalStats, totalStats, range, matchRows);
-      renderMonthlyReportMatchTable(matchRows);
-      renderMonthlyReportReconciliation(displayDetailStats, totalStats, range);
-    }
-
-    function monthlyReportDisplayDetailStats(detailStats, range) {
-      const displayStats = new Map();
-      const detailRows = monthlyReportRows.filter((row) => row.type === "detail");
-      detailRows.forEach((row) => {
-        const rawStats = detailStats.get(row) || emptyMonthlyStats();
-        const stats = emptyMonthlyStats();
-        stats.otherIds = new Set(rawStats.otherIds);
-        stats.otherLabels = [...rawStats.otherLabels];
-        displayStats.set(row, stats);
-      });
-
-      [
-        { key: "currentIds", predicate: (employee) => isCurrentForMonthlyReport(employee, range) },
-        { key: "hireIds", predicate: (employee) => isDateInMonthlyRange(employee.joinDate, range) },
-        { key: "retirementIds", predicate: (employee) => isDateInMonthlyRange(employee.retirementDate, range) }
-      ].forEach(({ key, predicate }) => {
-        state.employees.filter(predicate).forEach((employee) => {
-          const matchedRows = detailRows.filter((row) => detailStats.get(row)?.[key].has(employee.id));
-          const targetRow = monthlyReportBestDisplayRow(employee, matchedRows);
-          if (targetRow) displayStats.get(targetRow)?.[key].add(employee.id);
-        });
-      });
-      return displayStats;
-    }
-
-    function monthlyReportBestDisplayRow(employee, rows = []) {
-      if (!rows.length) return null;
-      return rows
-        .map((row, index) => ({ row, index, score: monthlyReportRowSpecificityForEmployee(employee, row) }))
-        .sort((a, b) => b.score - a.score || a.index - b.index)[0].row;
-    }
-
-    function monthlyReportRowSpecificityForEmployee(employee, row) {
-      const directOrgName = employeeDirectOrgName(employee);
-      const directOrgNodes = directMonthlyOrgNodesForLabel(directOrgName);
-      let bestScore = 0;
-      monthlyReportCriteriaForRow(row).forEach((criterion) => {
-        const parsed = parseMonthlyCriterion(criterion);
-        if (!employeeMatchesMonthlyReportCriterion(employee, parsed, row)) return;
-        if (employeeMatchesMonthlyPersonCriterion(employee, parsed.include)) {
-          bestScore = Math.max(bestScore, 10000);
-          return;
-        }
-        const roots = directMonthlyOrgNodesForLabel(parsed.include);
-        roots.forEach((root) => {
-          const rootDescendants = new Set(descendantOrgIds(root.id));
-          const matchedDirectNode = directOrgNodes.find((node) => rootDescendants.has(node.id));
-          if (!matchedDirectNode) return;
-          const rootDepth = orgNodePath(root.id).length;
-          const isDirectRoot = matchedDirectNode.id === root.id;
-          bestScore = Math.max(bestScore, 1000 + rootDepth * 10 + (isDirectRoot ? 5 : 0));
-        });
-        if (!roots.length && employeeMatchesMonthlySimple(employee, parsed.include)) bestScore = Math.max(bestScore, 500);
-      });
-      return bestScore;
-    }
-
-    function monthlyReportUniqueTotalStats(detailStats) {
-      const stats = emptyMonthlyStats();
-      monthlyReportRows
-        .filter((row) => row.type === "detail")
-        .forEach((row) => {
-          const rowStats = detailStats.get(row);
-          rowStats?.currentIds.forEach((id) => stats.currentIds.add(id));
-          rowStats?.hireIds.forEach((id) => stats.hireIds.add(id));
-          rowStats?.retirementIds.forEach((id) => stats.retirementIds.add(id));
-          rowStats?.otherIds.forEach((id) => stats.otherIds.add(id));
-        });
-      stats.countOverrides = {
-        current: stats.currentIds.size,
-        hires: stats.hireIds.size,
-        retirements: stats.retirementIds.size,
-        other: stats.otherIds.size
-      };
-      return stats;
-    }
-
-    function refreshMonthlyReportMonthOptions() {
-      const options = monthlyReportMonthOptions();
-      if (!options.includes(state.monthlyReportMonth)) state.monthlyReportMonth = options[0];
-      const currentValue = elements.monthlyReportMonth.value;
-      elements.monthlyReportMonth.replaceChildren();
-      options.forEach((monthValue) => {
-        const option = document.createElement("option");
-        option.value = monthValue;
-        option.textContent = monthlyReportMonthLabel(monthValue);
-        elements.monthlyReportMonth.append(option);
-      });
-      elements.monthlyReportMonth.value = options.includes(currentValue) ? currentValue : state.monthlyReportMonth;
-      state.monthlyReportMonth = elements.monthlyReportMonth.value;
-    }
-
     function monthlyReportMonthOptions() {
       const months = new Set();
       const now = new Date();
@@ -12536,361 +12089,6 @@
       return Boolean(date && date >= range.start && date <= range.end);
     }
 
-    function isCurrentAtMonthEnd(employee, monthEnd) {
-      const joinDate = parseLocalDate(employee.joinDate);
-      if (joinDate && joinDate > monthEnd) return false;
-      const retirementDate = parseLocalDate(employee.retirementDate);
-      if (retirementDate) return retirementDate > monthEnd;
-      return employee.status !== "퇴직";
-    }
-
-    function isCurrentForMonthlyReport(employee, range) {
-      if (range.isCurrentMonth) return isWorkingAsOf(employee);
-      return isCurrentAtMonthEnd(employee, range.end);
-    }
-
-    function emptyMonthlyStats() {
-      return {
-        currentIds: new Set(),
-        hireIds: new Set(),
-        retirementIds: new Set(),
-        otherIds: new Set(),
-        otherLabels: [],
-        countOverrides: null
-      };
-    }
-
-    function monthlyReportStatsForRow(row, range) {
-      const stats = emptyMonthlyStats();
-      state.employees.forEach((employee) => {
-        if (!employeeMatchesMonthlyReportRow(employee, row)) return;
-        if (isCurrentForMonthlyReport(employee, range)) stats.currentIds.add(employee.id);
-        if (isDateInMonthlyRange(employee.joinDate, range)) stats.hireIds.add(employee.id);
-        if (isDateInMonthlyRange(employee.retirementDate, range)) stats.retirementIds.add(employee.id);
-      });
-      assignmentRecords().forEach((record) => {
-        const effectiveDate = record.effectiveDate || record.dateStart || "";
-        if (!isDateInMonthlyRange(effectiveDate, range)) return;
-        if (!assignmentRecordMatchesMonthlyCriteria(record, row.criteria)) return;
-        stats.otherIds.add(record.id);
-        stats.otherLabels.push(text(record.type || record.category || "기타", "기타"));
-      });
-      return stats;
-    }
-
-    function sumMonthlyStats(items) {
-      const summed = emptyMonthlyStats();
-      summed.countOverrides = items.filter(Boolean).reduce((acc, stats) => {
-        const counts = monthlyStatsCounts(stats);
-        acc.current += counts.current;
-        acc.hires += counts.hires;
-        acc.retirements += counts.retirements;
-        acc.other += counts.other;
-        return acc;
-      }, { current: 0, hires: 0, retirements: 0, other: 0 });
-      return summed;
-    }
-
-    function monthlyStatsCounts(stats) {
-      if (stats.countOverrides) return { ...stats.countOverrides };
-      return {
-        current: stats.currentIds.size,
-        hires: stats.hireIds.size,
-        retirements: stats.retirementIds.size,
-        other: stats.otherIds.size
-      };
-    }
-
-    function renderMonthlyReportSummary(stats, range) {
-      elements.monthlyReportSummary.replaceChildren();
-      const counts = monthlyStatsCounts(stats);
-      const label = monthlyReportMonthLabel(range.value);
-      const currentBasis = range.isCurrentMonth ? "현재 조직도 기준" : `${label} 월말 기준`;
-      [
-        ["현재 인원수", `${counts.current}명`, currentBasis, "users"],
-        ["입사", `${counts.hires}명`, `${label} 입사일 기준`, "user-plus"],
-        ["퇴사", `${counts.retirements}명`, `${label} 퇴직일 기준`, "user-minus"],
-        ["기타", `${counts.other}건`, `${label} 발령/계약 이력`, "shuffle"]
-      ].forEach(([title, value, note, icon]) => {
-        const card = document.createElement("article");
-        card.className = "metric-card";
-        const top = document.createElement("div");
-        top.className = "metric-top";
-        const labelEl = document.createElement("span");
-        labelEl.className = "metric-label";
-        labelEl.textContent = title;
-        const iconEl = document.createElement("span");
-        iconEl.className = "metric-icon";
-        iconEl.append(makeIcon(icon));
-        top.append(labelEl, iconEl);
-        const valueEl = document.createElement("p");
-        valueEl.className = "metric-value";
-        valueEl.textContent = value;
-        const noteEl = document.createElement("span");
-        noteEl.className = "metric-note";
-        noteEl.textContent = note;
-        card.append(top, valueEl, noteEl);
-        elements.monthlyReportSummary.append(card);
-      });
-    }
-
-    function renderMonthlyReportTable(detailStats, subtotalStats, totalStats, range, matchRows) {
-      elements.monthlyReportTable.replaceChildren();
-      elements.monthlyReportPeriodLabel.textContent = `${monthlyReportMonthLabel(range.value)} 기준 월간업무보고`;
-      elements.monthlyReportHeadcountHeader.textContent = `${monthlyReportMonthLabel(range.value)} 현재 인원수`;
-      const groupRowCounts = monthlyReportRows.reduce((acc, row) => {
-        if (row.type === "detail" && row.group) acc[row.group] = (acc[row.group] || 0) + 1;
-        return acc;
-      }, {});
-      const renderedGroups = new Set();
-      const matchInfoByRow = new Map(matchRows.map((item) => [item.row, item]));
-
-      monthlyReportRows.forEach((row) => {
-        const tr = document.createElement("tr");
-        if (row.type === "detail") {
-          const stats = detailStats.get(row) || emptyMonthlyStats();
-          const counts = monthlyStatsCounts(stats);
-          if (!row.group) {
-            tr.append(makeMonthlyCell("", "monthly-report-group"));
-          } else if (!renderedGroups.has(row.group)) {
-            const groupCell = makeMonthlyCell(row.group, "monthly-report-group");
-            groupCell.rowSpan = groupRowCounts[row.group] || 1;
-            tr.append(groupCell);
-            renderedGroups.add(row.group);
-          }
-          tr.append(
-            makeMonthlyCell(row.label, "monthly-report-label"),
-            makeMonthlyCell(counts.current),
-            makeMonthlyCell(counts.hires),
-            makeMonthlyCell(counts.retirements),
-            makeMonthlyCell(counts.other),
-            makeMonthlyCell(monthlyReportNote(stats, matchInfoByRow.get(row)), "monthly-report-note")
-          );
-        } else if (row.type === "subtotal") {
-          tr.className = "is-subtotal";
-          const counts = monthlyStatsCounts(subtotalStats.get(row.group) || emptyMonthlyStats());
-          tr.append(
-            makeMonthlyCell(""),
-            makeMonthlyCell(`${row.group} ${row.label}`, "monthly-report-label"),
-            makeMonthlyCell(counts.current),
-            makeMonthlyCell(counts.hires),
-            makeMonthlyCell(counts.retirements),
-            makeMonthlyCell(counts.other),
-            makeMonthlyCell("")
-          );
-        } else if (row.type === "total") {
-          tr.className = "is-total";
-          const counts = monthlyStatsCounts(totalStats);
-          const labelCell = makeMonthlyCell(row.label, "monthly-report-label");
-          labelCell.colSpan = 2;
-          tr.append(
-            labelCell,
-            makeMonthlyCell(counts.current),
-            makeMonthlyCell(counts.hires),
-            makeMonthlyCell(counts.retirements),
-            makeMonthlyCell(counts.other),
-            makeMonthlyCell("")
-          );
-        }
-        elements.monthlyReportTable.append(tr);
-      });
-    }
-
-    function makeMonthlyCell(value, className = "") {
-      const td = document.createElement("td");
-      if (className) td.className = className;
-      td.textContent = value === 0 ? "0" : text(value, "");
-      return td;
-    }
-
-    function monthlyReportNote(stats, matchInfo) {
-      if (matchInfo?.status === "missing") return "매칭 필요";
-      if (matchInfo?.status === "partial") return "일부 매칭";
-      if (stats.otherIds.size) return [...new Set(stats.otherLabels)].slice(0, 2).join(", ");
-      return "";
-    }
-
-    function renderMonthlyReportMatchTable(matchRows) {
-      const total = matchRows.length;
-      const matched = matchRows.filter((row) => row.status === "matched").length;
-      const employee = matchRows.filter((row) => row.status === "employee").length;
-      const partial = matchRows.filter((row) => row.status === "partial").length;
-      const missing = matchRows.filter((row) => row.status === "missing").length;
-      elements.monthlyReportMatchSummary.textContent = `총 ${total}개 기준 중 조직도 매칭 ${matched}개, 사원정보 보조 매칭 ${employee}개, 일부 매칭 ${partial}개, 미매칭 ${missing}개`;
-      renderTableRows(elements.monthlyReportMatchTable, matchRows, 5, (item) => {
-        const tr = document.createElement("tr");
-        tr.append(
-          makeCell(item.row.group || "-"),
-          makeCell(item.row.label),
-          makeCell(item.row.criteria.join(", ")),
-          makeStatusCell(item.label, item.variant),
-          makeCell(item.detail)
-        );
-        return tr;
-      }, "매칭 기준이 없습니다.", "엑셀 매칭 기준을 확인하세요.");
-    }
-
-    function renderMonthlyReportReconciliation(detailStats, totalStats, range) {
-      if (!elements.monthlyReportReconcileSummary || !elements.monthlyReportReconcileTable) return;
-      const orgEmployees = employeesForOrgNodeByFilter(ROOT_ORG_ID, true, (employee) => isWorkingAsOf(employee));
-      const reportCount = monthlyStatsCounts(totalStats).current;
-      const orgCount = orgEmployees.length;
-      const actualMatchRows = monthlyReportRows.filter((row) => row.type === "detail");
-      const reportEmployeeIds = new Set();
-      const reportAssignments = new Map();
-      actualMatchRows.forEach((row) => {
-        const stats = detailStats.get(row);
-        stats?.currentIds.forEach((id) => {
-          reportEmployeeIds.add(id);
-          if (!reportAssignments.has(id)) reportAssignments.set(id, []);
-          reportAssignments.get(id).push(monthlyReportRowTitle(row));
-        });
-      });
-      const basisExcludedEmployees = orgEmployees.filter((employee) => !isCurrentForMonthlyReport(employee, range));
-      const reportBasisEmployees = orgEmployees.filter((employee) => isCurrentForMonthlyReport(employee, range));
-      const unmatchedEmployees = reportBasisEmployees.filter((employee) => !reportEmployeeIds.has(employee.id));
-      const actualMatchedCount = reportBasisEmployees.filter((employee) => reportEmployeeIds.has(employee.id)).length;
-      const duplicateRows = [...reportAssignments.entries()]
-        .filter(([, rows]) => rows.length > 1)
-        .map(([id, rows]) => ({
-          employee: state.employees.find((employee) => employee.id === id),
-          rows
-        }))
-        .filter((item) => item.employee);
-      const orgEmployeeIds = new Set(orgEmployees.map((employee) => employee.id));
-      const reportOnlyEmployees = state.employees.filter((employee) => reportEmployeeIds.has(employee.id) && isCurrentForMonthlyReport(employee, range) && !orgEmployeeIds.has(employee.id));
-      const sourceDiff = reportBasisEmployees.length - actualMatchedCount;
-      const diff = orgCount - reportCount;
-      const signedSourceDiff = sourceDiff > 0 ? `+${sourceDiff}` : String(sourceDiff);
-      const signedDiff = diff > 0 ? `+${diff}` : String(diff);
-      elements.monthlyReportReconcileSummary.textContent = `원본데이터 퇴직 제외 ${reportBasisEmployees.length}명 - 월간보고 실제 매칭 ${actualMatchedCount}명 = ${signedSourceDiff}명 · 조직도 ${orgCount}명 - 월간업무보고 ${reportCount}명 = ${signedDiff}명 · 중복 기준 ${duplicateRows.length}명 합계 제외`;
-
-      const rows = [
-        ...unmatchedEmployees.map((employee) => ({
-          type: "원본데이터 미반영",
-          employee,
-          note: "조직도 퇴직 제외 인원에는 포함되지만 월간업무보고 분류표의 실제 조직 매칭 행에는 포함되지 않음"
-        })),
-        ...reportOnlyEmployees.map((employee) => ({
-          type: "월간보고만 포함",
-          employee,
-          note: "월간업무보고 분류에는 포함되지만 조직도 퇴직 제외 집계 기준에서는 제외됨"
-        })),
-        ...basisExcludedEmployees.map((employee) => ({
-          type: "기준일 차이",
-          employee,
-          note: range.isCurrentMonth
-            ? "현재월 조직도 기준에서는 제외되지 않아야 하는지 확인 필요"
-            : `${monthlyReportMonthLabel(range.value)} 월말 기준으로는 제외되지만 조직도 현재 인원에는 포함`
-        }))
-      ];
-
-      renderMonthlyReportGapSummary({
-        orgCount,
-        reportCount,
-        diff,
-        sourceBasisCount: reportBasisEmployees.length,
-        sourceDiff,
-        basisExcludedEmployees,
-        unmatchedEmployees,
-        reportOnlyEmployees,
-        duplicateRows,
-        actualMatchedCount,
-        rows
-      });
-
-      renderTableRows(elements.monthlyReportReconcileTable, rows, 7, (row) => {
-        const tr = document.createElement("tr");
-        tr.append(
-          makeCell(row.type),
-          row.employee ? makePersonCell(row.employee) : makeCell("-"),
-          row.employee ? makeBadgeCell(row.employee.status) : makeCell("-"),
-          makeCell(row.employee ? orgPathLabel(row.employee) : "-"),
-          makeCell(row.employee ? formatDate(row.employee.joinDate) : "-"),
-          makeCell(row.employee ? formatDate(row.employee.retirementDate) : "-"),
-          makeCell(row.note)
-        );
-        return tr;
-      }, "차이 항목이 없습니다.", "원본데이터 퇴직 제외 인원과 월간업무보고 실제 매칭 인원이 일치합니다.");
-    }
-
-    function renderMonthlyReportGapSummary({ orgCount, reportCount, diff, sourceBasisCount, sourceDiff, basisExcludedEmployees, unmatchedEmployees, reportOnlyEmployees = [], duplicateRows, actualMatchedCount, rows }) {
-      if (!elements.monthlyReportGapSummary || !elements.monthlyReportGapList) return;
-      const signedDiff = diff > 0 ? `+${diff}` : String(diff);
-      const signedSourceDiff = sourceDiff > 0 ? `+${sourceDiff}` : String(sourceDiff);
-      elements.monthlyReportGapSummary.textContent = `원본데이터 퇴직 제외 ${sourceBasisCount}명 / 월간보고 실제 매칭 ${actualMatchedCount}명 / 미반영 ${unmatchedEmployees.length}명 / 차이 ${signedSourceDiff}명 · 중복 기준 ${duplicateRows.length}명 합계 제외`;
-      const items = rows.map((row) => {
-        if (row.employee) {
-          return {
-            title: `${row.type}: ${row.employee.name || "(이름 없음)"} (${text(row.employee.employeeNo, "사번 없음")})`,
-            body: `${orgPathLabel(row.employee)} · 상태 ${text(row.employee.status)} · 입사 ${formatDate(row.employee.joinDate)} · 퇴직 ${formatDate(row.employee.retirementDate)} · ${row.note}`
-          };
-        }
-        return {
-          title: row.type,
-          body: row.note
-        };
-      });
-      if ((diff !== 0 || sourceDiff !== 0) && !items.length) {
-        items.push({
-          title: "차이 원인 추가 확인 필요",
-          body: `기준일 제외 ${basisExcludedEmployees.length}명, 원본데이터 미반영 ${unmatchedEmployees.length}명, 월간보고만 포함 ${reportOnlyEmployees.length}명, 중복포함 ${duplicateRows.length}명으로는 차이가 완전히 설명되지 않습니다.`
-        });
-      }
-      renderInsightItems(elements.monthlyReportGapList, items, "차이 없음", "원본데이터 퇴직 제외 인원과 월간업무보고 실제 매칭 인원이 일치합니다.");
-    }
-
-    function monthlyReportRowTitle(row) {
-      return [row.group, row.label].map((value) => text(value, "")).filter(Boolean).join(" / ") || row.label || "-";
-    }
-
-    function monthlyReportMatchInfo(row) {
-      const criteria = monthlyReportCriteriaForRow(row);
-      if (!criteria.length) {
-        return { row, status: "missing", label: "미매칭", variant: "danger", detail: "매칭 기준 없음" };
-      }
-      const checks = criteria.map((criterion) => monthlyCriterionMatchInfo(criterion, row));
-      const foundCount = checks.filter((item) => item.orgNames.length || item.employeeCount).length;
-      const orgCount = checks.filter((item) => item.orgNames.length).length;
-      let status = "missing";
-      let label = "미매칭";
-      let variant = "danger";
-      if (foundCount === criteria.length && orgCount === criteria.length) {
-        status = "matched";
-        label = "조직도 매칭";
-        variant = "success";
-      } else if (foundCount === criteria.length) {
-        status = "employee";
-        label = "사원정보 매칭";
-        variant = "warning";
-      } else if (foundCount > 0) {
-        status = "partial";
-        label = "일부 매칭";
-        variant = "warning";
-      }
-      const orgNames = [...new Set(checks.flatMap((item) => item.orgNames))];
-      const missingCriteria = checks.filter((item) => !item.orgNames.length && !item.employeeCount).map((item) => item.criterion);
-      const detail = orgNames.length
-        ? `조직도: ${orgNames.join(", ")}${missingCriteria.length ? ` / 확인 필요: ${missingCriteria.join(", ")}` : ""}`
-        : foundCount
-          ? `조직도 직접 매칭 없음, 사원정보 ${checks.reduce((sum, item) => sum + item.employeeCount, 0)}명 기준`
-          : `확인 필요: ${missingCriteria.join(", ")}`;
-      return { row, status, label, variant, detail };
-    }
-
-    function monthlyReportCriteriaForRow(row) {
-      return [...new Set([...(row.criteria || []), ...(row.aliases || [])].map((value) => text(value, "")).filter(Boolean))];
-    }
-
-    function monthlyCriterionMatchInfo(criterion, row = null) {
-      const parsed = parseMonthlyCriterion(criterion);
-      const orgNames = row ? monthlyReportOrgNamesForCriterion(parsed, row) : monthlyOrgNamesForLabel(parsed.include);
-      const employeeCount = state.employees.filter((employee) => row
-        ? employeeMatchesMonthlyReportCriterion(employee, parsed, row)
-        : employeeMatchesMonthlyCriterion(employee, parsed)).length;
-      return { criterion, orgNames, employeeCount };
-    }
-
     function parseMonthlyCriterion(criterion) {
       const raw = text(criterion, "");
       const excludeMatch = raw.match(/^(.*?)\((.*?)\s*제외\)$/);
@@ -12922,62 +12120,6 @@
         });
       });
       return [...names];
-    }
-
-    function monthlyReportOrgNamesForCriterion(parsed, row) {
-      const roots = directMonthlyOrgNodesForLabel(parsed.include);
-      if (!roots.length) return [];
-      const excludedIds = monthlyReportExcludedOrgIds(roots, row, parsed);
-      const names = new Set();
-      roots.forEach((root) => {
-        descendantOrgIds(root.id).forEach((id) => {
-          if (excludedIds.has(id)) return;
-          const node = findOrgNode(id);
-          if (node?.name) names.add(node.name);
-        });
-      });
-      return [...names];
-    }
-
-    function monthlyReportExcludedOrgIds(currentRoots, currentRow, parsed) {
-      const currentRootDescendants = new Map(currentRoots.map((root) => [root.id, new Set(descendantOrgIds(root.id))]));
-      const excluded = new Set();
-      const addDescendants = (node) => {
-        descendantOrgIds(node.id).forEach((id) => excluded.add(id));
-      };
-      (parsed.exclusions || []).forEach((label) => {
-        directMonthlyOrgNodesForLabel(label).forEach(addDescendants);
-      });
-      monthlyReportRows
-        .filter((row) => row !== currentRow && row.type === "detail")
-        .forEach((row) => {
-          monthlyReportCriteriaForRow(row).forEach((criterion) => {
-            const other = parseMonthlyCriterion(criterion);
-            directMonthlyOrgNodesForLabel(other.include).forEach((otherRoot) => {
-              const isDescendantOfCurrentRoot = currentRoots.some((root) => root.id !== otherRoot.id && currentRootDescendants.get(root.id)?.has(otherRoot.id));
-              if (isDescendantOfCurrentRoot) addDescendants(otherRoot);
-            });
-          });
-        });
-      return excluded;
-    }
-
-    function employeeMatchesMonthlyReportRow(employee, row) {
-      return monthlyReportCriteriaForRow(row).some((criterion) => employeeMatchesMonthlyReportCriterion(employee, parseMonthlyCriterion(criterion), row));
-    }
-
-    function employeeMatchesMonthlyReportCriterion(employee, parsed, row) {
-      if (parsed.exclusions.some((label) => employeeMatchesMonthlySimple(employee, label))) return false;
-      const allowedNames = monthlyReportOrgNamesForCriterion(parsed, row);
-      if (allowedNames.length) {
-        const allowed = allowedNames.map(normalizeMonthlyLabel);
-        const directOrgRaw = employeeDirectOrgName(employee);
-        const directOrgName = normalizeMonthlyLabel(directOrgRaw);
-        if (directOrgName && orgNodeNameExists(directOrgRaw)) return allowed.includes(directOrgName);
-        const orgValues = [employee.department, employee.team, employee.part].map(normalizeMonthlyLabel).filter(Boolean);
-        return orgValues.some((value) => allowed.includes(value));
-      }
-      return employeeMatchesMonthlySimple(employee, parsed.include);
     }
 
     function employeeMatchesMonthlyCriteria(employee, criteria = []) {
@@ -13035,52 +12177,6 @@
         `${legalName} ${position}`,
         `${legalName}${position}`
       ];
-    }
-
-    function employeeMatchesMonthlyPersonCriterion(employee, label) {
-      const normalized = normalizeMonthlyLabel(label);
-      const position = text(employee.position, "");
-      return monthlyEmployeePersonLabels(employee)
-        .concat([
-          `${employee.employeeNo || ""}`,
-          `${employee.name || ""} ${position}`,
-          `${employee.name || ""}${position}`
-        ])
-        .map(normalizeMonthlyLabel)
-        .includes(normalized);
-    }
-
-    function assignmentRecordMatchesMonthlyCriteria(record, criteria = []) {
-      const values = monthlyAssignmentValues(record);
-      return criteria.some((criterion) => monthlyValuesMatchCriterion(values, parseMonthlyCriterion(criterion)));
-    }
-
-    function monthlyAssignmentValues(record) {
-      const snapshots = [record.from, record.to].filter(Boolean);
-      const values = [];
-      snapshots.forEach((snapshot) => {
-        const orgValues = [snapshot.department, snapshot.team, snapshot.part].filter(Boolean);
-        values.push(...orgValues, snapshot.position);
-        orgValues.forEach((orgValue) => {
-          values.push(`${orgValue} ${snapshot.position || ""}`, `${orgValue}${snapshot.position || ""}`);
-        });
-      });
-      const employee = state.employees.find((item) => item.id === record.employeeId);
-      if (employee) {
-        values.push(employee.department, employee.team, employee.part, employee.position, employee.name, `${employee.name || ""} ${employee.position || ""}`);
-      }
-      return values.map(normalizeMonthlyLabel).filter(Boolean);
-    }
-
-    function monthlyValuesMatchCriterion(values, parsed) {
-      if (parsed.exclusions.some((label) => monthlyValuesMatchSimple(values, label))) return false;
-      return monthlyValuesMatchSimple(values, parsed.include);
-    }
-
-    function monthlyValuesMatchSimple(values, label) {
-      const normalized = normalizeMonthlyLabel(label);
-      const orgNames = monthlyOrgNamesForLabel(label).map(normalizeMonthlyLabel);
-      return values.includes(normalized) || orgNames.some((name) => values.includes(name));
     }
 
     function renderDocuments() {
@@ -15446,131 +14542,6 @@
       return false;
     }
 
-    const monthlyReportMappingColumns = [
-      { header: "순서", key: "order" },
-      { header: "행유형", key: "type", aliases: ["유형"] },
-      { header: "본부", key: "group" },
-      { header: "부서", key: "label", aliases: ["항목", "표시명"] },
-      { header: "매칭기준", key: "criteria", aliases: ["기준"] },
-      { header: "별칭", key: "aliases", aliases: ["추가매칭", "보조기준"] }
-    ];
-
-    function monthlyMappingTypeLabel(type) {
-      if (type === "subtotal") return "소계";
-      if (type === "total") return "전체합계";
-      return "상세";
-    }
-
-    function monthlyMappingTypeValue(value) {
-      const normalized = normalizeMonthlyLabel(value);
-      if (["subtotal", "소계"].includes(normalized)) return "subtotal";
-      if (["total", "전체합계", "합계"].includes(normalized)) return "total";
-      return "detail";
-    }
-
-    function monthlyMappingExcelValue(row, column) {
-      const targets = [column.header, ...(column.aliases || [])].map(normalizeExcelHeader);
-      const key = Object.keys(row).find((header) => targets.includes(normalizeExcelHeader(header)));
-      return key ? row[key] : "";
-    }
-
-    async function downloadMonthlyReportMappingExcel() {
-      await ensureXlsx();
-      if (!xlsxReady()) return;
-      const workbook = window.XLSX.utils.book_new();
-      const headers = monthlyReportMappingColumns.map((column) => column.header);
-      const rows = monthlyReportRows.map((row, index) => [
-        index + 1,
-        monthlyMappingTypeLabel(row.type),
-        row.group || "",
-        row.label || "",
-        mappingCellFromList(row.criteria),
-        mappingCellFromList(row.aliases)
-      ]);
-      const sheet = window.XLSX.utils.aoa_to_sheet([headers, ...rows]);
-      sheet["!cols"] = [
-        { wch: 8 },
-        { wch: 12 },
-        { wch: 18 },
-        { wch: 24 },
-        { wch: 38 },
-        { wch: 38 }
-      ];
-      window.XLSX.utils.book_append_sheet(workbook, sheet, "월간보고매핑");
-      const guideRows = [
-        ["작성 안내"],
-        ["행유형", "상세, 소계, 전체합계 중 하나로 입력하세요. 소계/전체합계 행은 화면 표 구분용입니다."],
-        ["매칭기준/별칭", "여러 기준은 줄바꿈, 쉼표, 세미콜론 중 하나로 구분하세요."],
-        ["제외 조건", "예: 구매자재팀(원료제조파트 제외)처럼 괄호 안에 '제외'를 넣으면 해당 조직은 제외됩니다."],
-        ["집계 기준", "현재 조직도에 실제 등록된 재직 인원만 월간업무보고 현재 인원수에 반영됩니다."],
-        ["업로드 방식", "월간보고매핑 시트의 1행은 제목으로 유지하고 2행부터 수정하세요. 업로드하면 운영 설정에 저장됩니다."]
-      ];
-      window.XLSX.utils.book_append_sheet(workbook, window.XLSX.utils.aoa_to_sheet(guideRows), "작성안내");
-      window.XLSX.writeFile(workbook, `peopleops-monthly-report-mapping-${new Date().toISOString().slice(0, 10)}.xlsx`);
-      showToast("월간업무보고 매핑 엑셀을 생성했습니다.");
-    }
-
-    function parseMonthlyReportMappingRows(rows) {
-      const parsedRows = rows
-        .filter((row) => Object.values(row).some((value) => text(value, "").trim()))
-        .map((row, index) => {
-          const order = Number(monthlyMappingExcelValue(row, monthlyReportMappingColumns[0]));
-          return {
-            order: Number.isFinite(order) ? order : index + 1,
-            rowNumber: index + 2,
-            type: monthlyMappingTypeValue(monthlyMappingExcelValue(row, monthlyReportMappingColumns[1])),
-            group: text(monthlyMappingExcelValue(row, monthlyReportMappingColumns[2]), ""),
-            label: text(monthlyMappingExcelValue(row, monthlyReportMappingColumns[3]), ""),
-            criteria: listFromMappingCell(monthlyMappingExcelValue(row, monthlyReportMappingColumns[4])),
-            aliases: listFromMappingCell(monthlyMappingExcelValue(row, monthlyReportMappingColumns[5]))
-          };
-        })
-        .sort((a, b) => a.order - b.order);
-      return parsedRows;
-    }
-
-    function validateMonthlyReportMappingRows(rows) {
-      const errors = [];
-      rows.forEach((row) => {
-        if (row.type === "detail" && !row.label) errors.push(`${row.rowNumber}행: 상세 행은 부서/항목명을 입력하세요.`);
-        if (row.type === "detail" && !row.criteria.length && !row.aliases.length) {
-          errors.push(`${row.rowNumber}행: 상세 행은 매칭기준 또는 별칭이 필요합니다.`);
-        }
-      });
-      if (!rows.some((row) => row.type === "detail")) errors.push("상세 행이 최소 1개 필요합니다.");
-      return errors;
-    }
-
-    async function importMonthlyReportMappingExcel(event) {
-      await ensureXlsx();
-      if (!requireWritePermission()) return;
-      if (!xlsxReady()) return;
-      const file = event.target.files?.[0];
-      event.target.value = "";
-      if (!file) return;
-
-      try {
-        const workbook = window.XLSX.read(await file.arrayBuffer(), { type: "array", cellDates: true });
-        const sheet = workbook.Sheets["월간보고매핑"] || workbook.Sheets[workbook.SheetNames[0]];
-        const rows = window.XLSX.utils.sheet_to_json(sheet, { defval: "", raw: true });
-        const parsedRows = parseMonthlyReportMappingRows(rows);
-        const errors = validateMonthlyReportMappingRows(parsedRows);
-        if (errors.length) {
-          window.alert(["월간업무보고 매핑 업로드를 중단했습니다.", ...errors.slice(0, 12), errors.length > 12 ? `외 ${errors.length - 12}건` : ""].filter(Boolean).join("\n"));
-          return;
-        }
-        state.settings.monthlyReportRows = normalizeMonthlyReportRows(parsedRows);
-        monthlyReportRows = state.settings.monthlyReportRows;
-        saveSettings();
-        renderMonthlyReport();
-        if (window.lucide) window.lucide.createIcons();
-        showToast(`${monthlyReportRows.length}개 월간업무보고 매핑 행을 저장했습니다.`);
-      } catch (error) {
-        console.error("monthly report mapping import failed", error);
-        showToast("월간업무보고 매핑 엑셀을 읽지 못했습니다. 양식을 확인하세요.");
-      }
-    }
-
     async function downloadEmployeeExcelTemplate() {
       await ensureXlsx();
       if (!xlsxReady()) return;
@@ -15889,7 +14860,40 @@
       showToast("저장 데이터가 초기화되었습니다.");
     }
 
+    // 인사 통계: 구역을 탭으로 나눠 한 번에 한 구역만 보여준다.
+    const ANALYTICS_GROUP_START = {
+      "analytics-kpi": "summary", "analytics-government": "summary",
+      "analytics-disability": "legal", "analytics-foreign-workers": "legal",
+      "analytics-composition": "composition", "analytics-lifecycle": "lifecycle",
+      "analytics-monthly-headcount": "monthly", "yearly-lifecycle-title": "lifecycle",
+      "grade-stat-title": "composition", "analytics-organization": "organization", "analytics-detail": "detail"
+    };
+
+    function setupAnalyticsTabs() {
+      const view = document.querySelector("#statistics");
+      if (!view) return;
+      let group = "";
+      [...view.children].forEach((child) => {
+        if (child.classList.contains("analytics-hero")) return;
+        const key = Object.keys(ANALYTICS_GROUP_START).find((id) => child.id === id || child.querySelector(`#${id}`));
+        if (key) group = ANALYTICS_GROUP_START[key];
+        if (group) child.dataset.analyticsGroup = group;
+      });
+      const tabs = view.querySelectorAll("[data-analytics-tab]");
+      const show = (name) => {
+        tabs.forEach((tab) => {
+          const active = tab.dataset.analyticsTab === name;
+          tab.classList.toggle("is-active", active);
+          tab.setAttribute("aria-selected", String(active));
+        });
+        view.querySelectorAll("[data-analytics-group]").forEach((el) => { el.hidden = el.dataset.analyticsGroup !== name; });
+      };
+      tabs.forEach((tab) => tab.addEventListener("click", () => show(tab.dataset.analyticsTab)));
+      show("summary");
+    }
+
     function bindEvents() {
+      setupAnalyticsTabs();
       const on = (element, eventName, handler) => {
         if (element) element.addEventListener(eventName, handler);
       };
@@ -15945,11 +14949,6 @@
         if (window.lucide) window.lucide.createIcons();
       });
 
-      on(elements.monthlyReportMonth, "change", (event) => {
-        state.monthlyReportMonth = event.target.value;
-        renderMonthlyReport();
-        if (window.lucide) window.lucide.createIcons();
-      });
 
       on(elements.downloadMonthlyHeadcountStats, "click", downloadMonthlyHeadcountStats);
 
@@ -16184,11 +15183,6 @@
         state.selectedEmployeeIds.clear();
         renderEmployeeTable();
       });
-      on(elements.downloadMonthlyReportMapping, "click", downloadMonthlyReportMappingExcel);
-      on(elements.uploadMonthlyReportMapping, "click", () => {
-        if (requireWritePermission()) elements.monthlyReportMappingInput?.click();
-      });
-      on(elements.monthlyReportMappingInput, "change", importMonthlyReportMappingExcel);
       on(elements.clearEmployees, "click", clearEmployeeDataOnly);
       [elements.exportCsv, elements.exportSettings].forEach((button) => {
         on(button, "click", () => exportCsvFile());
