@@ -6624,7 +6624,7 @@
       locations: ["서울 본사", "판교 오피스", "부산 지사", "원격"],
       jobGroups: ["인사직군", "개발직군", "디자인직군", "재무직군", "사업직군", "운영직군", "품질직군"],
       gradeLevels: ["임원", "부장", "차장", "과장", "대리", "주임", "사원", "인턴"],
-      promotionYears: { 사원: 2, 주임: 2, 대리: 3, 과장: 4, 차장: 4 },
+      promotionYears: { 사원: 0, 주임: 0, 대리: 0, 과장: 0, 차장: 0 },
       workTypes: ["전일제", "단시간", "시차출퇴근", "원격", "하이브리드"],
       onboardingChecklist: ["근로계약서 체결", "개인정보 동의서 수령", "4대보험 취득신고", "계정·이메일 발급", "장비·출입증 지급", "법정의무교육 안내", "조직 배치·자리 준비"],
       offboardingChecklist: ["사직서 수령", "인수인계 확인", "장비·출입증 회수", "계정 회수", "4대보험 상실신고", "퇴직 정산 확인(급여 담당 전달)", "증명서 발급", "개인정보 보유기간 등록"]
@@ -7647,6 +7647,8 @@
       });
       merged.gradeLevels = gradeLevelOptions(merged.gradeLevels);
       merged.promotionYears = merged.promotionYears && typeof merged.promotionYears === "object" ? { ...merged.promotionYears } : { ...defaultSettings.promotionYears };
+      // 직급별 체류연수 미운영(2026-09): 초기 예시값(2·2·3·4·4)이 저장돼 있으면 0으로 되돌린다
+      if (JSON.stringify(merged.promotionYears) === JSON.stringify({ 사원: 2, 주임: 2, 대리: 3, 과장: 4, 차장: 4 })) merged.promotionYears = { ...defaultSettings.promotionYears };
       if (!merged.gradeLevels.length) merged.gradeLevels = [...defaultSettings.gradeLevels];
       merged.teams = translateList(merged.teams, legacyTeamLabels);
       merged.jobGroups = translateList(merged.jobGroups, legacyJobGroupLabels);
@@ -12659,7 +12661,9 @@
           action
         );
         return tr;
-      }, "승진 검토 대상이 없습니다.", "직급별 승진 소요연수는 운영 설정 › 기준 코드 › 직급에서 정합니다.");
+      }, "승진 검토 대상이 없습니다.", Object.values(state.settings.promotionYears || {}).some((value) => Number(value) > 0)
+        ? "현 직급 체류연수가 승진 소요연수에 도달한 재직자가 없습니다."
+        : "직급별 승진 소요연수가 모두 0(미운영)입니다. 운영하려면 운영 설정 › 기준 코드 › 직급에서 연수를 입력하세요.");
     }
 
     // 발령 구분이 '승진'이면 변경 후 직급을 바로 위 직급으로 채운다
