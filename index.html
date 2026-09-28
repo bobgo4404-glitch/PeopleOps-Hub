@@ -4044,6 +4044,57 @@
 
     .topbar { justify-content: flex-start; }
 
+    /* 기준 코드 관리 */
+    .code-manager { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 16px; }
+    .code-tabs { display: grid; gap: 2px; align-content: start; }
+    .code-tab {
+      display: flex; justify-content: space-between; align-items: center; gap: 8px;
+      min-height: 38px; padding: 0 10px; border: 0; border-radius: var(--radius-sm);
+      background: transparent; color: var(--muted); font: inherit; font-weight: 600; text-align: left; cursor: pointer;
+    }
+    .code-tab:hover { background: var(--surface-muted); }
+    .code-tab.is-active { background: var(--primary-soft); color: var(--primary); }
+    .code-tab em { font-style: normal; font-size: 0.75rem; color: var(--subtle); font-variant-numeric: tabular-nums; }
+    .code-hint { margin: 0 0 10px; color: var(--muted); font-size: 0.85rem; }
+    .code-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+    .code-row { display: grid; grid-template-columns: 56px minmax(120px, 1fr) 96px auto; gap: 8px; align-items: center; padding: 6px 10px; border-top: 1px solid var(--line); }
+    .code-row .code-actions:has(select) { grid-column: 2 / -1; justify-content: flex-start; }
+    .code-row:first-child { border-top: 0; }
+    .code-row.is-unregistered { background: var(--warning-soft); }
+    .code-move { display: flex; gap: 2px; }
+    .code-move button, .code-actions button {
+      min-width: 26px; height: 28px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px;
+      background: var(--surface); color: var(--muted); font: inherit; font-size: 0.8rem; cursor: pointer;
+    }
+    .code-move button:disabled { opacity: 0.35; cursor: default; }
+    .code-actions { display: flex; gap: 4px; justify-content: flex-end; flex-wrap: wrap; }
+    .code-actions button.is-danger { color: var(--danger); }
+    .code-actions button.is-primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .code-actions select { height: 28px; border: 1px solid var(--line); border-radius: 6px; font: inherit; font-size: 0.8rem; max-width: 150px; }
+    .code-name {
+      width: 100%; min-width: 0; height: 32px; padding: 0 8px; border: 1px solid transparent; border-radius: 6px;
+      background: transparent; font: inherit; color: var(--text);
+    }
+    .code-name:hover { border-color: var(--line); }
+    .code-name:focus { border-color: var(--primary); background: var(--surface); outline: none; box-shadow: 0 0 0 3px var(--primary-soft); }
+    .code-name[readonly] { cursor: default; border-color: transparent; box-shadow: none; }
+    .code-label { font-size: 0.75rem; color: var(--subtle); padding-left: 8px; }
+    .code-usage { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 0.82rem; text-align: left; cursor: pointer; font-variant-numeric: tabular-nums; }
+    .code-usage.is-zero { color: var(--subtle); cursor: default; }
+    .code-usage:not(.is-zero):hover { color: var(--primary); text-decoration: underline; }
+    .code-users { grid-column: 2 / -1; font-size: 0.8rem; color: var(--muted); padding: 2px 8px 6px; }
+    .code-badge { font-size: 0.7rem; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 1px 6px; margin-left: 6px; }
+    .code-add { display: flex; gap: 8px; margin-top: 10px; }
+    .code-add input { flex: 1; min-width: 0; height: 38px; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); font: inherit; }
+    .code-section-title { margin: 18px 0 6px; font-size: 0.9rem; font-weight: 700; }
+    @media (max-width: 820px) {
+      .code-manager { grid-template-columns: 1fr; }
+      .code-tabs { display: flex; overflow-x: auto; }
+      .code-tab { flex: 0 0 auto; }
+      .code-row { grid-template-columns: 1fr auto; }
+      .code-move { order: 3; }
+    }
+
     /* 전역 검색 포커스 표시 */
     .topbar-search:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
 
@@ -5997,56 +6048,24 @@
                     <input id="settingNoNext" type="number" min="1" data-setting-field="employeeNoNextSequence" />
                   </div>
                 </div>
+                <div class="form-actions">
+                  <button class="button primary" type="submit">
+                    <i data-lucide="save"></i>
+                    기본정보·사번 규칙 저장
+                  </button>
+                </div>
               </section>
 
               <section class="panel" aria-labelledby="code-settings-title">
                 <div class="section-head">
                   <div>
                     <h2 id="code-settings-title">기준 코드 관리</h2>
-                    <p>직책, 고용형태, 근무지 등 조직도 외 기준값을 관리합니다. 부서, 팀, 파트는 조직도 메뉴에서 관리합니다.</p>
+                    <p>사원 등록·발령 화면의 선택 목록입니다. 변경은 바로 저장됩니다. 이름을 바꾸면 그 값을 쓰는 사원 정보도 함께 바뀌고 변경 이력이 남습니다. 부서·팀은 조직도 메뉴에서 관리합니다.</p>
                   </div>
                 </div>
-                <div class="form-grid">
-                  <div class="field">
-                    <label for="settingPositions">직책/직급</label>
-                    <textarea id="settingPositions" class="textarea-code" data-setting-list="positions"></textarea>
-                  </div>
-                  <div class="field">
-                    <label for="settingEmploymentTypes">고용형태</label>
-                    <textarea id="settingEmploymentTypes" class="textarea-code" data-setting-list="employmentTypes"></textarea>
-                  </div>
-                  <div class="field">
-                    <label for="settingLocations">근무지</label>
-                    <textarea id="settingLocations" class="textarea-code" data-setting-list="locations"></textarea>
-                  </div>
-                  <div class="field">
-                    <label for="settingJobGroups">직군</label>
-                    <textarea id="settingJobGroups" class="textarea-code" data-setting-list="jobGroups"></textarea>
-                  </div>
-                  <div class="field">
-                    <label for="settingGradeLevels">직급/레벨</label>
-                    <textarea id="settingGradeLevels" class="textarea-code" data-setting-list="gradeLevels"></textarea>
-                    <small>인턴 · L1 사원급 · L2 주임급 · L2 대리급 · L3 과장급 · L4 차장급 · L5 부장급 · 임원</small>
-                  </div>
-                  <div class="field">
-                    <label for="settingWorkTypes">근무형태</label>
-                    <textarea id="settingWorkTypes" class="textarea-code" data-setting-list="workTypes"></textarea>
-                  </div>
-                  <div class="field">
-                    <label for="settingOnboardingChecklist">입사 체크리스트 (한 줄에 하나)</label>
-                    <textarea id="settingOnboardingChecklist" class="textarea-code" data-setting-list="onboardingChecklist"></textarea>
-                    <small>사원 상세의 입퇴사 탭에서 항목별로 완료 체크합니다. 항목명을 바꾸면 기존 체크는 새 항목 기준으로 다시 표시됩니다.</small>
-                  </div>
-                  <div class="field">
-                    <label for="settingOffboardingChecklist">퇴사 체크리스트 (한 줄에 하나)</label>
-                    <textarea id="settingOffboardingChecklist" class="textarea-code" data-setting-list="offboardingChecklist"></textarea>
-                  </div>
-                </div>
-                <div class="form-actions">
-                  <button class="button primary" type="submit">
-                    <i data-lucide="save"></i>
-                    설정 저장
-                  </button>
+                <div class="code-manager">
+                  <div class="code-tabs" id="codeTabs" role="tablist" aria-label="기준 코드 종류"></div>
+                  <div class="code-body" id="codeBody"></div>
                 </div>
               </section>
             </form>
@@ -8986,6 +9005,315 @@
       });
     }
 
+    // ---------- 기준 코드 관리 ----------
+    // field: 사원 정보에서 이 코드를 담는 항목 / checks: 체크리스트 완료 기록 위치
+    const CODE_GROUPS = [
+      { key: "positions", field: "position", label: "직책", hint: "팀장·본부장처럼 맡은 역할입니다." },
+      { key: "gradeLevels", field: "gradeLevel", label: "직급", hint: "직급 체계입니다. '기본' 표시 항목은 통계 기준값이라 이름 변경·삭제·순서 변경이 되지 않습니다." },
+      { key: "employmentTypes", field: "employmentType", label: "고용형태", hint: "정규직·계약직 등 고용 형태입니다." },
+      { key: "workTypes", field: "workType", label: "근무형태", hint: "전일제·단시간·시차출퇴근 등 근무 방식입니다." },
+      { key: "jobGroups", field: "jobGroup", label: "직군", hint: "직무 계열입니다. 통계의 직군별 현황에 쓰입니다." },
+      { key: "locations", field: "location", label: "근무지", hint: "사업장·근무 장소입니다." },
+      { key: "onboardingChecklist", checks: "onboarding", label: "입사 체크리스트", hint: "사원 상세 > 입퇴사 탭에서 항목별로 완료 체크합니다. 이름을 바꿔도 기존 완료 체크는 유지됩니다." },
+      { key: "offboardingChecklist", checks: "offboarding", label: "퇴사 체크리스트", hint: "퇴사 처리 시 확인할 항목입니다. 이름을 바꿔도 기존 완료 체크는 유지됩니다." }
+    ];
+    const LOCKED_GRADE_LEVELS = new Set(gradeLevelOptions([]));
+    let activeCodeKey = "positions";
+    let codeMergeTarget = "";
+    const openCodeUsers = new Set();
+
+    function codeGroup(key = activeCodeKey) {
+      return CODE_GROUPS.find((group) => group.key === key) || CODE_GROUPS[0];
+    }
+
+    function codeItems(group) {
+      return group.checks ? [...checklistItems(group.checks)] : [...(state.settings[group.key] || [])];
+    }
+
+    function isLockedCode(group, value) {
+      return group.key === "gradeLevels" && LOCKED_GRADE_LEVELS.has(value);
+    }
+
+    function codeUsers(group, value) {
+      if (group.checks) return state.employees.filter((employee) => checklistState(employee, group.checks)[value]);
+      return state.employees.filter((employee) => text(employee[group.field], "").trim() === value);
+    }
+
+    function unregisteredCodes(group) {
+      if (group.checks) return [];
+      const items = new Set(codeItems(group));
+      return uniqueValues(group.field).filter((value) => !items.has(value));
+    }
+
+    function moveEmployeesToCode(group, users, from, to, source) {
+      users.forEach((employee) => {
+        if (group.checks) {
+          const key = group.checks === "onboarding" ? "onboardingChecks" : "offboardingChecks";
+          const checks = { ...checklistState(employee, group.checks) };
+          if (to && !checks[to]) checks[to] = checks[from];
+          delete checks[from];
+          employee[key] = checks;
+          return;
+        }
+        const before = { ...employee };
+        employee[group.field] = to;
+        recordEmployeeHistory(employee, source, employeeChanges(before, employee));
+      });
+    }
+
+    function commitCodes(group, items, detail, employeesChanged = false) {
+      state.settings[group.key] = items;
+      state.settings = normalizeSettings(state.settings);
+      saveSettings();
+      if (employeesChanged) saveEmployees();
+      addAuditLog("settings:update", `기준 코드 · ${group.label}`, detail);
+      codeMergeTarget = "";
+      renderAll();
+      showToast(detail);
+    }
+
+    function addCodes(group, raw) {
+      if (!requireWritePermission()) return;
+      const items = codeItems(group);
+      const added = String(raw || "").split(/[\n,]/).map((value) => value.trim()).filter((value) => value && !items.includes(value));
+      const unique = [...new Set(added)];
+      if (!unique.length) {
+        showToast("추가할 새 항목이 없습니다. 이미 있는 이름인지 확인하세요.");
+        return;
+      }
+      commitCodes(group, [...items, ...unique], `${group.label} ${unique.length}개 추가: ${unique.join(", ")}`);
+    }
+
+    function renameCode(group, from, to) {
+      to = String(to || "").trim();
+      if (!to || to === from) return false;
+      if (!requireWritePermission()) return false;
+      const items = codeItems(group);
+      if (items.includes(to)) {
+        showToast(`"${to}"은(는) 이미 있습니다. 두 값을 합치려면 "${from}"의 [삭제]에서 통합하세요.`);
+        return false;
+      }
+      const users = codeUsers(group, from);
+      if (users.length && !window.confirm(`"${from}" → "${to}"(으)로 바꿉니다.\n이 값을 쓰는 사원 ${users.length}명의 정보도 함께 바뀌고 변경 이력이 남습니다.`)) return false;
+      moveEmployeesToCode(group, users, from, to, "기준 코드 이름 변경");
+      commitCodes(group, items.map((value) => (value === from ? to : value)), `${group.label} 이름 변경: ${from} → ${to}${users.length ? ` (사원 ${users.length}명 반영)` : ""}`, users.length > 0);
+      return true;
+    }
+
+    function moveCode(group, index, step) {
+      if (!requireWritePermission()) return;
+      const items = codeItems(group);
+      const target = index + step;
+      if (target < 0 || target >= items.length || isLockedCode(group, items[target])) return;
+      [items[index], items[target]] = [items[target], items[index]];
+      commitCodes(group, items, `${group.label} 순서 변경: ${items[target]}`);
+    }
+
+    function deleteCode(group, value) {
+      if (!requireWritePermission()) return;
+      const items = codeItems(group);
+      if (items.length <= 1) {
+        showToast("마지막 항목은 삭제할 수 없습니다. 새 항목을 먼저 추가하세요.");
+        return;
+      }
+      const users = codeUsers(group, value);
+      if (users.length && !group.checks) {
+        codeMergeTarget = value; // 사용 중이면 바로 지우지 않고 통합 대상 선택을 띄운다
+        renderCodeManager();
+        return;
+      }
+      const note = users.length ? `\n${users.length}명의 완료 체크 기록도 함께 지워집니다.` : "";
+      if (!window.confirm(`"${value}" 항목을 삭제할까요?${note}`)) return;
+      moveEmployeesToCode(group, users, value, "", "기준 코드 삭제");
+      commitCodes(group, items.filter((item) => item !== value), `${group.label} 삭제: ${value}`, users.length > 0);
+    }
+
+    function mergeCode(group, from, to, registered) {
+      if (!requireWritePermission() || !to) return;
+      const users = codeUsers(group, from);
+      if (!window.confirm(`"${from}"을(를) "${to}"(으)로 통합합니다.\n사원 ${users.length}명의 정보가 "${to}"(으)로 바뀌고 변경 이력이 남습니다.`)) return;
+      moveEmployeesToCode(group, users, from, to, "기준 코드 통합");
+      const items = registered ? codeItems(group).filter((item) => item !== from) : codeItems(group);
+      commitCodes(group, items, `${group.label} 통합: ${from} → ${to} (사원 ${users.length}명)`, true);
+    }
+
+    function codeButton(label, onClick, className = "", title = "") {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = label;
+      if (className) button.className = className;
+      if (title) button.title = title;
+      button.setAttribute("aria-label", title || label);
+      button.addEventListener("click", onClick);
+      return button;
+    }
+
+    function codeMergeControls(group, value, registered) {
+      const select = document.createElement("select");
+      select.setAttribute("aria-label", `${value}을(를) 통합할 코드`);
+      const blank = document.createElement("option");
+      blank.value = "";
+      blank.textContent = "통합할 코드 선택";
+      select.append(blank);
+      codeItems(group).filter((item) => item !== value).forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item;
+        option.textContent = group.key === "gradeLevels" ? gradeLevelLabel(item) : item;
+        select.append(option);
+      });
+      const apply = codeButton("통합", () => {
+        if (!select.value) { showToast("통합할 코드를 선택하세요."); return; }
+        mergeCode(group, value, select.value, registered);
+      }, "is-primary");
+      return [select, apply];
+    }
+
+    function codeRow(group, value, index, items, registered = true) {
+      const li = document.createElement("li");
+      li.className = `code-row${registered ? "" : " is-unregistered"}`;
+      const locked = isLockedCode(group, value);
+      const users = codeUsers(group, value);
+
+      const move = document.createElement("div");
+      move.className = "code-move";
+      if (registered) {
+        const up = codeButton("▲", () => moveCode(group, index, -1), "", `${value} 위로`);
+        const down = codeButton("▼", () => moveCode(group, index, 1), "", `${value} 아래로`);
+        up.disabled = locked || index === 0 || isLockedCode(group, items[index - 1]);
+        down.disabled = locked || index === items.length - 1;
+        move.append(up, down);
+      }
+
+      const nameWrap = document.createElement("div");
+      const name = document.createElement("input");
+      name.className = "code-name";
+      name.value = value;
+      name.setAttribute("aria-label", `${group.label} 이름`);
+      name.readOnly = locked || !registered;
+      if (!name.readOnly) {
+        name.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") { event.preventDefault(); name.blur(); }
+          if (event.key === "Escape") { name.value = value; name.blur(); }
+        });
+        name.addEventListener("change", () => { if (!renameCode(group, value, name.value)) name.value = value; });
+      }
+      nameWrap.append(name);
+      if (group.key === "gradeLevels" && gradeLevelLabel(value) !== value) {
+        const label = document.createElement("div");
+        label.className = "code-label";
+        label.textContent = gradeLevelLabel(value);
+        nameWrap.append(label);
+      }
+      if (locked) {
+        const badge = document.createElement("span");
+        badge.className = "code-badge";
+        badge.textContent = "기본";
+        (nameWrap.querySelector(".code-label") || nameWrap).append(badge);
+      }
+
+      const usage = document.createElement("button");
+      usage.type = "button";
+      usage.className = `code-usage${users.length ? "" : " is-zero"}`;
+      usage.textContent = group.checks ? `완료 ${users.length}명` : `${users.length}명 사용`;
+      usage.setAttribute("aria-expanded", String(openCodeUsers.has(value)));
+      if (users.length) usage.addEventListener("click", () => {
+        openCodeUsers.has(value) ? openCodeUsers.delete(value) : openCodeUsers.add(value);
+        renderCodeManager();
+      });
+
+      const actions = document.createElement("div");
+      actions.className = "code-actions";
+      if (codeMergeTarget === value || !registered) {
+        actions.append(...codeMergeControls(group, value, registered));
+        if (!registered) actions.append(codeButton("코드로 등록", () => addCodes(group, value)));
+        else actions.append(codeButton("취소", () => { codeMergeTarget = ""; renderCodeManager(); }));
+      } else if (!locked) {
+        actions.append(codeButton("삭제", () => deleteCode(group, value), "is-danger", `${value} 삭제`));
+      }
+
+      li.append(move, nameWrap, usage, actions);
+      if (codeMergeTarget === value) {
+        const note = document.createElement("div");
+        note.className = "code-users";
+        note.textContent = `사원 ${users.length}명이 쓰고 있어 바로 삭제할 수 없습니다. 옮길 코드를 고르면 사원 정보를 바꾼 뒤 삭제합니다.`;
+        li.append(note);
+      }
+      if (openCodeUsers.has(value) && users.length) {
+        const list = document.createElement("div");
+        list.className = "code-users";
+        const names = users.map((employee) => `${text(employee.name)}${employee.status && employee.status !== "재직" ? `(${employee.status})` : ""}`);
+        list.textContent = names.slice(0, 30).join(", ") + (names.length > 30 ? ` 외 ${names.length - 30}명` : "");
+        li.append(list);
+      }
+      return li;
+    }
+
+    function renderCodeManager() {
+      const tabs = document.querySelector("#codeTabs");
+      const body = document.querySelector("#codeBody");
+      if (!tabs || !body) return;
+      const group = codeGroup();
+      tabs.replaceChildren(...CODE_GROUPS.map((item) => {
+        const tab = document.createElement("button");
+        tab.type = "button";
+        tab.className = `code-tab${item.key === group.key ? " is-active" : ""}`;
+        tab.setAttribute("role", "tab");
+        tab.setAttribute("aria-selected", String(item.key === group.key));
+        const warn = unregisteredCodes(item).length;
+        const label = document.createElement("span");
+        label.textContent = item.label;
+        const count = document.createElement("em");
+        count.textContent = warn ? `${codeItems(item).length} · 미등록 ${warn}` : String(codeItems(item).length);
+        tab.append(label, count);
+        tab.addEventListener("click", () => {
+          activeCodeKey = item.key;
+          codeMergeTarget = "";
+          openCodeUsers.clear();
+          renderCodeManager();
+        });
+        return tab;
+      }));
+
+      const hint = document.createElement("p");
+      hint.className = "code-hint";
+      hint.textContent = group.hint;
+      const items = codeItems(group);
+      const list = document.createElement("ul");
+      list.className = "code-list";
+      list.append(...items.map((value, index) => codeRow(group, value, index, items)));
+
+      const add = document.createElement("div");
+      add.className = "code-add";
+      const input = document.createElement("input");
+      input.placeholder = `새 ${group.label} 입력 (여러 개는 쉼표로 구분)…`;
+      input.setAttribute("aria-label", `새 ${group.label} 추가`);
+      input.autocomplete = "off";
+      const addButton = document.createElement("button");
+      addButton.type = "button";
+      addButton.className = "button ghost";
+      addButton.textContent = "추가";
+      addButton.addEventListener("click", () => addCodes(group, input.value));
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") { event.preventDefault(); addCodes(group, input.value); }
+      });
+      add.append(input, addButton);
+      body.replaceChildren(hint, list, add);
+
+      const unregistered = unregisteredCodes(group);
+      if (unregistered.length) {
+        const title = document.createElement("h3");
+        title.className = "code-section-title";
+        title.textContent = `미등록 값 ${unregistered.length}개`;
+        const note = document.createElement("p");
+        note.className = "code-hint";
+        note.textContent = "사원 정보에는 있지만 기준 코드에 없는 값입니다(엑셀 업로드·오타 등). 코드로 등록하거나 기존 코드로 통합하세요.";
+        const extra = document.createElement("ul");
+        extra.className = "code-list";
+        extra.append(...unregistered.map((value) => codeRow(group, value, -1, items, false)));
+        body.append(title, note, extra);
+      }
+    }
+
     function renderAll() {
       [
         ["department filter", refreshDepartmentFilter],
@@ -9007,6 +9335,7 @@
         ["operation records", renderOperationRecords],
         ["administration", renderAdministration],
         ["settings", renderSettings],
+        ["code manager", renderCodeManager],
         ["trash", renderTrash],
         ["certificate register", renderCertificateRegister]
       ].forEach(([label, callback]) => runRender(label, callback));
