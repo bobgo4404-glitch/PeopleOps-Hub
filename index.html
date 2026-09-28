@@ -1380,7 +1380,7 @@
     }
 
     .certificate-grid th {
-      width: 210px;
+      width: 38%;
       background: #e3e3e3;
       font-weight: 600;
       color: #111111;
@@ -2209,8 +2209,8 @@
     }
 
     .org-tree-actions {
-      display: grid;
-      grid-template-columns: auto 36px 36px 36px 36px minmax(0, 1fr);
+      display: flex;
+      flex-wrap: wrap;
       gap: 8px;
       align-items: center;
       margin-bottom: 14px;
@@ -2218,7 +2218,10 @@
 
     .org-tree-actions strong {
       font-size: 0.9rem;
+      margin-right: auto;
     }
+
+    .org-tree-actions .search-field { flex: 1 1 100%; }
 
     .org-tree {
       margin: 0;
@@ -4352,7 +4355,7 @@
                   <tr>
                     <th scope="col">사원</th>
                     <th scope="col">소속</th>
-                    <th scope="col">직책</th>
+                    <th scope="col">직급·직책</th>
                     <th scope="col">입사일</th>
                     <th scope="col">상태</th>
                   </tr>
@@ -5444,7 +5447,7 @@
                     <th scope="col">사원</th>
                     <th scope="col">국적</th>
                     <th scope="col">소속</th>
-                    <th scope="col">직책</th>
+                    <th scope="col">직급·직책</th>
                     <th scope="col">고용형태</th>
                     <th scope="col">상태</th>
                     <th scope="col">계약종료일</th>
@@ -5611,7 +5614,7 @@
               <div class="section-head">
                 <div>
                   <h2 id="grade-stat-title">직급 현황</h2>
-                  <p>재직자 기준 직급, 레벨, 직책 분포를 확인합니다.</p>
+                  <p>재직자 기준 직급 분포입니다. 순서는 기준 코드의 직급 순서를 따릅니다.</p>
                 </div>
               </div>
               <div class="chart-grid" id="gradeBars"></div>
@@ -5621,16 +5624,16 @@
             <section class="panel" aria-labelledby="position-gender-title">
               <div class="section-head">
                 <div>
-                  <h2 id="position-gender-title">직책/직급별 남녀 현황</h2>
-                  <p>재직자 기준 직책/직급별 성별 구성을 확인합니다.</p>
+                  <h2 id="position-gender-title">직급별 남녀 현황</h2>
+                  <p>재직자 기준 직급별 성별 구성을 확인합니다. 여성 관리자 비율 등 법정 대응 검토에 씁니다.</p>
                 </div>
               </div>
               <div class="table-wrap">
                 <table>
-                  <caption class="sr-only">직책/직급별 남녀 통계표</caption>
+                  <caption class="sr-only">직급별 남녀 통계표</caption>
                   <thead>
                     <tr>
-                      <th scope="col">직책/직급</th>
+                      <th scope="col">직급</th>
                       <th scope="col">여성</th>
                       <th scope="col">남성</th>
                       <th scope="col">기타/응답안함</th>
@@ -5762,7 +5765,7 @@
                     <tr>
                       <th scope="col">사원</th>
                       <th scope="col">부서</th>
-                      <th scope="col">직책</th>
+                      <th scope="col">직급·직책</th>
                       <th scope="col">고용형태</th>
                       <th scope="col">입사일</th>
                       <th scope="col">상태</th>
@@ -5807,7 +5810,7 @@
                     <tr>
                       <th scope="col">사원</th>
                       <th scope="col">부서</th>
-                      <th scope="col">직책</th>
+                      <th scope="col">직급·직책</th>
                       <th scope="col">입사일</th>
                       <th scope="col">퇴직일</th>
                       <th scope="col">근속</th>
@@ -6123,37 +6126,6 @@
                 </div>
               </section>
 
-              <section class="panel">
-                <div class="section-head">
-                  <div>
-                    <h2>실운영 전 확인</h2>
-                    <p>현재 단일 파일 단계에서 분리해야 할 항목입니다.</p>
-                  </div>
-                </div>
-                <ul class="insight-list">
-                  <li class="insight-item">
-                    <span class="activity-dot"></span>
-                    <div>
-                      <strong>백업/복구</strong>
-                      <span>아래 데이터 관리에서 JSON 전체 백업을 받을 수 있습니다. 주 1회 이상 백업하고 회사 공용 드라이브에 보관하세요. 복원은 소유자만 가능합니다.</span>
-                    </div>
-                  </li>
-                  <li class="insight-item">
-                    <span class="activity-dot"></span>
-                    <div>
-                      <strong>고유식별정보 최소수집</strong>
-                      <span>주민등록번호는 앞 7자리(생년월일·성별)만 저장하며 뒤 6자리는 저장하지 않습니다. 증명서에 전체 번호가 필요하면 발급 시점에만 입력합니다. 급여, 계좌, 건강정보는 저장하지 않습니다.</span>
-                    </div>
-                  </li>
-                  <li class="insight-item">
-                    <span class="activity-dot"></span>
-                    <div>
-                      <strong>변경 이력</strong>
-                      <span>사원 정보 수정·발령 반영·엑셀 병합은 항목 단위로 변경 이력이 남으며 사원 상세의 이력 탭에서 확인합니다.</span>
-                    </div>
-                  </li>
-                </ul>
-              </section>
             </aside>
           </div>
 
@@ -6161,7 +6133,7 @@
             <div class="section-head">
               <div>
                 <h2 id="settings-actions-title">데이터 관리</h2>
-                <p>Firebase Cloud Firestore에 저장된 운영 데이터를 기준으로 동작합니다.</p>
+                <p>주 1회 이상 전체 백업(JSON)을 받아 회사 공용 드라이브에 보관하세요. 복원은 소유자만 가능합니다. 주민등록번호는 앞 7자리만 저장하며 급여·계좌·건강정보는 저장하지 않습니다.</p>
               </div>
             </div>
             <div class="filters">
@@ -8747,6 +8719,11 @@
         });
     }
 
+    // 목록·명부용 '직급 · 직책' 표기 (보직 없으면 직급만)
+    function employeeRankLabel(employee) {
+      return [gradeLevelLabel(text(employee.gradeLevel, "")), text(employee.position, "")].filter(Boolean).join(" · ") || "-";
+    }
+
     function gradeAnalyticsValue(employee) {
       return migrateGradeLevel(employee.gradeLevel) || "미입력";
     }
@@ -8897,7 +8874,7 @@
         const name = document.createElement("span");
         name.textContent = `${employee.name} · ${text(employee.employeeNo, "사번없음")}`;
         const meta = document.createElement("small");
-        meta.textContent = `${orgPathLabel(employee)} · ${text(employee.position, "")} · ${text(employee.status, "")}`;
+        meta.textContent = `${orgPathLabel(employee)} · ${employeeRankLabel(employee)} · ${text(employee.status, "")}`;
         button.append(name, meta);
         button.addEventListener("click", () => {
           list.hidden = true;
@@ -9541,7 +9518,7 @@
         tr.append(
           makePersonCell(employee),
           makeCell(orgPathLabel(employee)),
-          makeCell(employee.position),
+          makeCell(employeeRankLabel(employee)),
           makeCell(formatDate(employee.joinDate)),
           makeBadgeCell(employee.status)
         );
@@ -9746,7 +9723,7 @@
           makeRowCheckboxCell(employee),
           makePersonCell(employee),
           makeCell(orgPathLabel(employee)),
-          makeCell([gradeLevelLabel(text(employee.gradeLevel, "")), employee.position].filter(Boolean).join(" · ") || "-"),
+          makeCell(employeeRankLabel(employee)),
           makeCell(employee.employmentType),
           makeCell(`${text(employee.email)}\n${text(employee.phone)}`),
           makeCell(formatDate(employee.joinDate)),
@@ -10268,7 +10245,7 @@
             const name = document.createElement("strong");
             name.textContent = text(employee.name);
             const meta = document.createElement("span");
-            meta.textContent = `${orgPathLabel(employee)} · ${text(employee.position)} · ${text(employee.status)}`;
+            meta.textContent = `${orgPathLabel(employee)} · ${employeeRankLabel(employee)} · ${text(employee.status)}`;
             body.append(name, meta);
             li.append(avatar, body);
             list.append(li);
@@ -11167,7 +11144,8 @@
       return [
         { label: "성명", value: text(employee.name, "") },
         { label: "주민등록번호", value: residentRegistrationDisplay(employee, residentDisplayMode, residentFullValue) },
-        { label: "직급", value: text(employee.position, "") },
+        { label: "직급", value: gradeLevelLabel(text(employee.gradeLevel, "")) },
+        ...(text(employee.position, "") ? [{ label: "직책", value: text(employee.position, "") }] : []),
         { label: "부서", value: orgPathLabel(employee) },
         { label: "현주소", value: text(employee.address, "") },
         { label: "재직기간", value: `${formatKoreanDate(employee.joinDate)}부터  ${formatKoreanDate(periodEnd)}까지` },
@@ -13230,7 +13208,7 @@
           makePersonCell(employee),
           makeCell(nationalityStatValue(employee)),
           makeCell(orgPathLabel(employee)),
-          makeCell(text(employee.position)),
+          makeCell(employeeRankLabel(employee)),
           makeCell(text(employee.employmentType)),
           makeBadgeCell(employee.status),
           makeCell(employee.contractEndDate ? formatDate(employee.contractEndDate) : "-")
@@ -13483,9 +13461,9 @@
     function renderPositionGenderTable(period) {
       renderGenderBreakdownTable(
         elements.positionGenderTable,
-        genderBreakdownRows("position", state.settings.positions, (value) => value, period),
-        "직책/직급별 남녀 통계 데이터가 없습니다.",
-        "직책/직급과 성별 정보가 등록되면 남녀 현황표가 표시됩니다."
+        genderBreakdownRows("gradeLevel", state.settings.gradeLevels, gradeLevelLabel, period),
+        "직급별 남녀 통계 데이터가 없습니다.",
+        "직급과 성별 정보가 등록되면 남녀 현황표가 표시됩니다."
       );
     }
 
@@ -14066,7 +14044,7 @@
     function monthlyHeadcountUnmatchedReason(employee) {
       const orgLabel = orgPathLabel(employee);
       if (!text(employee.department, "") && !text(employee.team, "") && !text(employee.part, "")) return "조직 미입력";
-      if (!text(employee.position, "") && !text(employee.gradeLevel, "")) return "직책/직급 미입력";
+      if (!text(employee.position, "") && !text(employee.gradeLevel, "")) return "직급 미입력";
       return `${orgLabel}이(가) 월별인원현황 양식 행에 매핑되지 않음`;
     }
 
@@ -14174,7 +14152,7 @@
       if (elements.monthlyHeadcountUnmatchedList) {
         const items = unmatched.slice(0, 20).map((employee) => ({
           title: `${employeeLabel(employee)} 미분류`,
-          body: `${monthlyHeadcountUnmatchedReason(employee)} · 직책 ${text(employee.position)} · 직급/레벨 ${gradeLevelLabel(text(employee.gradeLevel, "")) || "-"}`
+          body: `${monthlyHeadcountUnmatchedReason(employee)} · 직급 ${gradeLevelLabel(text(employee.gradeLevel, ""))} · 직책 ${text(employee.position)} || "-"}`
         }));
         if (unmatched.length > 20) {
           items.push({
@@ -14333,7 +14311,7 @@
         tr.append(
           makePersonCell(employee),
           makeCell(text(employee.department)),
-          makeCell(text(employee.position)),
+          makeCell(employeeRankLabel(employee)),
           makeCell(text(employee.employmentType)),
           makeCell(formatDate(employee.joinDate)),
           makeBadgeCell(employeeStatusAsOf(employee, period.end))
@@ -14393,7 +14371,7 @@
         tr.append(
           makePersonCell(employee),
           makeCell(text(employee.department)),
-          makeCell(text(employee.position)),
+          makeCell(employeeRankLabel(employee)),
           makeCell(formatDate(employee.joinDate)),
           makeCell(formatDate(employee.retirementDate)),
           makeCell(tenure === null ? "-" : `${tenure.toFixed(1)}년`)
