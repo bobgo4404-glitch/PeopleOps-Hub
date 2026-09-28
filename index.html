@@ -3197,21 +3197,6 @@
       cursor: pointer;
     }
 
-    .deadline-list .insight-item {
-      align-items: center;
-    }
-
-    .deadline-list .badge {
-      flex-shrink: 0;
-      min-width: 56px;
-      justify-content: center;
-    }
-
-    .deadline-list .button {
-      margin-left: auto;
-      flex-shrink: 0;
-    }
-
     @media print {
       html,
       body {
@@ -4260,16 +4245,6 @@
               <span class="metric-note">입사일 입력자 기준</span>
             </article>
           </div>
-
-          <section class="panel" aria-labelledby="deadline-title">
-            <div class="section-head">
-              <div>
-                <h2 id="deadline-title">처리 기한 알림 <span class="tab-count" id="deadlineCount">0</span></h2>
-                <p>수습·계약·정년, 발령 미반영, 교육·평가 기한, 입퇴사 체크리스트, 개인정보 보유기간 기준으로 60일 안에 처리할 항목입니다. 지난 기한은 D+로 표시합니다.</p>
-              </div>
-            </div>
-            <ul class="insight-list deadline-list" id="deadlineList"></ul>
-          </section>
 
           <div class="grid two-column">
             <section class="panel" aria-labelledby="dept-chart-title">
@@ -9252,7 +9227,6 @@
         ["kpis", renderKpis],
         ["department bars", renderDepartmentBars],
         ["insights", renderInsights],
-        ["deadline alerts", renderDeadlineAlerts],
         ["recent employees", renderRecentEmployees],
         ["operation panels", buildOperationPanels],
         ["employee table", renderEmployeeTable],
@@ -11371,117 +11345,6 @@
         list.append(li);
       });
       body.append(heading, list);
-    }
-
-    // ---------- 처리 기한 알림 ----------
-    function collectDeadlineAlerts() {
-      const alerts = [];
-      const push = (days, title, body, view, employeeId = "", tab = "basic") => alerts.push({ days, title, body, view, employeeId, tab });
-      const retentionYears = Number(state.settings.privacyRetentionYears) || 3;
-
-      activeEmployees().forEach((employee) => {
-        const name = employee.name;
-        if (employee.probationEndDate) {
-          const days = daysFromToday(employee.probationEndDate);
-          if (days <= 30 && days >= -30) push(days, `${name} 수습 종료 ${describeDaysFromToday(employee.probationEndDate)}`, "수습 평가와 정규 전환 여부를 확정하세요.", "lifecycle", employee.id);
-        }
-        if (employee.contractEndDate) {
-          const days = daysFromToday(employee.contractEndDate);
-          if (days <= 60 && days >= -30) push(days, `${name} 계약 만료 ${describeDaysFromToday(employee.contractEndDate)}`, "갱신·종료·전환을 결정하고 발령을 등록하세요.", "assignments", employee.id, "assignment");
-        }
-        if (employee.retirementDate) {
-          const days = daysFromToday(employee.retirementDate);
-          if (days <= 30 && days >= -30) push(days, `${name} 퇴직 예정 ${describeDaysFromToday(employee.retirementDate)}`, "퇴사 체크리스트를 진행하세요.", "lifecycle", employee.id, "lifecycle");
-        }
-        if (employee.joinDate) {
-          const days = daysFromToday(employee.joinDate);
-          const progress = checklistProgress(employee, "onboarding");
-          if (days <= 0 && days >= -60 && !progress.complete) push(days, `${name} 입사 체크리스트 ${progress.done}/${progress.total}`, `남은 항목: ${progress.remaining.slice(0, 3).join(", ")}`, "lifecycle", employee.id, "lifecycle");
-        }
-      });
-
-      state.employees.filter((employee) => employee.status === "퇴직" || employee.retirementDate).forEach((employee) => {
-        const progress = checklistProgress(employee, "offboarding");
-        const baseDate = employee.retirementDate || employee.contractEndDate;
-        if (!progress.complete && baseDate && daysFromToday(baseDate) >= -60 && employee.status === "퇴직") {
-          push(daysFromToday(baseDate), `${employee.name} 퇴사 체크리스트 ${progress.done}/${progress.total}`, `남은 항목: ${progress.remaining.slice(0, 3).join(", ")}`, "lifecycle", employee.id, "lifecycle");
-        }
-        if (employee.retirementDate && employee.status === "퇴직") {
-          const expiry = parseLocalDate(employee.retirementDate);
-          if (expiry) {
-            expiry.setFullYear(expiry.getFullYear() + retentionYears);
-            const expiryDate = formatDateObject(expiry);
-            const days = daysFromToday(expiryDate);
-            if (days <= 60) push(days, `${employee.name} 개인정보 보유기간 ${days < 0 ? "경과" : describeDaysFromToday(expiryDate)}`, `퇴직일 기준 ${retentionYears}년. 파기 또는 보유 근거를 확인하세요.`, "employees", employee.id);
-          }
-        }
-      });
-
-      assignmentRecords().forEach((record) => {
-        const employee = state.employees.find((entry) => entry.id === record.employeeId);
-        const name = employee ? employee.name : "삭제된 사원";
-        if (record.status === "적용완료" && !record.appliedToEmployee) {
-          push(0, `${name} 발령 사원정보 미반영`, `${text(record.type)} · 적용일 ${formatDate(record.effectiveDate)}`, "assignments", record.employeeId, "assignment");
-        } else if (record.dueDate && !["적용완료", "보류"].includes(record.status)) {
-          const days = daysFromToday(record.dueDate);
-          if (days <= 14) push(days, `${name} 발령 처리 기한 ${describeDaysFromToday(record.dueDate)}`, `${text(record.type)} · ${text(record.status)}`, "assignments", record.employeeId, "assignment");
-        }
-      });
-
-      [["training", "교육", ["대상", "진행중", "미이수"]], ["reviews", "평가", ["예정", "진행중"]]].forEach(([key, label, openStatuses]) => {
-        (state.operationRecords[key] || []).forEach((record) => {
-          if (!record.dateEnd || !openStatuses.includes(record.status)) return;
-          const days = daysFromToday(record.dateEnd);
-          if (days > 30) return;
-          const employee = state.employees.find((entry) => entry.id === record.employeeId);
-          const name = employee ? employee.name : "삭제된 사원";
-          push(days, `${name} ${text(record.category, label)} ${days < 0 ? "기한 경과" : describeDaysFromToday(record.dateEnd)}`, `${text(record.subject, "")} · ${text(record.status)}`, key, record.employeeId);
-        });
-      });
-
-      return alerts.sort((a, b) => a.days - b.days);
-    }
-
-    function renderDeadlineAlerts() {
-      const list = document.querySelector("#deadlineList");
-      if (!list) return;
-      const alerts = collectDeadlineAlerts();
-      const count = document.querySelector("#deadlineCount");
-      if (count) count.textContent = String(alerts.length);
-      if (!alerts.length) {
-        renderInsightItems(list, [], "처리 기한이 임박한 항목이 없습니다.", "60일 이내 기한이 없습니다.");
-        return;
-      }
-      list.replaceChildren();
-      alerts.slice(0, 12).forEach((alert) => {
-        const li = document.createElement("li");
-        li.className = "insight-item";
-        const badge = document.createElement("span");
-        badge.className = `badge ${alert.days < 0 ? "danger" : alert.days <= 7 ? "warning" : "neutral"}`;
-        badge.textContent = alert.days < 0 ? `D+${Math.abs(alert.days)}` : alert.days === 0 ? "D-Day" : `D-${alert.days}`;
-        const wrap = document.createElement("div");
-        const title = document.createElement("strong");
-        title.textContent = alert.title;
-        const body = document.createElement("span");
-        body.textContent = alert.body;
-        wrap.append(title, body);
-        const go = document.createElement("button");
-        go.type = "button";
-        go.className = "button ghost";
-        go.textContent = "이동";
-        go.addEventListener("click", () => {
-          switchView(alert.view);
-          if (alert.employeeId && ["lifecycle", "employees", "assignments"].includes(alert.view)) openEmployeeDrawer(alert.employeeId, alert.tab);
-        });
-        li.append(badge, wrap, go);
-        list.append(li);
-      });
-      if (alerts.length > 12) {
-        const more = document.createElement("li");
-        more.className = "insight-item";
-        more.textContent = `외 ${alerts.length - 12}건은 각 화면에서 확인하세요.`;
-        list.append(more);
-      }
     }
 
     function renderLifecycle() {
