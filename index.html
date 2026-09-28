@@ -7558,7 +7558,7 @@
         employeeNo: migrateEmployeeNo(merged.employeeNo),
         team: translateKnownValue(merged.team, legacyTeamLabels),
         jobGroup: translateKnownValue(merged.jobGroup, legacyJobGroupLabels),
-        gradeLevel: migrateGradeLevel(merged.gradeLevel, merged.position),
+        gradeLevel: migrateGradeLevel(merged.gradeLevel),
         disabilitySeverity: isDisabilityTargetValue(disabilityStatus)
           ? normalizedDisabilitySeverity
           : ""
@@ -7646,7 +7646,7 @@
       ["departments", "teams", "parts", "positions", "jobRoles", "employmentTypes", "locations", "jobGroups", "gradeLevels", "workTypes", "onboardingChecklist", "offboardingChecklist"].forEach((key) => {
         merged[key] = Array.isArray(merged[key]) && merged[key].length ? merged[key] : defaultSettings[key];
       });
-      merged.gradeLevels = gradeLevelOptions(merged.gradeLevels).filter((value) => value !== "L2");
+      merged.gradeLevels = gradeLevelOptions(merged.gradeLevels);
       if (!merged.gradeLevels.length) merged.gradeLevels = [...defaultSettings.gradeLevels];
       merged.teams = translateList(merged.teams, legacyTeamLabels);
       merged.jobGroups = translateList(merged.jobGroups, legacyJobGroupLabels);
@@ -8721,23 +8721,19 @@
       return [employee.department, employee.team, employee.part].map((value) => text(value, "")).filter(Boolean).join(" / ") || "-";
     }
 
-    // 예전 L1~L5 체계 값을 회사 직급명으로 옮긴다. L2는 직책으로 주임/대리를 구분할 수 있을 때만 옮긴다.
-    const LEGACY_GRADE_LEVELS = { L1: "사원", "L2-주임": "주임", "L2-대리": "대리", L3: "과장", L4: "차장", L5: "부장" };
+    // 예전 L 체계 값을 회사 직급명으로 옮긴다 (L1 사원 · L2 주임 · L3 대리 · L4 과장 · L5 차장 · L6 부장)
+    const LEGACY_GRADE_LEVELS = {
+      L1: "사원", L2: "주임", "L2-주임": "주임", "L2-대리": "대리", "L2-미분류": "주임",
+      L3: "대리", L4: "과장", L5: "차장", L6: "부장"
+    };
 
-    function migrateGradeLevel(grade, position = "") {
+    function migrateGradeLevel(grade) {
       const value = text(grade, "").trim();
-      if (LEGACY_GRADE_LEVELS[value]) return LEGACY_GRADE_LEVELS[value];
-      if (value === "L2" || value === "L2-미분류") {
-        const compact = text(position, "").replace(/\s+/g, "");
-        if (compact.includes("대리") && !compact.includes("주임")) return "대리";
-        if (compact.includes("주임") && !compact.includes("대리")) return "주임";
-        return "L2";
-      }
-      return value;
+      return LEGACY_GRADE_LEVELS[value] || value;
     }
 
     function gradeLevelLabel(value) {
-      return value === "L2" || value === "L2-미분류" ? "L2 (주임/대리 미분류)" : value;
+      return value;
     }
 
     function gradeLevelOptions(values = []) {
@@ -8752,7 +8748,7 @@
     }
 
     function gradeAnalyticsValue(employee) {
-      return migrateGradeLevel(employee.gradeLevel, employee.position) || "미입력";
+      return migrateGradeLevel(employee.gradeLevel) || "미입력";
     }
 
     function uniqueValues(key) {
@@ -13339,7 +13335,7 @@
         acc[grade] = (acc[grade] || 0) + 1;
         return acc;
       }, {});
-      const preferredOrder = [...(state.settings.gradeLevels || []), "L2", "미입력"];
+      const preferredOrder = [...(state.settings.gradeLevels || []), "미입력"];
       const ordered = [
         ...preferredOrder.filter((grade) => counts[grade]),
         ...Object.keys(counts).filter((grade) => !preferredOrder.includes(grade)).sort((a, b) => a.localeCompare(b, "ko"))
