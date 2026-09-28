@@ -4095,6 +4095,27 @@
       .code-move { order: 3; }
     }
 
+    /* 사원 등록: 영역 바로가기·필수 진행 */
+    .form-jump {
+      position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+      margin: -4px 0 12px; padding: 8px 0; background: var(--surface); border-bottom: 1px solid var(--line);
+    }
+    .form-jump button {
+      height: 30px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px;
+      background: var(--surface); color: var(--muted); font: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+    }
+    .form-jump button:hover { color: var(--primary); border-color: var(--primary); }
+    .form-required-progress { margin-left: auto; font-size: 0.82rem; font-weight: 700; color: var(--warning); }
+    .form-required-progress.is-done { color: var(--success); }
+    .form-section { scroll-margin-top: 56px; }
+    #employeeForm .form-grid { align-items: start; }
+    .conditional-mark { color: var(--danger); }
+
+    /* 입퇴사: 표 안 체크리스트 */
+    .checklist-detail-row td { background: var(--surface-muted); padding: 12px 16px 14px; }
+    .checklist-detail-row .checklist { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+    .checklist-detail-actions { display: flex; gap: 8px; }
+
     /* 전역 검색 포커스 표시 */
     .topbar-search:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
 
@@ -4441,8 +4462,8 @@
                       </button>
                     </th>
                     <th scope="col">
-                      <button class="sort-button" type="button" data-employee-sort="position" data-sort-label="직책">
-                        직책 <span class="sort-indicator" aria-hidden="true">↕</span>
+                      <button class="sort-button" type="button" data-employee-sort="position" data-sort-label="직급·직책">
+                        직급·직책 <span class="sort-indicator" aria-hidden="true">↕</span>
                       </button>
                     </th>
                     <th scope="col">
@@ -4773,7 +4794,7 @@
                     <tr>
                       <th scope="col">대상자</th>
                       <th scope="col">입사일</th>
-                      <th scope="col">조직/직책</th>
+                      <th scope="col">조직/직급</th>
                       <th scope="col">계약/기본정보</th>
                       <th scope="col">개인정보 동의</th>
                       <th scope="col">연락/비상연락</th>
@@ -4973,11 +4994,11 @@
                     <select id="assignmentNewPart"></select>
                   </div>
                   <div class="field">
-                    <label for="assignmentNewPosition">변경 후 직책/직급</label>
+                    <label for="assignmentNewPosition">변경 후 직책</label>
                     <select id="assignmentNewPosition"></select>
                   </div>
                   <div class="field">
-                    <label for="assignmentNewGradeLevel">변경 후 직급/레벨</label>
+                    <label for="assignmentNewGradeLevel">변경 후 직급</label>
                     <select id="assignmentNewGradeLevel"></select>
                   </div>
                   <div class="field">
@@ -5589,7 +5610,7 @@
           <section class="panel" aria-labelledby="grade-stat-title">
               <div class="section-head">
                 <div>
-                  <h2 id="grade-stat-title">직급/레벨 현황</h2>
+                  <h2 id="grade-stat-title">직급 현황</h2>
                   <p>재직자 기준 직급, 레벨, 직책 분포를 확인합니다.</p>
                 </div>
               </div>
@@ -6260,7 +6281,15 @@
       <div class="modal-body">
         <form id="employeeForm" novalidate>
           <input type="hidden" id="employeeId" />
-          <fieldset class="form-section">
+          <nav class="form-jump" aria-label="입력 영역 바로가기">
+            <button type="button" data-jump="empSecBasic">기본</button>
+            <button type="button" data-jump="empSecOrg">소속·직위</button>
+            <button type="button" data-jump="empSecWork">고용·근무</button>
+            <button type="button" data-jump="empSecContact">연락처</button>
+            <button type="button" data-jump="empSecLegal">경력·법정</button>
+            <span class="form-required-progress" id="employeeRequiredProgress" aria-live="polite"></span>
+          </nav>
+          <fieldset class="form-section" id="empSecBasic">
             <legend>기본 식별 정보</legend>
             <div class="form-grid">
               <div class="field">
@@ -6313,41 +6342,69 @@
             </div>
           </fieldset>
 
-          <fieldset class="form-section">
-            <legend>조직 및 고용 정보</legend>
+          <fieldset class="form-section" id="empSecOrg">
+            <legend>소속·직위</legend>
             <div class="form-grid">
               <div class="field">
                 <label for="department">부서 *</label>
-                    <select id="department" name="department" required></select>
+                <select id="department" name="department" required></select>
               </div>
               <div class="field">
                 <label for="team">팀</label>
-                    <select id="team" name="team"></select>
+                <select id="team" name="team"></select>
               </div>
               <div class="field">
                 <label for="part">파트</label>
-                    <select id="part" name="part"></select>
+                <select id="part" name="part"></select>
               </div>
               <div class="field">
-                <label for="position">직책/직급 *</label>
-                    <select id="position" name="position" required></select>
+                <label for="location">근무지</label>
+                <select id="location" name="location"></select>
+              </div>
+              <div class="field">
+                <label for="gradeLevel">직급 *</label>
+                <select id="gradeLevel" name="gradeLevel" required></select>
+              </div>
+              <div class="field">
+                <label for="position">직책</label>
+                <select id="position" name="position"></select>
+                <small>팀장·파트장 등 보직. 없으면 '없음(팀원)'</small>
+              </div>
+              <div class="field">
+                <label for="jobRole">직무</label>
+                <select id="jobRole" name="jobRole"></select>
+                <small>실제 담당 업무 (예: 생산관리, 품질보증)</small>
               </div>
               <div class="field">
                 <label for="jobGroup">직군</label>
-                    <select id="jobGroup" name="jobGroup"></select>
+                <select id="jobGroup" name="jobGroup"></select>
               </div>
               <div class="field">
-                <label for="gradeLevel">직급/레벨</label>
-                    <select id="gradeLevel" name="gradeLevel"></select>
-                <small>인턴 · L1 사원급 · L2 주임급 · L2 대리급 · L3 과장급 · L4 차장급 · L5 부장급 · 임원</small>
+                <label for="manager">상위 관리자</label>
+                <input id="manager" name="manager" type="text" list="managerList" autocomplete="off" />
+                <datalist id="managerList"></datalist>
               </div>
+              <div class="field">
+                <label for="costCenter">코스트센터</label>
+                <input id="costCenter" name="costCenter" type="text" autocomplete="off" />
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="form-section" id="empSecWork">
+            <legend>고용·근무</legend>
+            <div class="form-grid">
               <div class="field">
                 <label for="employmentType">고용형태</label>
                 <select id="employmentType" name="employmentType"></select>
               </div>
               <div class="field">
                 <label for="workType">근무형태</label>
-                    <select id="workType" name="workType"></select>
+                <select id="workType" name="workType"></select>
+              </div>
+              <div class="field">
+                <label for="joinDate">입사일 *</label>
+                <input id="joinDate" name="joinDate" type="date" required />
               </div>
               <div class="field">
                 <label for="status">상태</label>
@@ -6358,38 +6415,26 @@
                 </select>
               </div>
               <div class="field">
-                <label for="joinDate">입사일 *</label>
-                <input id="joinDate" name="joinDate" type="date" required />
-              </div>
-              <div class="field">
                 <label for="probationEndDate">수습 종료일</label>
-                <input id="probationEndDate" name="probationEndDate" type="date" />
+                <div class="compound-field">
+                  <input id="probationEndDate" name="probationEndDate" type="date" />
+                  <button class="button ghost" type="button" id="probationThreeMonths" title="입사일 기준 3개월 수습">입사+3개월</button>
+                </div>
               </div>
               <div class="field">
-                <label for="contractEndDate">계약 종료일</label>
+                <label for="contractEndDate">계약 종료일 <span class="conditional-mark" id="contractEndMark" hidden>*</span></label>
                 <input id="contractEndDate" name="contractEndDate" type="date" />
+                <small id="contractEndHint">계약직·인턴은 필수</small>
               </div>
               <div class="field">
-                <label for="retirementDate">퇴직일</label>
+                <label for="retirementDate">퇴직일 <span class="conditional-mark" id="retirementMark" hidden>*</span></label>
                 <input id="retirementDate" name="retirementDate" type="date" />
-              </div>
-              <div class="field">
-                <label for="location">근무지</label>
-                    <select id="location" name="location"></select>
-              </div>
-              <div class="field">
-                <label for="costCenter">코스트센터</label>
-                <input id="costCenter" name="costCenter" type="text" />
-              </div>
-              <div class="field">
-                <label for="manager">상위 관리자</label>
-                <input id="manager" name="manager" type="text" list="managerList" />
-                <datalist id="managerList"></datalist>
+                <small>상태가 '퇴직'이면 필수</small>
               </div>
             </div>
           </fieldset>
 
-          <fieldset class="form-section">
+          <fieldset class="form-section" id="empSecContact">
             <legend>연락처 및 비상연락</legend>
             <div class="form-grid">
               <div class="field">
@@ -6419,7 +6464,7 @@
             </div>
           </fieldset>
 
-          <fieldset class="form-section">
+          <fieldset class="form-section" id="empSecLegal">
             <legend>경력, 학력, 법정 관리 항목</legend>
             <div class="form-grid">
               <div class="field">
@@ -6576,11 +6621,12 @@
       departments: ["인사팀", "개발본부", "사업전략실", "재무관리실", "운영본부", "제품디자인팀", "품질관리팀"],
       teams: ["인사운영팀", "채용팀", "프론트엔드팀", "백엔드팀", "플랫폼팀", "성장전략팀", "재무팀", "고객성공팀", "제품디자인팀", "품질관리팀"],
       parts: [],
-      positions: ["대표", "실장", "본부장", "팀장", "Manager", "Senior Engineer", "Staff Engineer", "Engineer", "Product Designer", "Recruiter"],
+      positions: ["대표이사", "본부장", "실장", "팀장", "파트장"],
+      jobRoles: ["인사", "총무", "재무회계", "구매", "영업", "마케팅", "생산관리", "생산", "품질보증", "품질관리", "연구개발", "IT", "디자인"],
       employmentTypes: ["정규직", "계약직", "파견/외주", "인턴"],
       locations: ["서울 본사", "판교 오피스", "부산 지사", "원격"],
       jobGroups: ["인사직군", "개발직군", "디자인직군", "재무직군", "사업직군", "운영직군", "품질직군"],
-      gradeLevels: ["임원", "L5", "L4", "L3", "L2-대리", "L2-주임", "L2", "L1", "인턴"],
+      gradeLevels: ["임원", "부장", "차장", "과장", "대리", "주임", "사원", "인턴"],
       workTypes: ["전일제", "단시간", "시차출퇴근", "원격", "하이브리드"],
       onboardingChecklist: ["근로계약서 체결", "개인정보 동의서 수령", "4대보험 취득신고", "계정·이메일 발급", "장비·출입증 지급", "법정의무교육 안내", "조직 배치·자리 준비"],
       offboardingChecklist: ["사직서 수령", "인수인계 확인", "장비·출입증 회수", "계정 회수", "4대보험 상실신고", "퇴직 정산 확인(급여 담당 전달)", "증명서 발급", "개인정보 보유기간 등록"]
@@ -6607,6 +6653,7 @@
       maritalStatus: "",
       privacyConsentDate: "",
       jobGroup: "",
+      jobRole: "",
       gradeLevel: "",
       workType: "전일제",
       probationEndDate: "",
@@ -6679,7 +6726,8 @@
         name: "박도윤",
         department: "개발본부",
         team: "프론트엔드팀",
-        position: "Senior Engineer",
+        position: "",
+        jobRole: "연구개발",
         employmentType: "정규직",
         status: "재직",
         joinDate: "2020-09-21",
@@ -6696,7 +6744,8 @@
         name: "이서연",
         department: "개발본부",
         team: "백엔드팀",
-        position: "Engineer",
+        position: "",
+        jobRole: "연구개발",
         employmentType: "정규직",
         status: "재직",
         joinDate: "2024-02-13",
@@ -6747,7 +6796,8 @@
         name: "한지우",
         department: "운영본부",
         team: "고객성공팀",
-        position: "Manager",
+        position: "파트장",
+        jobRole: "영업",
         employmentType: "계약직",
         status: "재직",
         joinDate: "2024-08-05",
@@ -6781,7 +6831,8 @@
         name: "오유진",
         department: "제품디자인팀",
         team: "제품디자인팀",
-        position: "Product Designer",
+        position: "",
+        jobRole: "디자인",
         employmentType: "정규직",
         status: "재직",
         joinDate: "2025-04-07",
@@ -6798,7 +6849,8 @@
         name: "윤서아",
         department: "인사팀",
         team: "채용팀",
-        position: "Recruiter",
+        position: "",
+        jobRole: "인사",
         employmentType: "인턴",
         status: "휴직",
         joinDate: "2025-07-01",
@@ -6815,7 +6867,8 @@
         name: "강준호",
         department: "개발본부",
         team: "플랫폼팀",
-        position: "Staff Engineer",
+        position: "",
+        jobRole: "연구개발",
         employmentType: "정규직",
         status: "퇴직",
         joinDate: "2017-05-15",
@@ -7261,6 +7314,7 @@
       position: document.querySelector("#position"),
       jobGroup: document.querySelector("#jobGroup"),
       gradeLevel: document.querySelector("#gradeLevel"),
+      jobRole: document.querySelector("#jobRole"),
       employmentType: document.querySelector("#employmentType"),
       workType: document.querySelector("#workType"),
       status: document.querySelector("#status"),
@@ -7504,6 +7558,7 @@
         employeeNo: migrateEmployeeNo(merged.employeeNo),
         team: translateKnownValue(merged.team, legacyTeamLabels),
         jobGroup: translateKnownValue(merged.jobGroup, legacyJobGroupLabels),
+        gradeLevel: migrateGradeLevel(merged.gradeLevel, merged.position),
         disabilitySeverity: isDisabilityTargetValue(disabilityStatus)
           ? normalizedDisabilitySeverity
           : ""
@@ -7588,10 +7643,11 @@
     function normalizeSettings(settings = {}) {
       const merged = { ...defaultSettings, ...settings };
       merged.employeeNoUseDeptCode = "false";
-      ["departments", "teams", "parts", "positions", "employmentTypes", "locations", "jobGroups", "gradeLevels", "workTypes", "onboardingChecklist", "offboardingChecklist"].forEach((key) => {
+      ["departments", "teams", "parts", "positions", "jobRoles", "employmentTypes", "locations", "jobGroups", "gradeLevels", "workTypes", "onboardingChecklist", "offboardingChecklist"].forEach((key) => {
         merged[key] = Array.isArray(merged[key]) && merged[key].length ? merged[key] : defaultSettings[key];
       });
-      merged.gradeLevels = gradeLevelOptions(merged.gradeLevels);
+      merged.gradeLevels = gradeLevelOptions(merged.gradeLevels).filter((value) => value !== "L2");
+      if (!merged.gradeLevels.length) merged.gradeLevels = [...defaultSettings.gradeLevels];
       merged.teams = translateList(merged.teams, legacyTeamLabels);
       merged.jobGroups = translateList(merged.jobGroups, legacyJobGroupLabels);
       merged.organizationNodes = normalizeOrganizationNodes(merged.organizationNodes, text(merged.companyName, defaultSettings.companyName));
@@ -8252,7 +8308,9 @@
         body.append(drawerGroup("소속 · 고용", [
           drawerKv("상태", badge),
           drawerKv("조직", orgPathLabel(employee)),
-          drawerKv("직책/직급", employee.position),
+          drawerKv("직급", gradeLevelLabel(text(employee.gradeLevel, ""))),
+          drawerKv("직책", employee.position || "팀원"),
+          drawerKv("직무", employee.jobRole),
           drawerKv("직군", employee.jobGroup),
           drawerKv("고용형태", employee.employmentType),
           drawerKv("근무지", employee.location),
@@ -8663,25 +8721,29 @@
       return [employee.department, employee.team, employee.part].map((value) => text(value, "")).filter(Boolean).join(" / ") || "-";
     }
 
+    // 예전 L1~L5 체계 값을 회사 직급명으로 옮긴다. L2는 직책으로 주임/대리를 구분할 수 있을 때만 옮긴다.
+    const LEGACY_GRADE_LEVELS = { L1: "사원", "L2-주임": "주임", "L2-대리": "대리", L3: "과장", L4: "차장", L5: "부장" };
+
+    function migrateGradeLevel(grade, position = "") {
+      const value = text(grade, "").trim();
+      if (LEGACY_GRADE_LEVELS[value]) return LEGACY_GRADE_LEVELS[value];
+      if (value === "L2" || value === "L2-미분류") {
+        const compact = text(position, "").replace(/\s+/g, "");
+        if (compact.includes("대리") && !compact.includes("주임")) return "대리";
+        if (compact.includes("주임") && !compact.includes("대리")) return "주임";
+        return "L2";
+      }
+      return value;
+    }
+
     function gradeLevelLabel(value) {
-      const labels = {
-        L1: "L1 (사원급)",
-        "L2-주임": "L2 (주임급)",
-        "L2-대리": "L2 (대리급)",
-        "L2-미분류": "L2 (주임/대리 미분류)",
-        L2: "L2 (주임/대리 미분류)",
-        L3: "L3 (과장급)",
-        L4: "L4 (차장급)",
-        L5: "L5 (부장급)"
-      };
-      return labels[value] || value;
+      return value === "L2" || value === "L2-미분류" ? "L2 (주임/대리 미분류)" : value;
     }
 
     function gradeLevelOptions(values = []) {
-      const preferred = ["임원", "L5", "L4", "L3", "L2-대리", "L2-주임", "L2", "L1", "인턴"];
       const seen = new Set();
-      return [...preferred, ...(values || [])]
-        .map((value) => text(value, "").trim())
+      return (values || [])
+        .map((value) => migrateGradeLevel(value))
         .filter((value) => {
           if (!value || seen.has(value)) return false;
           seen.add(value);
@@ -8690,20 +8752,7 @@
     }
 
     function gradeAnalyticsValue(employee) {
-      const grade = text(employee.gradeLevel, "");
-      const compactGrade = grade.replace(/\s+/g, "");
-      const gradeHasLead = compactGrade.includes("주임");
-      const gradeHasAssistant = compactGrade.includes("대리");
-      if (gradeHasLead && !gradeHasAssistant) return "L2-주임";
-      if (gradeHasAssistant && !gradeHasLead) return "L2-대리";
-      if (!compactGrade.includes("L2")) return grade || "미입력";
-
-      const compactPosition = text(employee.position, "").replace(/\s+/g, "");
-      const positionHasLead = compactPosition.includes("주임");
-      const positionHasAssistant = compactPosition.includes("대리");
-      if (positionHasAssistant && !positionHasLead) return "L2-대리";
-      if (positionHasLead && !positionHasAssistant) return "L2-주임";
-      return "L2-미분류";
+      return migrateGradeLevel(employee.gradeLevel, employee.position) || "미입력";
     }
 
     function uniqueValues(key) {
@@ -8733,6 +8782,7 @@
       const teams = combinedValues("team", "teams");
       const parts = combinedValues("part", "parts");
       const positions = combinedValues("position", "positions");
+      const jobRoles = combinedValues("jobRole", "jobRoles");
       const jobGroups = combinedValues("jobGroup", "jobGroups");
       const gradeLevels = gradeLevelOptions(combinedValues("gradeLevel", "gradeLevels"));
       const workTypes = combinedValues("workType", "workTypes");
@@ -8741,7 +8791,8 @@
       fillSelect(elements.department, departments, "", "선택");
       fillSelect(elements.team, teams, "", "선택 안 함");
       fillSelect(elements.part, parts, "", "선택 안 함");
-      fillSelect(elements.position, positions, "", "선택");
+      fillSelect(elements.position, positions, "", "없음(팀원)");
+      fillSelect(elements.jobRole, jobRoles, "", "선택 안 함");
       fillSelect(elements.jobGroup, jobGroups, "", "선택 안 함");
       fillSelect(elements.gradeLevel, gradeLevels, "", "선택 안 함", gradeLevelLabel);
       fillSelect(elements.workType, workTypes, "", "선택 안 함");
@@ -9008,8 +9059,9 @@
     // ---------- 기준 코드 관리 ----------
     // field: 사원 정보에서 이 코드를 담는 항목 / checks: 체크리스트 완료 기록 위치
     const CODE_GROUPS = [
-      { key: "positions", field: "position", label: "직책", hint: "팀장·본부장처럼 맡은 역할입니다." },
-      { key: "gradeLevels", field: "gradeLevel", label: "직급", hint: "직급 체계입니다. '기본' 표시 항목은 통계 기준값이라 이름 변경·삭제·순서 변경이 되지 않습니다." },
+      { key: "gradeLevels", field: "gradeLevel", label: "직급", hint: "직급 체계입니다. 이 순서가 통계·목록의 직급 정렬 순서가 됩니다(높은 직급을 위로)." },
+      { key: "positions", field: "position", label: "직책", hint: "팀장·파트장처럼 맡은 보직입니다. 보직이 없는 팀원은 비워 둡니다. 업무명이 섞여 있으면 [직무로 이동]으로 옮기세요." },
+      { key: "jobRoles", field: "jobRole", label: "직무", hint: "생산관리·품질보증처럼 실제 담당 업무입니다." },
       { key: "employmentTypes", field: "employmentType", label: "고용형태", hint: "정규직·계약직 등 고용 형태입니다." },
       { key: "workTypes", field: "workType", label: "근무형태", hint: "전일제·단시간·시차출퇴근 등 근무 방식입니다." },
       { key: "jobGroups", field: "jobGroup", label: "직군", hint: "직무 계열입니다. 통계의 직군별 현황에 쓰입니다." },
@@ -9017,8 +9069,7 @@
       { key: "onboardingChecklist", checks: "onboarding", label: "입사 체크리스트", hint: "사원 상세 > 입퇴사 탭에서 항목별로 완료 체크합니다. 이름을 바꿔도 기존 완료 체크는 유지됩니다." },
       { key: "offboardingChecklist", checks: "offboarding", label: "퇴사 체크리스트", hint: "퇴사 처리 시 확인할 항목입니다. 이름을 바꿔도 기존 완료 체크는 유지됩니다." }
     ];
-    const LOCKED_GRADE_LEVELS = new Set(gradeLevelOptions([]));
-    let activeCodeKey = "positions";
+    let activeCodeKey = "gradeLevels";
     let codeMergeTarget = "";
     const openCodeUsers = new Set();
 
@@ -9028,10 +9079,6 @@
 
     function codeItems(group) {
       return group.checks ? [...checklistItems(group.checks)] : [...(state.settings[group.key] || [])];
-    }
-
-    function isLockedCode(group, value) {
-      return group.key === "gradeLevels" && LOCKED_GRADE_LEVELS.has(value);
     }
 
     function codeUsers(group, value) {
@@ -9104,7 +9151,7 @@
       if (!requireWritePermission()) return;
       const items = codeItems(group);
       const target = index + step;
-      if (target < 0 || target >= items.length || isLockedCode(group, items[target])) return;
+      if (target < 0 || target >= items.length) return;
       [items[index], items[target]] = [items[target], items[index]];
       commitCodes(group, items, `${group.label} 순서 변경: ${items[target]}`);
     }
@@ -9135,6 +9182,23 @@
       moveEmployeesToCode(group, users, from, to, "기준 코드 통합");
       const items = registered ? codeItems(group).filter((item) => item !== from) : codeItems(group);
       commitCodes(group, items, `${group.label} 통합: ${from} → ${to} (사원 ${users.length}명)`, true);
+    }
+
+    // 직책 칸에 들어간 업무명(예: 생산관리)을 직무로 옮긴다. 직무가 비어 있는 사원만 옮긴다.
+    function movePositionToJobRole(value, registered) {
+      if (!requireWritePermission()) return;
+      const users = codeUsers(codeGroup("positions"), value);
+      if (!window.confirm(`"${value}"을(를) 직무로 옮깁니다.\n사원 ${users.length}명의 직책은 비우고 직무를 "${value}"(으)로 기록합니다(이미 직무가 있으면 직무는 유지).`)) return;
+      users.forEach((employee) => {
+        const before = { ...employee };
+        employee.position = "";
+        if (!text(employee.jobRole, "")) employee.jobRole = value;
+        recordEmployeeHistory(employee, "직책→직무 이동", employeeChanges(before, employee));
+      });
+      const jobRoles = state.settings.jobRoles || [];
+      if (!jobRoles.includes(value)) state.settings.jobRoles = [...jobRoles, value];
+      const positions = codeItems(codeGroup("positions")).filter((item) => !registered || item !== value);
+      commitCodes(codeGroup("positions"), positions.length ? positions : codeItems(codeGroup("positions")), `직책 "${value}" → 직무 이동 (사원 ${users.length}명)`, users.length > 0);
     }
 
     function codeButton(label, onClick, className = "", title = "") {
@@ -9171,7 +9235,6 @@
     function codeRow(group, value, index, items, registered = true) {
       const li = document.createElement("li");
       li.className = `code-row${registered ? "" : " is-unregistered"}`;
-      const locked = isLockedCode(group, value);
       const users = codeUsers(group, value);
 
       const move = document.createElement("div");
@@ -9179,8 +9242,8 @@
       if (registered) {
         const up = codeButton("▲", () => moveCode(group, index, -1), "", `${value} 위로`);
         const down = codeButton("▼", () => moveCode(group, index, 1), "", `${value} 아래로`);
-        up.disabled = locked || index === 0 || isLockedCode(group, items[index - 1]);
-        down.disabled = locked || index === items.length - 1;
+        up.disabled = index === 0;
+        down.disabled = index === items.length - 1;
         move.append(up, down);
       }
 
@@ -9189,7 +9252,7 @@
       name.className = "code-name";
       name.value = value;
       name.setAttribute("aria-label", `${group.label} 이름`);
-      name.readOnly = locked || !registered;
+      name.readOnly = !registered;
       if (!name.readOnly) {
         name.addEventListener("keydown", (event) => {
           if (event.key === "Enter") { event.preventDefault(); name.blur(); }
@@ -9203,12 +9266,6 @@
         label.className = "code-label";
         label.textContent = gradeLevelLabel(value);
         nameWrap.append(label);
-      }
-      if (locked) {
-        const badge = document.createElement("span");
-        badge.className = "code-badge";
-        badge.textContent = "기본";
-        (nameWrap.querySelector(".code-label") || nameWrap).append(badge);
       }
 
       const usage = document.createElement("button");
@@ -9226,8 +9283,10 @@
       if (codeMergeTarget === value || !registered) {
         actions.append(...codeMergeControls(group, value, registered));
         if (!registered) actions.append(codeButton("코드로 등록", () => addCodes(group, value)));
+        if (!registered && group.key === "positions") actions.append(codeButton("직무로 이동", () => movePositionToJobRole(value, false)));
         else actions.append(codeButton("취소", () => { codeMergeTarget = ""; renderCodeManager(); }));
-      } else if (!locked) {
+      } else {
+        if (group.key === "positions") actions.append(codeButton("직무로 이동", () => movePositionToJobRole(value, true), "", `${value}을(를) 직무로 이동`));
         actions.append(codeButton("삭제", () => deleteCode(group, value), "is-danger", `${value} 삭제`));
       }
 
@@ -9527,7 +9586,7 @@
         "name",
         "department",
         "team",
-        "position",
+        "gradeLevel",
         "employmentType",
         "status",
         "joinDate",
@@ -9601,8 +9660,10 @@
           return `${text(employee.name, "")} ${text(employee.employeeNo, "")}`.trim();
         case "affiliation":
           return employeeAffiliationSortText(employee);
-        case "position":
-          return text(employee.position, "");
+        case "position": {
+          const rank = (state.settings.gradeLevels || []).indexOf(employee.gradeLevel);
+          return rank < 0 ? 999 : rank;
+        }
         case "employmentType":
           return text(employee.employmentType, "");
         case "contact":
@@ -9689,7 +9750,7 @@
           makeRowCheckboxCell(employee),
           makePersonCell(employee),
           makeCell(orgPathLabel(employee)),
-          makeCell(employee.position),
+          makeCell([gradeLevelLabel(text(employee.gradeLevel, "")), employee.position].filter(Boolean).join(" · ") || "-"),
           makeCell(employee.employmentType),
           makeCell(`${text(employee.email)}\n${text(employee.phone)}`),
           makeCell(formatDate(employee.joinDate)),
@@ -10938,8 +10999,9 @@
       ]);
 
       appendPersonnelRecordSection(elements.certificatePreview, "소속 및 근무 정보", [
-        [["소속", orgPathLabel(employee)], ["직책/직급", employee.position]],
-        [["직군", employee.jobGroup], ["직급/레벨", gradeLevelLabel(text(employee.gradeLevel, ""))]],
+        [["소속", orgPathLabel(employee)], ["직급", gradeLevelLabel(text(employee.gradeLevel, ""))]],
+        [["직책", employee.position || "팀원"], ["직무", employee.jobRole]],
+        [["직군", employee.jobGroup], ["근무지", employee.location]],
         [["고용형태", employee.employmentType], ["근무형태", employee.workType]],
         [["근무지", employee.location], ["상위 관리자", employee.manager]],
         [["코스트센터", employee.costCenter], ["상태", employee.status]]
@@ -11393,6 +11455,54 @@
       renderAll();
     }
 
+    let expandedChecklistKey = "";
+
+    function completeRemainingChecklist(employee, kind) {
+      if (!requireWritePermission()) return;
+      const progress = checklistProgress(employee, kind);
+      if (!progress.remaining.length) return;
+      if (!window.confirm(`${employee.name}의 남은 ${progress.remaining.length}개 항목을 오늘 날짜로 완료 처리할까요?`)) return;
+      const key = kind === "onboarding" ? "onboardingChecks" : "offboardingChecks";
+      const checks = { ...checklistState(employee, kind) };
+      const today = new Date().toISOString().slice(0, 10);
+      progress.remaining.forEach((item) => { checks[item] = today; });
+      employee[key] = checks;
+      recordEmployeeHistory(employee, kind === "onboarding" ? "입사 체크리스트" : "퇴사 체크리스트", [], `남은 ${progress.remaining.length}개 일괄 완료`);
+      saveEmployees();
+      renderAll();
+    }
+
+    // 표 행 아래에 체크리스트를 펼친다 (사원 상세를 열지 않고 바로 체크)
+    function withChecklistRow(tr, employee, kind, colSpan) {
+      if (expandedChecklistKey !== `${employee.id}:${kind}`) return tr;
+      const detail = document.createElement("tr");
+      detail.className = "checklist-detail-row";
+      const td = document.createElement("td");
+      td.colSpan = colSpan;
+      renderChecklistGroup(td, employee, kind, kind === "onboarding" ? "입사 체크리스트" : "퇴사 체크리스트");
+      const actions = document.createElement("div");
+      actions.className = "checklist-detail-actions";
+      if (checklistProgress(employee, kind).remaining.length && canWriteData()) {
+        const all = document.createElement("button");
+        all.type = "button";
+        all.className = "button ghost";
+        all.textContent = "남은 항목 모두 완료";
+        all.addEventListener("click", () => completeRemainingChecklist(employee, kind));
+        actions.append(all);
+      }
+      const open = document.createElement("button");
+      open.type = "button";
+      open.className = "button ghost";
+      open.textContent = "사원 상세 열기";
+      open.addEventListener("click", () => openEmployeeDrawer(employee.id, "lifecycle"));
+      actions.append(open);
+      td.append(actions);
+      detail.append(td);
+      const fragment = document.createDocumentFragment();
+      fragment.append(tr, detail);
+      return fragment;
+    }
+
     function makeChecklistProgressCell(employee, kind) {
       const td = document.createElement("td");
       const progress = checklistProgress(employee, kind);
@@ -11401,10 +11511,14 @@
       button.className = `badge ${progress.complete ? "success" : progress.done ? "warning" : "danger"}`;
       button.style.cursor = "pointer";
       button.textContent = `${progress.done}/${progress.total} 완료`;
-      button.setAttribute("aria-label", `${employee.name} ${kind === "onboarding" ? "입사" : "퇴사"} 체크리스트 열기`);
+      const key = `${employee.id}:${kind}`;
+      button.setAttribute("aria-label", `${employee.name} ${kind === "onboarding" ? "입사" : "퇴사"} 체크리스트 펼치기`);
+      button.setAttribute("aria-expanded", String(expandedChecklistKey === key));
+      button.textContent += expandedChecklistKey === key ? " ▴" : " ▾";
       button.addEventListener("click", (event) => {
         event.stopPropagation();
-        openEmployeeDrawer(employee.id, "lifecycle");
+        expandedChecklistKey = expandedChecklistKey === key ? "" : key;
+        renderLifecycle();
       });
       td.append(button);
       return td;
@@ -11457,7 +11571,7 @@
     function lifecycleOnboardingEmployees() {
       const today = startOfToday();
       const recentCutoff = new Date(today);
-      recentCutoff.setDate(recentCutoff.getDate() - 240);
+      recentCutoff.setDate(recentCutoff.getDate() - 90);
       const upcomingCutoff = new Date(today);
       upcomingCutoff.setDate(upcomingCutoff.getDate() + 60);
       const recentOrUpcoming = activeEmployees()
@@ -11467,11 +11581,7 @@
         })
         .sort((a, b) => text(b.joinDate, "").localeCompare(text(a.joinDate, "")));
 
-      if (recentOrUpcoming.length) return recentOrUpcoming.slice(0, 10);
-      return [...activeEmployees()]
-        .filter((employee) => employee.joinDate)
-        .sort((a, b) => text(b.joinDate, "").localeCompare(text(a.joinDate, "")))
-        .slice(0, 8);
+      return recentOrUpcoming;
     }
 
     function lifecycleProbationEmployees() {
@@ -11521,7 +11631,7 @@
     function renderOnboardingTable(rows) {
       renderTableRows(elements.onboardingTable, rows, 8, (employee) => {
         const checks = [
-          Boolean(employee.department && employee.position),
+          Boolean(employee.department && employee.gradeLevel),
           Boolean(employee.employeeNo && employee.name && employee.joinDate && employee.employmentType),
           Boolean(employee.privacyConsentDate),
           Boolean(employee.email && employee.phone && employee.emergencyPhone)
@@ -11540,8 +11650,8 @@
           makeChecklistProgressCell(employee, "onboarding"),
           makeStatusCell(status[0], status[1])
         );
-        return tr;
-      }, "입사 처리 대상이 없습니다.", "최근 입사자 또는 예정 입사자를 등록하면 표시됩니다.");
+        return withChecklistRow(tr, employee, "onboarding", 8);
+      }, "입사 처리 대상이 없습니다.", "최근 90일 내 입사자와 60일 내 입사 예정자가 표시됩니다.");
     }
 
     function renderProbationTable(rows) {
@@ -11578,7 +11688,7 @@
           makeCell(remainingLabel || "없음"),
           makeStatusCell(offboarding.complete ? "처리 완료" : datePassed ? "기한 경과" : "진행 중", offboarding.complete ? "success" : datePassed ? "danger" : "warning")
         );
-        return tr;
+        return withChecklistRow(tr, employee, "offboarding", 7);
       }, "퇴사 또는 계약 종료 대상이 없습니다.", "퇴직일 또는 계약 종료일을 입력하면 표시됩니다.");
     }
 
@@ -11587,7 +11697,7 @@
       onboardingRows.forEach((employee) => {
         if (!employee.privacyConsentDate) issues.push({ title: `${employee.name} 개인정보 동의 누락`, body: "입사 처리 전 개인정보 동의일을 확인하세요." });
         if (!employee.emergencyPhone) issues.push({ title: `${employee.name} 비상연락처 누락`, body: "입사 후 비상연락처와 관계를 확인하세요." });
-      if (!employee.department || !employee.position) issues.push({ title: `${employee.name} 조직/직책 배치 미완료`, body: "조직도 기준 부서, 팀, 파트, 직책을 확정하세요." });
+      if (!employee.department || !employee.gradeLevel) issues.push({ title: `${employee.name} 조직/직급 배치 미완료`, body: "부서와 직급을 확정하세요. 보직이 있으면 직책도 입력합니다." });
       });
       probationRows.forEach((employee) => {
         const days = daysFromToday(employee.probationEndDate);
@@ -12082,7 +12192,7 @@
       const lines = values ? [
         ["조직", [values.department, values.team, values.part].map((value) => text(value, "")).filter(Boolean).join(" / ") || "-"],
         ["직책", text(values.position)],
-        ["레벨", gradeLevelLabel(text(values.gradeLevel, "")) || "-"],
+        ["직급", gradeLevelLabel(text(values.gradeLevel, "")) || "-"],
         ["고용", text(values.employmentType)],
         ["근무지", text(values.location)],
         ["계약종료", formatDate(values.contractEndDate)]
@@ -12165,7 +12275,7 @@
       team: "팀",
       part: "파트",
       position: "직책",
-      gradeLevel: "직급/레벨",
+      gradeLevel: "직급",
       employmentType: "고용형태",
       location: "근무지",
       contractEndDate: "계약 종료일"
@@ -13229,13 +13339,13 @@
         acc[grade] = (acc[grade] || 0) + 1;
         return acc;
       }, {});
-      const preferredOrder = ["임원", "L5", "L4", "L3", "L2-대리", "L2-주임", "L2-미분류", "L1", "인턴", "미입력"];
+      const preferredOrder = [...(state.settings.gradeLevels || []), "L2", "미입력"];
       const ordered = [
         ...preferredOrder.filter((grade) => counts[grade]),
         ...Object.keys(counts).filter((grade) => !preferredOrder.includes(grade)).sort((a, b) => a.localeCompare(b, "ko"))
       ];
       const rows = ordered.map((grade) => [gradeLevelLabel(grade), counts[grade] || 0]);
-      renderBars(elements.gradeBars, rows, employees.length, "직급/레벨 데이터가 없습니다.");
+      renderBars(elements.gradeBars, rows, employees.length, "직급 데이터가 없습니다.");
     }
 
     function renderGovernmentReadiness(period) {
@@ -13507,14 +13617,13 @@
         ["이름", "name"],
         ["부서", "department"],
         ["팀", "team"],
-        ["직책", "position"],
         ["입사일", "joinDate"],
         ["생년월일", "birthDate"],
         ["이메일", "email"],
         ["연락처", "phone"],
         ["비상연락처", "emergencyPhone"],
         ["직군", "jobGroup"],
-        ["직급/레벨", "gradeLevel"],
+        ["직급", "gradeLevel"],
         ["근무지", "location"],
         ["개인정보 동의일", "privacyConsentDate"]
       ];
@@ -14331,7 +14440,6 @@
         ["사번", "employeeNo"],
         ["이름", "name"],
         ["부서", "department"],
-        ["직책", "position"],
         ["입사일", "joinDate"],
         ["이메일", "email"],
         ["연락처", "phone"],
@@ -14341,7 +14449,7 @@
         ["주소", "address"],
         ["비상연락처", "emergencyPhone"],
         ["직군", "jobGroup"],
-        ["직급/레벨", "gradeLevel"],
+        ["직급", "gradeLevel"],
         ["근무형태", "workType"],
         ["개인정보 동의일", "privacyConsentDate"]
       ];
@@ -14497,6 +14605,35 @@
       reader.readAsDataURL(file);
     }
 
+    const CONTRACT_END_REQUIRED = ["계약직", "인턴"];
+    const EMPLOYEE_REQUIRED_FIELDS = ["name", "department", "gradeLevel", "joinDate"];
+
+    // 필수값 진행 현황과 조건부 필수 표시(계약 종료일·퇴직일)를 갱신한다
+    function syncEmployeeFormGuides() {
+      const filled = EMPLOYEE_REQUIRED_FIELDS.filter((key) => text(elements[key]?.value, "").trim()).length;
+      const progress = document.querySelector("#employeeRequiredProgress");
+      if (progress) {
+        progress.textContent = `필수 ${filled}/${EMPLOYEE_REQUIRED_FIELDS.length}`;
+        progress.classList.toggle("is-done", filled === EMPLOYEE_REQUIRED_FIELDS.length);
+      }
+      const contractMark = document.querySelector("#contractEndMark");
+      if (contractMark) contractMark.hidden = !CONTRACT_END_REQUIRED.includes(elements.employmentType?.value);
+      const retirementMark = document.querySelector("#retirementMark");
+      if (retirementMark) retirementMark.hidden = elements.status?.value !== "퇴직";
+    }
+
+    function setProbationThreeMonths() {
+      const join = parseLocalDate(elements.joinDate.value);
+      if (!join) {
+        showToast("입사일을 먼저 입력하세요.");
+        elements.joinDate.focus();
+        return;
+      }
+      const end = new Date(join.getFullYear(), join.getMonth() + 3, join.getDate() - 1);
+      elements.probationEndDate.value = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")}`;
+      state.employeeFormDirty = true;
+    }
+
     function syncDisabilitySeverityField() {
       if (!elements.disabilitySeverityField || !elements.disabilitySeverity || !elements.disabilityStatus) return;
       const isTarget = isDisabilityTargetValue(elements.disabilityStatus.value);
@@ -14527,6 +14664,7 @@
         elements.part.value = employee.part || "";
         elements.position.value = employee.position || "";
         elements.jobGroup.value = employee.jobGroup || "";
+        elements.jobRole.value = employee.jobRole || "";
         elements.gradeLevel.value = employee.gradeLevel || "";
         elements.employmentType.value = employee.employmentType || "정규직";
         elements.workType.value = employee.workType || "";
@@ -14566,6 +14704,7 @@
       }
 
       syncDisabilitySeverityField();
+      syncEmployeeFormGuides();
       clearEmployeeFieldErrors();
       state.employeeFormDirty = false;
       elements.modal.classList.add("is-open");
@@ -14605,6 +14744,7 @@
         part: elements.part.value.trim(),
         position: elements.position.value.trim(),
         jobGroup: elements.jobGroup.value.trim(),
+        jobRole: elements.jobRole.value.trim(),
         gradeLevel: elements.gradeLevel.value.trim(),
         employmentType: elements.employmentType.value,
         workType: elements.workType.value.trim(),
@@ -14681,7 +14821,7 @@
       [
         [elements.name, "이름", employee.name],
         [elements.department, "부서", employee.department],
-        [elements.position, "직책/직급", employee.position],
+        [elements.gradeLevel, "직급", employee.gradeLevel],
         [elements.joinDate, "입사일", employee.joinDate]
       ].forEach(([input, label, value]) => {
         if (!value) errors.push([input, `${label}${josa(label, "은", "는")} 반드시 입력해야 합니다.`]);
@@ -14692,6 +14832,14 @@
 
       if (employee.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(employee.email)) {
         errors.push([elements.email, "이메일 형식이 올바르지 않습니다."]);
+      }
+
+      if (employee.status === "퇴직" && !employee.retirementDate) {
+        errors.push([elements.retirementDate, "상태가 퇴직이면 퇴직일을 입력하세요."]);
+      }
+
+      if (CONTRACT_END_REQUIRED.includes(employee.employmentType) && employee.status !== "퇴직" && !employee.contractEndDate) {
+        errors.push([elements.contractEndDate, `${employee.employmentType}${josa(employee.employmentType, "은", "는")} 계약 종료일을 입력하세요.`]);
       }
 
       if (employee.contractEndDate && employee.joinDate && employee.contractEndDate < employee.joinDate) {
@@ -14918,9 +15066,10 @@
       { header: "부서", key: "department", required: true, aliases: ["부서명", "소속", "소속부서", "소속명", "조직", "조직명"] },
       { header: "팀", key: "team", aliases: ["팀명", "소속팀"] },
       { header: "파트", key: "part", aliases: ["파트명", "소속파트"] },
-      { header: "직책", key: "position", required: true, aliases: ["직책/직급", "직급", "직위", "직책명"] },
+      { header: "직책", key: "position", aliases: ["직책/직급", "직위", "직책명", "보직"] },
+      { header: "직무", key: "jobRole", aliases: ["담당업무", "업무", "직무명"] },
       { header: "직군", key: "jobGroup" },
-      { header: "직급/레벨", key: "gradeLevel" },
+      { header: "직급", key: "gradeLevel", aliases: ["직급/레벨", "레벨"] },
       { header: "고용형태", key: "employmentType", aliases: ["근로자구분", "근로형태", "계약형태"] },
       { header: "근무형태", key: "workType" },
       { header: "상태", key: "status" },
@@ -14981,11 +15130,12 @@
         ["팀", ...(state.settings.teams || [])],
         ["파트", ...(state.settings.parts || [])],
         ["직책", ...(state.settings.positions || [])],
+        ["직무", ...(state.settings.jobRoles || [])],
         ["고용형태", ...(state.settings.employmentTypes || [])],
         ["근무형태", ...(state.settings.workTypes || [])],
         ["근무지", ...(state.settings.locations || [])],
         ["직군", ...(state.settings.jobGroups || [])],
-        ["직급/레벨", ...gradeLevelOptions(state.settings.gradeLevels || [])],
+        ["직급", ...(state.settings.gradeLevels || [])],
         ["상태", "재직", "휴직", "퇴직"],
         ["장애 여부", "비대상", "대상"],
         ["장애 정도", "중증", "경증"]
@@ -15165,7 +15315,7 @@
       }
     }
     function exportCsvFile(list) {
-      const headers = ["사번", "이름", "성별", "국적", "혼인상태", "부서", "팀", "파트", "직책", "직군", "직급/레벨", "고용형태", "근무형태", "상태", "입사일", "수습 종료일", "계약 종료일", "퇴직일", "생년월일", "이메일", "연락처", "주소", "비상연락 이름", "비상연락 관계", "비상연락 번호", "근무지", "코스트센터", "상위 관리자", "최종학력", "전공", "입사 전 경력연수", "병역", "보훈 여부", "장애 여부", "장애 정도", "개인정보 동의일", "자격/면허", "언어 역량", "정보완성도", "메모"];
+      const headers = ["사번", "이름", "성별", "국적", "혼인상태", "부서", "팀", "파트", "직급", "직책", "직무", "직군", "고용형태", "근무형태", "상태", "입사일", "수습 종료일", "계약 종료일", "퇴직일", "생년월일", "이메일", "연락처", "주소", "비상연락 이름", "비상연락 관계", "비상연락 번호", "근무지", "코스트센터", "상위 관리자", "최종학력", "전공", "입사 전 경력연수", "병역", "보훈 여부", "장애 여부", "장애 정도", "개인정보 동의일", "자격/면허", "언어 역량", "정보완성도", "메모"];
       const rows = (Array.isArray(list) ? list : state.employees).map((employee) => [
         employee.employeeNo,
         employee.name,
@@ -15175,9 +15325,10 @@
         employee.department,
         employee.team,
         employee.part,
-        employee.position,
-        employee.jobGroup,
         employee.gradeLevel,
+        employee.position,
+        employee.jobRole,
+        employee.jobGroup,
         employee.employmentType,
         employee.workType,
         employee.status,
@@ -15471,6 +15622,12 @@
         }
       });
       on(elements.disabilityStatus, "change", syncDisabilitySeverityField);
+      elements.employeeForm.addEventListener("input", syncEmployeeFormGuides);
+      elements.employeeForm.addEventListener("change", syncEmployeeFormGuides);
+      on(document.querySelector("#probationThreeMonths"), "click", setProbationThreeMonths);
+      document.querySelectorAll(".form-jump [data-jump]").forEach((button) => {
+        button.addEventListener("click", () => document.getElementById(button.dataset.jump)?.scrollIntoView({ behavior: "smooth", block: "start" }));
+      });
       on(elements.generateEmployeeNo, "click", () => {
         elements.employeeNo.value = generateEmployeeNo();
         showToast("설정된 규칙으로 사번을 생성했습니다.");
