@@ -6378,7 +6378,7 @@
               <div class="field">
                 <label for="position">직책</label>
                 <select id="position" name="position"></select>
-                <small>팀원 · 팀장 · 임원 중 선택</small>
+                <small>팀장 · 임원만 선택, 팀원은 비워 둠</small>
               </div>
               <div class="field">
                 <label for="jobRole">직무</label>
@@ -6631,7 +6631,7 @@
       departments: ["인사팀", "개발본부", "사업전략실", "재무관리실", "운영본부", "제품디자인팀", "품질관리팀"],
       teams: ["인사운영팀", "채용팀", "프론트엔드팀", "백엔드팀", "플랫폼팀", "성장전략팀", "재무팀", "고객성공팀", "제품디자인팀", "품질관리팀"],
       parts: [],
-      positions: ["임원", "팀장", "팀원"],
+      positions: ["임원", "팀장"],
       jobRoles: ["인사", "총무", "재무회계", "구매", "영업", "마케팅", "생산관리", "생산", "품질보증", "품질관리", "연구개발", "IT", "디자인"],
       employmentTypes: ["정규직", "계약직", "파견/외주", "인턴"],
       locations: ["서울 본사", "판교 오피스", "부산 지사", "원격"],
@@ -8819,7 +8819,7 @@
       fillSelect(elements.department, departments, "", "선택");
       fillSelect(elements.team, teams, "", "선택 안 함");
       fillSelect(elements.part, parts, "", "선택 안 함");
-      fillSelect(elements.position, positions, "", "선택");
+      fillSelect(elements.position, positions, "", "없음(팀원)");
       fillSelect(elements.jobRole, jobRoles, "", "선택 안 함");
       fillSelect(elements.jobGroup, jobGroups, "", "선택 안 함");
       fillSelect(elements.gradeLevel, gradeLevels, "", "선택 안 함", gradeLevelLabel);
@@ -9089,7 +9089,7 @@
     // field: 사원 정보에서 이 코드를 담는 항목 / checks: 체크리스트 완료 기록 위치
     const CODE_GROUPS = [
       { key: "gradeLevels", field: "gradeLevel", label: "직급", hint: "직급 체계입니다. 높은 직급을 위로 두세요. 이 순서가 통계·목록 정렬과 승진 시 다음 직급이 됩니다. '승진 N년'은 승진 검토 대상에 오르는 현 직급 체류연수입니다." },
-      { key: "positions", field: "position", label: "직책", hint: "팀원 · 팀장 · 임원으로 운영합니다. 사원·과장 같은 직급명이 섞여 있으면 [직책 비우기]·[직급으로 반영], 업무명이 섞여 있으면 [직무로 이동]으로 정리하세요." },
+      { key: "positions", field: "position", label: "직책", hint: "팀장 · 임원만 운영하고 팀원은 비워 둡니다. 다른 값은 [삭제] 후 [비우고 삭제]로 정리하세요. 사원·과장 같은 직급명이 섞여 있으면 [직책 비우기]·[직급으로 반영], 업무명이 섞여 있으면 [직무로 이동]으로 정리하세요." },
       { key: "jobRoles", field: "jobRole", label: "직무", hint: "생산관리·품질보증처럼 실제 담당 업무입니다." },
       { key: "employmentTypes", field: "employmentType", label: "고용형태", hint: "정규직·계약직 등 고용 형태입니다." },
       { key: "workTypes", field: "workType", label: "근무형태", hint: "전일제·단시간·시차출퇴근 등 근무 방식입니다." },
@@ -9290,7 +9290,19 @@
         if (!select.value) { showToast("통합할 코드를 선택하세요."); return; }
         mergeCode(group, value, select.value, registered);
       }, "is-primary");
+      // 직책은 공란(=팀원)이 정상 값이라 통합 대신 비우고 지울 수 있다
+      if (group.key === "positions") return [select, apply, codeButton("비우고 삭제", () => clearAndDeletePosition(value, registered), "", `${value} 비우고 삭제`)];
       return [select, apply];
+    }
+
+    function clearAndDeletePosition(value, registered) {
+      if (!requireWritePermission()) return;
+      const group = codeGroup("positions");
+      const users = codeUsers(group, value);
+      if (!window.confirm(`직책 "${value}"을(를) 사원 ${users.length}명에게서 비우고 코드에서 삭제합니다. 변경 이력이 남습니다.`)) return;
+      moveEmployeesToCode(group, users, value, "", "직책 비우고 삭제");
+      const items = codeItems(group).filter((item) => !registered || item !== value);
+      commitCodes(group, items.length ? items : codeItems(group), `직책 "${value}" 비우고 삭제 (사원 ${users.length}명)`, users.length > 0);
     }
 
     function codeRow(group, value, index, items, registered = true) {
