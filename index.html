@@ -6378,7 +6378,7 @@
               <div class="field">
                 <label for="position">직책</label>
                 <select id="position" name="position"></select>
-                <small>팀장·파트장 등 보직. 없으면 '없음(팀원)'</small>
+                <small>팀원 · 팀장 · 임원 중 선택</small>
               </div>
               <div class="field">
                 <label for="jobRole">직무</label>
@@ -6631,12 +6631,12 @@
       departments: ["인사팀", "개발본부", "사업전략실", "재무관리실", "운영본부", "제품디자인팀", "품질관리팀"],
       teams: ["인사운영팀", "채용팀", "프론트엔드팀", "백엔드팀", "플랫폼팀", "성장전략팀", "재무팀", "고객성공팀", "제품디자인팀", "품질관리팀"],
       parts: [],
-      positions: ["대표이사", "본부장", "실장", "팀장", "파트장"],
+      positions: ["임원", "팀장", "팀원"],
       jobRoles: ["인사", "총무", "재무회계", "구매", "영업", "마케팅", "생산관리", "생산", "품질보증", "품질관리", "연구개발", "IT", "디자인"],
       employmentTypes: ["정규직", "계약직", "파견/외주", "인턴"],
       locations: ["서울 본사", "판교 오피스", "부산 지사", "원격"],
       jobGroups: ["인사직군", "개발직군", "디자인직군", "재무직군", "사업직군", "운영직군", "품질직군"],
-      gradeLevels: ["임원", "부장", "차장", "과장", "대리", "주임", "사원", "인턴"],
+      gradeLevels: ["임원", "부장", "차장", "과장", "대리", "계장", "주임", "사원", "인턴"],
       promotionYears: { 사원: 0, 주임: 0, 대리: 0, 과장: 0, 차장: 0 },
       workTypes: ["전일제", "단시간", "시차출퇴근", "원격", "하이브리드"],
       onboardingChecklist: ["근로계약서 체결", "개인정보 동의서 수령", "4대보험 취득신고", "계정·이메일 발급", "장비·출입증 지급", "법정의무교육 안내", "조직 배치·자리 준비"],
@@ -8764,13 +8764,15 @@
 
     // 목록·명부용 '직급 · 직책' 표기 (보직 없으면 직급만)
     function employeeRankLabel(employee) {
-      return [gradeLevelLabel(text(employee.gradeLevel, "")), employeePosition(employee)].filter(Boolean).join(" · ") || "-";
+      const position = employeePosition(employee);
+      return [gradeLevelLabel(text(employee.gradeLevel, "")), position === "팀원" ? "" : position].filter(Boolean).join(" · ") || "-";
     }
 
     // 직책 칸에 직급명(과장 등)이 잘못 들어간 경우 표시·증명서에서 뺀다 (원본 값은 그대로 둠)
     function positionIsGradeName(employee) {
       const position = text(employee.position, "").trim();
-      return Boolean(position) && (state.settings.gradeLevels || []).map(migrateGradeLevel).includes(migrateGradeLevel(position));
+      if (!position || (state.settings.positions || []).includes(position)) return false;
+      return (state.settings.gradeLevels || []).map(migrateGradeLevel).includes(migrateGradeLevel(position));
     }
 
     function employeePosition(employee) {
@@ -8817,7 +8819,7 @@
       fillSelect(elements.department, departments, "", "선택");
       fillSelect(elements.team, teams, "", "선택 안 함");
       fillSelect(elements.part, parts, "", "선택 안 함");
-      fillSelect(elements.position, positions, "", "없음(팀원)");
+      fillSelect(elements.position, positions, "", "선택");
       fillSelect(elements.jobRole, jobRoles, "", "선택 안 함");
       fillSelect(elements.jobGroup, jobGroups, "", "선택 안 함");
       fillSelect(elements.gradeLevel, gradeLevels, "", "선택 안 함", gradeLevelLabel);
@@ -9087,7 +9089,7 @@
     // field: 사원 정보에서 이 코드를 담는 항목 / checks: 체크리스트 완료 기록 위치
     const CODE_GROUPS = [
       { key: "gradeLevels", field: "gradeLevel", label: "직급", hint: "직급 체계입니다. 높은 직급을 위로 두세요. 이 순서가 통계·목록 정렬과 승진 시 다음 직급이 됩니다. '승진 N년'은 승진 검토 대상에 오르는 현 직급 체류연수입니다." },
-      { key: "positions", field: "position", label: "직책", hint: "팀장·파트장처럼 맡은 보직입니다. 보직이 없는 팀원은 비워 둡니다. 업무명이 섞여 있으면 [직무로 이동], 사원·과장 같은 직급명이 섞여 있으면 [직책 비우기]·[직급으로 반영]으로 정리하세요." },
+      { key: "positions", field: "position", label: "직책", hint: "팀원 · 팀장 · 임원으로 운영합니다. 사원·과장 같은 직급명이 섞여 있으면 [직책 비우기]·[직급으로 반영], 업무명이 섞여 있으면 [직무로 이동]으로 정리하세요." },
       { key: "jobRoles", field: "jobRole", label: "직무", hint: "생산관리·품질보증처럼 실제 담당 업무입니다." },
       { key: "employmentTypes", field: "employmentType", label: "고용형태", hint: "정규직·계약직 등 고용 형태입니다." },
       { key: "workTypes", field: "workType", label: "근무형태", hint: "전일제·단시간·시차출퇴근 등 근무 방식입니다." },
@@ -11263,7 +11265,8 @@
         { label: "성명", value: text(employee.name, "") },
         { label: "주민등록번호", value: residentRegistrationDisplay(employee, residentDisplayMode, residentFullValue) },
         { label: "직급", value: gradeLevelLabel(text(employee.gradeLevel, "")) },
-        ...(employeePosition(employee) ? [{ label: "직책", value: employeePosition(employee) }] : []),
+        // 팀원은 증명서에 직책 행을 두지 않는다
+        ...(employeePosition(employee) && employeePosition(employee) !== "팀원" ? [{ label: "직책", value: employeePosition(employee) }] : []),
         { label: "부서", value: orgPathLabel(employee) },
         { label: "현주소", value: text(employee.address, "") },
         { label: "재직기간", value: `${formatKoreanDate(employee.joinDate)}부터  ${formatKoreanDate(periodEnd)}까지` },
