@@ -8675,13 +8675,13 @@
       const updated = [];
       let untouched = 0;
 
-      incomingList.forEach((incoming) => {
+      incomingList.forEach(({ __fileValues, ...incoming }) => {
         const existing = findExistingEmployee(incoming);
         if (!existing) {
           added.push(incoming);
           return;
         }
-        const result = mergeEmployeeValues(existing, incoming);
+        const result = mergeEmployeeValues(existing, __fileValues || incoming);
         if (!result.changed.length) {
           untouched += 1;
           return;
@@ -15406,10 +15406,16 @@
       const uploadNos = new Set();
       employees.forEach((employee, index) => {
         const row = index + 2;
-        employeeExcelColumns.filter((column) => column.required && column.key !== "department").forEach((column) => {
+        // 이미 있는 사원(사번 일치)은 바꿀 항목만 있으면 된다. 필수 항목은 신규 등록에만 요구한다.
+        const isNew = !findExistingEmployee(employee);
+        if (isNew && employee.employeeNo && (!employee.joinDate || (!employee.department && !employee.team && !employee.part))) {
+          errors.push(`${row}행: 사번 ${employee.employeeNo}(${text(employee.name, "-")})은(는) 앱에 없는 사원입니다. 신규 등록하려면 부서·입사일을 넣고, 아니면 이 행을 지우세요.`);
+          return;
+        }
+        employeeExcelColumns.filter((column) => column.required && column.key !== "department" && (isNew || column.key === "name")).forEach((column) => {
           if (!employee[column.key]) errors.push(`${row}행: ${column.header} 항목을 입력하세요.`);
         });
-        if (!employee.department && !employee.team && !employee.part) errors.push(`${row}행: 부서, 팀, 파트 중 하나를 입력하세요.`);
+        if (isNew && !employee.department && !employee.team && !employee.part) errors.push(`${row}행: 부서, 팀, 파트 중 하나를 입력하세요.`);
         if (employee.employeeNo) {
           if (uploadNos.has(employee.employeeNo)) errors.push(`${row}행: 사번 ${employee.employeeNo}이(가) 파일 안에서 중복됩니다.`);
           uploadNos.add(employee.employeeNo);
@@ -15450,11 +15456,14 @@
               employee.gender = employee.gender || residentInfo.gender;
             }
             employee.residentIdPartError = residentInfo?.error || "";
+            // 기존 사원 갱신에는 파일에 실제로 있는 값만 쓴다 (아래 기본값이 퇴직·계약직 등을 덮어쓰지 않도록)
+            const fileValues = { ...employee };
+            delete fileValues.residentIdPartError;
             employee.status = employee.status || "재직";
             employee.nationality = employee.nationality || "대한민국";
             employee.employmentType = employee.employmentType || state.settings.employmentTypes[0] || "정규직";
             employee.workType = employee.workType || state.settings.workTypes[0] || "전일제";
-            return normalizeEmployee(employee);
+            return Object.assign(normalizeEmployee(employee), { __fileValues: fileValues });
           });
 
         if (!employees.length) {
