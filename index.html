@@ -8736,10 +8736,10 @@
       return [employee.department, employee.team, employee.part].map((value) => text(value, "")).filter(Boolean).join(" / ") || "-";
     }
 
-    // 예전 L 체계 값을 회사 직급명으로 옮긴다 (L1 사원 · L2 주임 · L3 대리 · L4 과장 · L5 차장 · L6 부장)
+    // 예전 L 체계 값을 회사 직급명으로 옮긴다. 앱 최초 기준: L1 사원급 · L2 주임/대리급 · L3 과장급 · L4 차장급 · L5 부장급
     const LEGACY_GRADE_LEVELS = {
       L1: "사원", L2: "주임", "L2-주임": "주임", "L2-대리": "대리", "L2-미분류": "주임",
-      L3: "대리", L4: "과장", L5: "차장", L6: "부장"
+      L3: "과장", L4: "차장", L5: "부장"
     };
 
     function migrateGradeLevel(grade) {
