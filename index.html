@@ -4073,7 +4073,7 @@
     .code-tab em { font-style: normal; font-size: 0.75rem; color: var(--subtle); font-variant-numeric: tabular-nums; }
     .code-hint { margin: 0 0 10px; color: var(--muted); font-size: 0.85rem; }
     .code-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: var(--radius-sm); }
-    .code-row { display: grid; grid-template-columns: 56px minmax(120px, 1fr) 96px auto; gap: 8px; align-items: center; padding: 6px 10px; border-top: 1px solid var(--line); }
+    .code-row { display: grid; grid-template-columns: 84px minmax(120px, 1fr) 96px auto; gap: 8px; align-items: center; padding: 6px 10px; border-top: 1px solid var(--line); }
     .code-row .code-actions:has(select) { grid-column: 2 / -1; justify-content: flex-start; }
     .code-row:first-child { border-top: 0; }
     .code-row.is-unregistered { background: var(--warning-soft); }
@@ -4099,7 +4099,7 @@
     .code-usage.is-zero { color: var(--subtle); cursor: default; }
     .code-usage:not(.is-zero):hover { color: var(--primary); text-decoration: underline; }
     .code-users { grid-column: 2 / -1; font-size: 0.8rem; color: var(--muted); padding: 2px 8px 6px; }
-    .code-row.has-years { grid-template-columns: 56px minmax(72px, 1fr) 64px 96px max-content; }
+    .code-row.has-years { grid-template-columns: 84px minmax(72px, 1fr) 64px 96px max-content; }
     .code-actions button { white-space: nowrap; }
     .code-years { display: inline-flex; align-items: center; gap: 4px; font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
     .code-years input { width: 52px; height: 28px; padding: 0 6px; border: 1px solid var(--line); border-radius: 6px; font: inherit; text-align: right; }
@@ -9191,9 +9191,10 @@
       if (!requireWritePermission()) return;
       const items = codeItems(group);
       const target = index + step;
-      if (target < 0 || target >= items.length) return;
-      [items[index], items[target]] = [items[target], items[index]];
-      commitCodes(group, items, `${group.label} 순서 변경: ${items[target]}`);
+      if (target < 0 || target >= items.length || target === index) return;
+      const [moved] = items.splice(index, 1);
+      items.splice(target, 0, moved);
+      commitCodes(group, items, `${group.label} 순서 변경: ${moved}`);
     }
 
     function deleteCode(group, value) {
@@ -9315,9 +9316,11 @@
       if (registered) {
         const up = codeButton("▲", () => moveCode(group, index, -1), "", `${value} 위로`);
         const down = codeButton("▼", () => moveCode(group, index, 1), "", `${value} 아래로`);
+        const top = codeButton("⤒", () => moveCode(group, index, -index), "", `${value} 맨 위로`);
         up.disabled = index === 0;
+        top.disabled = index === 0;
         down.disabled = index === items.length - 1;
-        move.append(up, down);
+        move.append(top, up, down);
       }
 
       const nameWrap = document.createElement("div");
