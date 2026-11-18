@@ -252,6 +252,14 @@ td.up { color: var(--ok); } td.down { color: var(--brand); }
   body.print-report > *:not(#appShell), body.print-report .topbar, body.print-report main > section:not(#view-report), body.print-report .report-tools { display: none !important; }
   body.print-report main { padding: 10mm !important; max-width: none; }
   body.print-report .report-card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; } body.print-report .rise { animation: none !important; }
+  body.print-report .report-grid { display: block !important; }
+  body.print-report .report-card { margin-bottom: 6mm; padding: 4mm 5mm; border-radius: 3mm; }
+  body.print-report .report-card .chart-box { height: auto !important; }
+  body.print-report .report-card canvas { width: 100% !important; height: auto !important; max-width: 100% !important; }
+  body.print-report .table-scroll { overflow: visible !important; max-height: none !important; }
+  body.print-report table.data { font-size: 9pt; } body.print-report table.data th, body.print-report table.data td { padding: 1.6mm 2mm; }
+  body.print-report table.data thead th { position: static; }
+  body.print-report .result-meta { font-size: 8pt; margin-bottom: 2mm; }
 }
 
 /* 설정 */
@@ -1409,8 +1417,12 @@ $("#rDelete").addEventListener("click", async () => {
 });
 $("#rPrint").addEventListener("click", async () => {
   const old = document.title; document.title = `[${state.settings.companyName || "엔코스"}]_${state.currentReport.name}_${state.currentReport.date || today()}`;
-  document.body.classList.add("print-report"); await new Promise((r) => setTimeout(r, 300));
+  document.body.classList.add("print-report");
+  const inSheet = [...charts].filter(([b]) => $("#reportSheet").contains(b)).map(([, ch]) => ch);
+  inSheet.forEach((ch) => ch.resize(680, 240)); // 종이 폭(약 180mm)에 맞춰 다시 그린다
+  await new Promise((r) => setTimeout(r, 300));
   window.print(); document.body.classList.remove("print-report"); document.title = old;
+  inSheet.forEach((ch) => ch.resize());
 });
 $("#rExport").addEventListener("click", () => {
   const rp = state.currentReport, views = rp.viewIds.map((id) => state.views.find((v) => v.id === id)).filter(Boolean);
