@@ -70,7 +70,7 @@ main { max-width: 1440px; margin: 0 auto; padding: 12px 32px 64px; }
 .panel-head h2 { margin: 0; font-size: 17px; letter-spacing: -.01em; }
 .panel-head .sub { color: var(--muted); font-size: 13px; font-weight: 500; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 42px; padding: 0 16px; border-radius: var(--r-ctl); border: 1px solid var(--line-2); background: var(--surface); font-weight: 600; font-size: 14px; cursor: pointer; white-space: nowrap; transition: background .16s, border-color .16s, transform .12s; }
-.btn i { font-size: 17px; } .btn:hover { background: var(--surface-2); } .btn:active { transform: scale(.98); }
+a.btn { text-decoration: none; color: inherit; } .btn i { font-size: 17px; } .btn:hover { background: var(--surface-2); } .btn:active { transform: scale(.98); }
 .btn.dark { background: var(--ink); border-color: var(--ink); color: #fff; } .btn.dark:hover { background: #2b2d33; }
 .btn.brand { background: var(--brand); border-color: var(--brand); color: #fff; } .btn.brand:hover { background: var(--brand-ink); }
 .btn.danger { color: var(--brand); border-color: var(--brand-line); } .btn.danger:hover { background: var(--brand-soft); }
@@ -231,12 +231,27 @@ dialog.modal[open] { animation: pop .22s cubic-bezier(.16, 1, .3, 1); }
 @page { size: A4 portrait; margin: 0; }
 @media print {
   html, body { background: #fff !important; width: 210mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  body > *:not(#appShell), .topbar, main > section:not(#view-certificates), #view-certificates > *:not(.cert-layout), .cert-layout > .panel, .cert-warn { display: none !important; }
-  #appShell, main, .cert-layout, .paper-stage { display: block !important; padding: 0 !important; margin: 0 !important; background: none !important; max-width: none !important; }
+  body:not(.print-report) > *:not(#appShell), body:not(.print-report) .topbar, body:not(.print-report) main > section:not(#view-certificates), #view-certificates > *:not(.cert-layout), .cert-layout > .panel, .cert-warn { display: none !important; }
+  body:not(.print-report) #appShell, body:not(.print-report) main, .cert-layout, .paper-stage { display: block !important; padding: 0 !important; margin: 0 !important; background: none !important; max-width: none !important; }
   .certificate-document { box-shadow: none; border-radius: 0; width: 100%; max-width: 210mm; height: 297mm; min-height: 0; margin: 0 auto; padding: 26mm 18mm 18mm; overflow: hidden; }
   .certificate-document h3 { margin: 8mm auto 20mm; }
   .certificate-grid { width: 148mm !important; margin-bottom: 14mm; } .certificate-grid th, .certificate-grid td { height: 10mm; padding-top: 2.5mm; padding-bottom: 2.5mm; }
   .certificate-footer { margin: 11mm auto 0; width: 148mm; } .certificate-stamp-image { width: 27mm; max-height: 20mm; }
+}
+
+/* 보고서 */
+.report-editor { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; align-items: end; }
+.report-items { display: grid; gap: 4px; margin-top: 14px; } .report-items .code-row span.t { flex: 1; font-weight: 600; font-size: 14px; }
+.report-sheet { margin-top: 16px; } .report-sheet > header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; }
+.report-sheet > header h2 { margin: 0; font-size: 26px; letter-spacing: -.02em; } .report-sheet > header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+.report-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; grid-auto-flow: dense; } .report-card.wide { grid-column: 1 / -1; }
+.report-card .table-scroll { max-height: none; } .report-card .chart-box { height: 230px; margin-bottom: 10px; }
+td.up { color: var(--ok); } td.down { color: var(--brand); }
+@media print {
+  body.print-report { background: #fff !important; width: auto; }
+  body.print-report > *:not(#appShell), body.print-report .topbar, body.print-report main > section:not(#view-report), body.print-report .report-tools { display: none !important; }
+  body.print-report main { padding: 10mm !important; max-width: none; }
+  body.print-report .report-card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; } body.print-report .rise { animation: none !important; }
 }
 
 /* 설정 */
@@ -380,6 +395,8 @@ dialog.modal[open] { animation: pop .22s cubic-bezier(.16, 1, .3, 1); }
         <div class="panel" style="padding:16px">
           <div class="panel-head" style="margin-bottom:8px"><h2 style="font-size:15px">저장된 보기</h2><button class="btn sm" id="viewNew" type="button"><i class="ph ph-plus"></i>새 보기</button></div>
           <div class="views-list" id="viewsList"></div>
+          <div class="panel-head" style="margin:18px 0 8px"><h2 style="font-size:15px">보고서</h2><button class="btn sm" id="reportNew" type="button"><i class="ph ph-plus"></i>새 보고서</button></div>
+          <div class="views-list" id="reportsList"></div>
         </div>
         <div class="grid" style="display:grid;gap:16px">
           <div class="panel">
@@ -399,6 +416,7 @@ dialog.modal[open] { animation: pop .22s cubic-bezier(.16, 1, .3, 1); }
               <label class="field" data-for="trend">종료월<input type="month" id="vToMonth" /></label>
               <label class="field" data-for="point trend">행<select id="vRows"></select></label>
               <label class="field" data-for="point">열<select id="vCols"></select></label>
+              <label class="field" data-for="point">비교<select id="vCompare"><option value="">없음</option><option value="prevMonth">전월 대비</option><option value="prevYear">전년 동일 대비</option><option value="ytd">전년 말 대비</option></select></label>
               <label class="field" data-for="point trend">차트<select id="vChart"><option value="">표만</option><option value="bar">막대</option><option value="stack">누적 막대</option><option value="line">꺾은선</option><option value="pie">도넛</option></select></label>
             </div>
             <div data-for="point trend" style="margin-bottom:16px"><div class="sub-label">지표 <span id="vMetricHint" style="font-weight:400"></span></div><div class="chips" id="vMetrics"></div></div>
@@ -407,6 +425,24 @@ dialog.modal[open] { animation: pop .22s cubic-bezier(.16, 1, .3, 1); }
           <div class="panel result"><p class="note" id="vNote" hidden></p><div id="vResult"></div></div>
         </div>
       </div>
+    </section>
+
+    <section id="view-report" data-view-panel="report" hidden>
+      <div class="page-head report-tools">
+        <div><h1>보고서</h1><p>저장한 보기를 모아 한 장으로 만듭니다. 기준일을 바꾸면 모든 보기가 그 날짜로 다시 계산됩니다.</p></div>
+        <div class="actions"><a class="btn" href="#stats"><i class="ph ph-arrow-left"></i>인사 통계</a><button class="btn" id="rExport" type="button"><i class="ph ph-download-simple"></i>엑셀</button><button class="btn dark" id="rPrint" type="button"><i class="ph ph-printer"></i>인쇄 · PDF</button></div>
+      </div>
+      <div class="panel report-tools">
+        <div class="report-editor">
+          <label class="field" style="grid-column:span 2">보고서 이름<input type="text" id="rName" /></label>
+          <label class="field">기준일<input type="date" id="rDate" /></label>
+          <label class="field">비교<select id="rCompare"><option value="">없음</option><option value="prevMonth">전월 대비</option><option value="prevYear">전년 동일 대비</option><option value="ytd">전년 말 대비</option></select></label>
+          <label class="field">보기 추가<select id="rAdd"></select></label>
+          <div class="actions"><button class="btn danger" id="rDelete" type="button"><i class="ph ph-trash"></i></button><button class="btn dark" id="rSave" type="button">저장</button></div>
+        </div>
+        <div class="report-items" id="rItems"></div>
+      </div>
+      <div class="report-sheet" id="reportSheet"></div>
     </section>
 
     <section id="view-settings" data-view-panel="settings" hidden>
@@ -532,7 +568,7 @@ const DEFAULT_SETTINGS = {
   employmentTypes: ["정규직", "계약직", "파견/외주", "인턴"], locations: [], orgUnits: [], viewsSeeded: false, baselineDate: "",
 };
 
-const state = { user: null, employees: [], history: [], certs: [], views: [], settings: { ...DEFAULT_SETTINGS }, view: "dashboard", currentView: null, editing: null, pendingImport: null, empStatus: "active", rrnKey: null, rrnCache: new Map(), afterUnlock: null };
+const state = { user: null, employees: [], history: [], certs: [], views: [], settings: { ...DEFAULT_SETTINGS }, view: "dashboard", currentView: null, editing: null, pendingImport: null, empStatus: "active", rrnKey: null, rrnCache: new Map(), afterUnlock: null, reports: [], currentReport: null };
 const charts = new Map();
 
 // ---------- 공통 ----------
@@ -697,10 +733,21 @@ function subscribe() {
     state.views = s.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.name.localeCompare(b.name, "ko"));
     loaded.views = true; maybeSeed(); scheduleRender();
   }, onErr));
+  unsubs.push(onSnapshot(col("reports"), (s) => {
+    state.reports = s.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    loaded.reports = true; maybeSeed(); scheduleRender();
+  }, onErr));
 }
-const loaded = { settings: false, views: false, employees: false };
+const loaded = { settings: false, views: false, employees: false, reports: false };
+let seedingReport = false;
 let seeding = false;
-async function maybeSeed() { // 처음 한 번만 기본 보기 7개를 만든다(사용자가 다 지워도 다시 만들지 않음)
+async function maybeSeed() { // 처음 한 번만 기본 보기 7개·기본 보고서 1개를 만든다(사용자가 다 지워도 다시 만들지 않음)
+  if (!seedingReport && loaded.settings && loaded.views && loaded.reports && !state.reports.length && !state.settings.reportsSeeded && state.views.length >= 5) {
+    seedingReport = true;
+    const pick = ["직종별 인원", "조직별 현황", "입퇴사 추이", "인력 구성(직급×성별)", "장애인·외국인"].map((n) => state.views.find((v) => v.name === n)?.id).filter(Boolean);
+    await saveSettings({ reportsSeeded: true });
+    await setDoc(doc(col("reports")), { name: "월간 인사현황", date: "", compare: "prevMonth", viewIds: pick, order: 0 });
+  }
   if (seeding || !loaded.settings || !loaded.views || state.views.length || state.settings.viewsSeeded) return;
   seeding = true;
   await saveSettings({ viewsSeeded: true });
@@ -724,7 +771,7 @@ function route() {
 window.addEventListener("hashchange", route);
 function render() {
   if (!state.user) return;
-  ({ dashboard: renderDashboard, employees: renderEmployees, org: renderOrg, certificates: renderCertificates, stats: renderStats, settings: renderSettings })[state.view]?.();
+  ({ dashboard: renderDashboard, employees: renderEmployees, org: renderOrg, certificates: renderCertificates, stats: renderStats, settings: renderSettings, report: renderReport })[state.view]?.();
 }
 const rise = (el, i) => { el.classList.add("rise"); el.style.setProperty("--i", i); return el; };
 
@@ -1174,7 +1221,9 @@ function renderStats() {
   $("#vMode").value = c.mode || "point"; $("#vDate").value = c.date || ""; $("#vFrom").value = c.from || ""; $("#vFromMonth").value = c.fromMonth || filled.fromMonth; $("#vToMonth").value = c.toMonth || "";
   const dimOpts = (sel, val, none) => { sel.replaceChildren(h("option", { value: "" }, none), ...L.DIMENSIONS.map((d) => h("option", { value: d.key }, d.label))); sel.value = val || ""; };
   dimOpts($("#vRows"), c.rows, c.mode === "trend" ? "(지표별)" : "(전체)"); dimOpts($("#vCols"), c.cols, "(지표별)");
-  $("#vChart").value = c.chart || "";
+  $("#vChart").value = c.chart || ""; $("#vCompare").value = c.compare || ""; $("#vCompare").disabled = !!c.cols;
+  $("#reportsList").replaceChildren(...state.reports.map((r) => h("button", { type: "button", onclick: () => { state.currentReport = structuredClone(r); location.hash = "#report"; } }, icon("files"), r.name)),
+    ...(state.reports.length ? [] : [h("span", { class: "muted small", style: { padding: "4px 12px" } }, "보고서가 없습니다.")]));
   $$("[data-for]").forEach((el) => (el.hidden = !el.dataset.for.split(" ").includes(c.mode || "point")));
   $("#vMetricHint").textContent = c.cols && c.mode === "point" ? "(열을 고르면 첫 지표만 씁니다)" : c.mode === "trend" && c.rows ? "(행을 고르면 첫 지표만 씁니다)" : "";
   $("#vMetrics").replaceChildren(...L.METRICS.map((m) => h("label", {}, h("input", { type: "checkbox", value: m.key, checked: (c.metrics || []).includes(m.key) }), m.label)));
@@ -1214,7 +1263,8 @@ function bindBuilder() {
   const on = (sel, fn) => $(sel).addEventListener("change", (ev) => { fn(ev.target.value); renderStats(); });
   on("#vMode", (v) => { c().mode = v; if (v === "trend") c().cols = ""; });
   on("#vDate", (v) => (c().date = v)); on("#vFrom", (v) => (c().from = v)); on("#vFromMonth", (v) => (c().fromMonth = v)); on("#vToMonth", (v) => (c().toMonth = v));
-  on("#vRows", (v) => (c().rows = v)); on("#vCols", (v) => (c().cols = v)); on("#vChart", (v) => (c().chart = v));
+  on("#vRows", (v) => (c().rows = v)); on("#vCols", (v) => { c().cols = v; if (v) c().compare = ""; }); on("#vChart", (v) => (c().chart = v)); on("#vCompare", (v) => (c().compare = v));
+  $("#reportNew").addEventListener("click", () => { state.currentReport = { name: "새 보고서", date: "", compare: "prevMonth", viewIds: [] }; location.hash = "#report"; });
   $("#vMetrics").addEventListener("change", () => { c().metrics = $$("#vMetrics input:checked").map((i) => i.value); renderStats(); });
   $("#vName").addEventListener("input", (ev) => (state.currentView.name = ev.target.value));
   $("#vStar").addEventListener("click", () => { state.currentView.star = !state.currentView.star; renderStats(); });
@@ -1251,12 +1301,18 @@ function showMembers(title, list) {
 
 function computeResult(cfg) {
   if (cfg.mode === "list") return { list: L.listMembers(state.employees, state.history, state.settings, cfg) };
+  if (cfg.mode === "point" && cfg.compare && !cfg.cols) return L.pivotCompare(state.employees, state.history, state.settings, cfg);
   return L.pivot(state.employees, state.history, state.settings, { ...cfg, metrics: cfg.metrics?.length ? cfg.metrics : ["count"] });
 }
 const LIST_COLS = ["empNo", "name", "dept", "grade", "position", "jobType", "employmentType", "location", "joinDate", "retireDate", "birthDate", "gender", "foreigner", "disability"];
 function resultAoa(cfg) {
   const r = computeResult(cfg);
   if (r.list) return [LIST_COLS.map((c) => L.FIELD_LABELS[c]), ...r.list.map((e) => LIST_COLS.map((c) => e[c] ?? ""))];
+  if (r.compare) {
+    const rk = [...r.rowKeys, ...(cfg.rows ? ["합계"] : [])];
+    return [[dimLabel(cfg.rows) || "", ...r.metrics.flatMap((m) => [metricLabel(m), `${metricLabel(m)} (${r.label} ${r.prevDate})`, "증감"])],
+      ...rk.map((k) => [k, ...r.metrics.flatMap((m) => [r.cur(k, m), r.prev(k, m), r.delta(k, m)])])];
+  }
   const colHead = (k) => (r.colsAreMetrics ? metricLabel(k) : k);
   const rowHead = (k) => (r.rowsAreMetrics ? metricLabel(k) : k);
   const showColTotal = !r.colsAreMetrics && !r.trend;
@@ -1274,6 +1330,18 @@ function renderResult(box, cfg, compact) {
       h("tbody", {}, ...list.slice(0, compact ? 50 : 2000).map((e) => h("tr", { class: "click", onclick: () => openEmployee(e.empNo) }, ...LIST_COLS.map((c) => h("td", {}, e[c] ?? ""))))))));
     return;
   }
+  if (r.compare) {
+    const rk = [...r.rowKeys, ...(cfg.rows ? ["합계"] : [])];
+    const sign = (v) => (v === null ? "-" : v > 0 ? `+${fmtNum(v)}` : fmtNum(v));
+    const exitLike = (m) => m === "exits" || m === "exitRate";
+    const table = h("table", { class: "data" },
+      h("thead", {}, h("tr", {}, h("th", {}, dimLabel(cfg.rows) || ""), ...r.metrics.flatMap((m) => [h("th", { class: "r" }, metricLabel(m)), h("th", { class: "r" }, `${r.label}`), h("th", { class: "r" }, "증감")]))),
+      h("tbody", {}, ...rk.map((k) => h("tr", { class: k === "합계" ? "total" : "" }, h("td", {}, k),
+        ...r.metrics.flatMap((m) => { const d = r.delta(k, m), good = exitLike(m) ? d < 0 : d > 0, judged = ["count", "hires", "exits", "exitRate"].includes(m);
+          return [h("td", { class: "r cell", onclick: () => showMembers(`${k} · ${metricLabel(m)}`, r.members(k, m)) }, fmtNum(r.cur(k, m))), h("td", { class: "r muted" }, fmtNum(r.prev(k, m))), h("td", { class: `r ${d && judged ? (good ? "up" : "down") : ""}` }, sign(d))]; })))));
+    box.replaceChildren(...(compact === true ? [] : [h("p", { class: "result-meta" }, `기준일 ${cfg.date} · 비교 ${r.label} ${r.prevDate} · 숫자를 누르면 명단이 열립니다`)]), h("div", { class: "table-scroll", style: compact ? {} : { maxHeight: "52vh" } }, table));
+    return;
+  }
   const colHead = (k) => (r.colsAreMetrics ? metricLabel(k) : r.trend ? `${k.slice(2, 4)}.${k.slice(5)}` : k);
   const rowHead = (k) => (r.rowsAreMetrics ? metricLabel(k) : k);
   const showColTotal = !r.colsAreMetrics && !r.trend;
@@ -1288,13 +1356,66 @@ function renderResult(box, cfg, compact) {
     h("tbody", {}, ...rowKeys.map((rk) => h("tr", { class: rk === "합계" ? "total" : "" }, h("td", {}, rk === "합계" ? "합계" : rowHead(rk)),
       ...r.colKeys.map((ck) => td(rk, ck)), ...(showColTotal ? [td(rk, "합계", "total")] : [])))));
   const wrap = h("div", { class: "table-scroll", style: compact ? {} : { maxHeight: "52vh" } }, table);
+  if (compact === "report") wrap.style.maxHeight = "none";
   const parts = [];
-  if (!compact) parts.push(h("p", { class: "result-meta" }, cfg.mode === "trend" ? `${cfg.fromMonth} ~ ${cfg.toMonth} · 각 월말 기준 · 숫자를 누르면 명단이 열립니다` : `기준일 ${cfg.date} · 입퇴사 집계 ${cfg.from} ~ ${cfg.date} · 숫자를 누르면 명단이 열립니다`));
+  if (!compact || compact === "report") parts.push(h("p", { class: "result-meta" }, cfg.mode === "trend" ? `${cfg.fromMonth} ~ ${cfg.toMonth} · 각 월말 기준 · 숫자를 누르면 명단이 열립니다` : `기준일 ${cfg.date} · 입퇴사 집계 ${cfg.from} ~ ${cfg.date} · 숫자를 누르면 명단이 열립니다`));
   if (cfg.chart) { const cb = h("div", { class: "chart-box" }, h("canvas", {})); parts.push(cb); drawChart(box, cb.firstChild, r, cfg, rowHead, colHead); }
   parts.push(wrap);
   box.replaceChildren(...parts);
-  if (compact && cfg.chart) wrap.hidden = true;
+  if (compact === true && cfg.chart) wrap.hidden = true;
 }
+
+// ---------- 보고서 ----------
+function reportCfg(rep, view) { // 보고서 기준일·비교를 보기에 덮어쓴다
+  const t = rep.date || today(), c = withDates({ ...view.config, date: rep.date || view.config.date });
+  if (c.mode === "trend") { c.toMonth = t.slice(0, 7); c.fromMonth = L.monthsBetween(`${Number(t.slice(0, 4)) - 1}-${t.slice(5, 7)}`, t.slice(0, 7))[1]; }
+  if (c.mode === "point" && rep.date && !view.config.from) c.from = `${t.slice(0, 4)}-01-01`;
+  if (c.mode === "point" && rep.compare && !c.cols && !view.config.compare) c.compare = rep.compare;
+  return c;
+}
+function renderReport() {
+  if (!state.currentReport) { location.hash = "#stats"; return; }
+  const rp = state.currentReport, views = (rp.viewIds || []).map((id) => state.views.find((v) => v.id === id)).filter(Boolean);
+  if (document.activeElement?.id !== "rName") $("#rName").value = rp.name || "";
+  $("#rDate").value = rp.date || ""; $("#rCompare").value = rp.compare || ""; $("#rDelete").hidden = !rp.id;
+  $("#rAdd").replaceChildren(h("option", { value: "" }, "보기 고르기"), ...state.views.filter((v) => !rp.viewIds.includes(v.id)).map((v) => h("option", { value: v.id }, v.name)));
+  $("#rItems").replaceChildren(...views.map((v, i) => h("div", { class: "code-row" },
+    h("button", { class: "btn sm ghost", type: "button", "aria-label": "위로", onclick: () => moveItem(i, -1) }, icon("caret-up")),
+    h("button", { class: "btn sm ghost", type: "button", "aria-label": "아래로", onclick: () => moveItem(i, 1) }, icon("caret-down")),
+    h("span", { class: "t" }, v.name), h("span", { class: "muted small" }, v.config.mode === "trend" ? "월별 추이" : v.config.mode === "list" ? "명부" : "시점"),
+    h("button", { class: "btn sm ghost", type: "button", "aria-label": "빼기", onclick: () => { rp.viewIds.splice(i, 1); renderReport(); } }, icon("x")))));
+  const d = rp.date || today();
+  $("#reportSheet").replaceChildren(h("header", {}, h("div", {}, h("h2", {}, rp.name || "보고서"), h("p", {}, `${state.settings.companyName || "엔코스"} · 기준일 ${d}${rp.compare ? ` · ${L.COMPARE[rp.compare]} 대비` : ""}`)), h("span", { class: "muted small" }, `작성 ${today()}`)),
+    views.length ? h("div", { class: "report-grid" }, ...views.map((v, i) => {
+      const cfg = reportCfg(rp, v), box = h("div", {});
+      const card = h("div", { class: `panel report-card${cfg.mode === "trend" || cfg.mode === "list" || (cfg.metrics || []).length > 2 || cfg.compare ? " wide" : ""}` }, h("div", { class: "panel-head" }, h("h2", {}, v.name)), box);
+      renderResult(box, cfg, "report");
+      return rise(card, i);
+    })) : h("div", { class: "panel empty" }, icon("files"), h("b", {}, "보기를 추가하세요"), "위 '보기 추가'에서 저장한 보기를 고르면 보고서에 들어갑니다."));
+}
+function moveItem(i, d) { const a = state.currentReport.viewIds, j = i + d; if (j < 0 || j >= a.length) return; [a[i], a[j]] = [a[j], a[i]]; renderReport(); }
+$("#rName").addEventListener("input", (ev) => (state.currentReport.name = ev.target.value));
+$("#rDate").addEventListener("change", (ev) => { state.currentReport.date = ev.target.value; renderReport(); });
+$("#rCompare").addEventListener("change", (ev) => { state.currentReport.compare = ev.target.value; renderReport(); });
+$("#rAdd").addEventListener("change", (ev) => { if (ev.target.value) state.currentReport.viewIds.push(ev.target.value); renderReport(); });
+$("#rSave").addEventListener("click", async () => {
+  const rp = state.currentReport, r = rp.id ? ref("reports", rp.id) : doc(col("reports"));
+  const data = { name: rp.name.trim() || "보고서", date: rp.date || "", compare: rp.compare || "", viewIds: rp.viewIds, order: rp.order ?? state.reports.length };
+  await setDoc(r, data); state.currentReport = { id: r.id, ...data }; toast("보고서를 저장했습니다.");
+});
+$("#rDelete").addEventListener("click", async () => {
+  if (!(await confirmBox(`'${state.currentReport.name}' 보고서를 삭제할까요? 들어 있는 보기는 지워지지 않습니다.`))) return;
+  await deleteDoc(ref("reports", state.currentReport.id)); state.currentReport = null; location.hash = "#stats"; toast("삭제했습니다.");
+});
+$("#rPrint").addEventListener("click", async () => {
+  const old = document.title; document.title = `[${state.settings.companyName || "엔코스"}]_${state.currentReport.name}_${state.currentReport.date || today()}`;
+  document.body.classList.add("print-report"); await new Promise((r) => setTimeout(r, 300));
+  window.print(); document.body.classList.remove("print-report"); document.title = old;
+});
+$("#rExport").addEventListener("click", () => {
+  const rp = state.currentReport, views = rp.viewIds.map((id) => state.views.find((v) => v.id === id)).filter(Boolean);
+  downloadXlsx(`${rp.name}_${rp.date || today()}.xlsx`, views.map((v) => [v.name.replace(/[\/?*[\]:]/g, " "), resultAoa(reportCfg(rp, v))]));
+});
 const PALETTE = ["#16171b", "#d92d20", "#8a8f99", "#f19a92", "#c9ccd3", "#4b4f58", "#b3221a", "#e3e5ea", "#6b7079", "#fbd0cb"];
 async function drawChart(box, canvas, r, cfg, rowHead, colHead) {
   await ensureChart();

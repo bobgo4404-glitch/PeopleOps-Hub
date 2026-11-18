@@ -411,3 +411,32 @@ export function extractRrn(rows) {
   return out;
 }
 export const formatRrn = (d) => (d && d.length === 13 ? `${d.slice(0, 6)}-${d.slice(6)}` : "");
+
+// ---------- 기간 비교 ----------
+export const COMPARE = { prevMonth: "전월", prevYear: "전년", ytd: "전년 말" };
+export function shiftMonths(iso, n) { // 말일은 말일로, 그 외 일자는 해당 월 길이에 맞춰 자른다
+  const [y, m, d] = iso.split("-").map(Number);
+  const t = new Date(Date.UTC(y, m - 1 + n, 1));
+  const ym = `${t.getUTCFullYear()}-${String(t.getUTCMonth() + 1).padStart(2, "0")}`;
+  const end = monthEnd(ym), isEnd = iso === monthEnd(iso.slice(0, 7));
+  return isEnd || d > Number(end.slice(8)) ? end : `${ym}-${String(d).padStart(2, "0")}`;
+}
+export function compareCfg(cfg) { // 비교 시점 설정(기준일·집계 시작일을 같은 만큼 옮긴다)
+  const y = Number(cfg.date.slice(0, 4)), from = cfg.from || `${y}-01-01`;
+  const base = { ...cfg, compare: "" };
+  if (cfg.compare === "prevMonth") return { ...base, date: shiftMonths(cfg.date, -1), from: shiftMonths(from, -1) };
+  if (cfg.compare === "prevYear") return { ...base, date: shiftMonths(cfg.date, -12), from: shiftMonths(from, -12) };
+  if (cfg.compare === "ytd") return { ...base, date: `${y - 1}-12-31`, from: `${y - 1}-01-01` };
+  return null;
+}
+// 시점 표(열 = 지표)에 비교 시점 값과 증감을 붙인다
+export function pivotCompare(employees, history, settings, cfg) {
+  const metrics = cfg.metrics?.length ? cfg.metrics : ["count"];
+  const cur = pivot(employees, history, settings, { ...cfg, compare: "", metrics });
+  const c2 = compareCfg(cfg), prev = pivot(employees, history, settings, { ...c2, metrics });
+  const rowKeys = [...cur.rowKeys, ...prev.rowKeys.filter((k) => !cur.rowKeys.includes(k))];
+  const delta = (a, b) => (a === null || b === null ? null : Math.round((a - b) * 10) / 10);
+  return { compare: true, label: COMPARE[cfg.compare], prevDate: c2.date, rowKeys, metrics,
+    cur: (r, m) => cur.value(r, m), prev: (r, m) => prev.value(r, m), delta: (r, m) => delta(cur.value(r, m), prev.value(r, m)),
+    members: (r, m) => cur.members(r, m) };
+}

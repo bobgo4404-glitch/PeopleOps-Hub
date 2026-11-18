@@ -136,3 +136,15 @@ test("주민번호 암호화: 왕복, 틀린 비밀번호 거부, 같은 값도 
   assert.deepEqual(L.extractRrn([{ 사원코드: "00001", "주민(외국인)등록번호": "900101-1234567" }, { 사원코드: "00002", "주민(외국인)등록번호": "900101-1" }]), { "00001": "9001011234567" });
   assert.equal(L.formatRrn("9001011234567"), "900101-1234567");
 });
+
+test("기간 비교: 시점 이동과 증감", () => {
+  assert.equal(L.shiftMonths("2026-03-31", -1), "2026-02-28");
+  assert.equal(L.shiftMonths("2026-11-18", -1), "2026-10-18");
+  assert.equal(L.shiftMonths("2026-11-30", -12), "2025-11-30");
+  assert.deepEqual([L.compareCfg({ date: "2026-11-18", compare: "ytd" }).date, L.compareCfg({ date: "2026-11-18", compare: "ytd" }).from], ["2025-12-31", "2025-01-01"]);
+  const c = L.pivotCompare(emps, [], settings, { mode: "point", date: "2026-07-31", compare: "prevYear", rows: "dept", metrics: ["count"] });
+  assert.equal(c.prevDate, "2025-07-31");
+  assert.equal(c.delta("영업", "count"), -1);
+  assert.equal(c.delta("생산", "count"), 1);
+  assert.equal(c.delta("합계", "count"), 0);
+});
