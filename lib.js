@@ -373,3 +373,41 @@ export function defaultViews(today) {
     { name: "상세 명부", star: false, config: { mode: "list", filters: [] } },
   ];
 }
+
+// ---------- 주민등록번호 암호화 (개인정보 보호법 제24조의2: 암호화 보관) ----------
+// 잠금 비밀번호 → PBKDF2(SHA-256, 31만 회) → AES-GCM 256. 비밀번호·원문은 저장하지 않는다.
+export const RRN_CHECK = "PEOPLEOPS-RRN-OK";
+export const PBKDF2_ITER = 310000;
+const b64 = (bytes) => btoa(String.fromCharCode(...bytes));
+const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+
+export function newSalt() { return b64(crypto.getRandomValues(new Uint8Array(16))); }
+
+export async function deriveKey(pass, saltB64, iterations = PBKDF2_ITER) {
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", salt: unb64(saltB64), iterations, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+}
+
+export async function encryptText(key, text) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(text)));
+  const out = new Uint8Array(iv.length + ct.length); out.set(iv); out.set(ct, iv.length);
+  return b64(out);
+}
+
+export async function decryptText(key, payload) { // 비밀번호가 틀리면 예외
+  const raw = unb64(payload);
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: raw.slice(0, 12) }, key, raw.slice(12));
+  return new TextDecoder().decode(pt);
+}
+
+// 명부에서 사번 → 주민번호 13자리(숫자만). 저장용이 아니라 암호화 직전에만 쓴다.
+export function extractRrn(rows) {
+  const out = {};
+  for (const r of rows) {
+    const no = clean(r["사원코드"]), d = String(r["주민(외국인)등록번호"] ?? "").replace(/\D/g, "");
+    if (no && d.length === 13) out[no] = d;
+  }
+  return out;
+}
+export const formatRrn = (d) => (d && d.length === 13 ? `${d.slice(0, 6)}-${d.slice(6)}` : "");

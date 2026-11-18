@@ -306,6 +306,7 @@ dialog.modal[open] { animation: pop .22s cubic-bezier(.16, 1, .3, 1); }
     </nav>
     <div class="me">
       <div class="me-chip"><span class="av" id="meAv"></span><div><b id="whoName"></b><small id="whoEmail"></small></div></div>
+      <button class="icon-btn" id="lockBtn" type="button" title="주민번호 잠금" aria-label="주민번호 잠금"><i class="ph ph-lock-simple"></i></button>
       <button class="icon-btn" id="logoutBtn" type="button" title="로그아웃" aria-label="로그아웃"><i class="ph ph-sign-out"></i></button>
     </div>
   </header>
@@ -361,8 +362,8 @@ dialog.modal[open] { animation: pop .22s cubic-bezier(.16, 1, .3, 1); }
           <label class="field">용도<input type="text" id="certPurpose" value="제출용" /></label>
           <label class="field">제출처<input type="text" id="certDest" placeholder="예: 은행" /></label>
           <label class="field">발급일<input type="date" id="certDate" /></label>
-          <label class="small" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="certRrnFull" /> 주민등록번호 전체 표시(저장하지 않음)</label>
-          <input type="text" id="certRrn" placeholder="주민등록번호 13자리" hidden />
+          <label class="field">주민등록번호 표시<select id="certRrnMode"><option value="full">전체</option><option value="masked">뒷자리 가림</option></select></label>
+          <input type="text" id="certRrn" placeholder="주민등록번호 13자리 직접 입력" autocomplete="off" hidden />
           <button class="btn dark" id="certIssue" type="button"><i class="ph ph-printer"></i>발급 기록 후 인쇄</button>
         </div>
         <div class="paper-stage"><div class="certificate-document" id="certPreview"></div></div>
@@ -454,7 +455,7 @@ dialog.modal[open] { animation: pop .22s cubic-bezier(.16, 1, .3, 1); }
         <label class="field">이름<input type="text" name="name" required /></label>
         <label class="field">성별<select name="gender"><option></option><option>남</option><option>여</option></select></label>
         <label class="field">생년월일<input type="date" name="birthDate" /></label>
-        <label class="field">주민번호 앞 7자리<input type="text" name="rrnFront7" placeholder="900101-1" /></label>
+        <label class="field">주민등록번호<input type="text" id="empRrn" autocomplete="off" inputmode="numeric" /></label>
         <label class="field">내외국인<select name="foreigner"><option>내국인</option><option>외국인</option></select></label>
         <label class="field">국적<input type="text" name="nationality" /></label>
         <label class="field">장애<select name="disability"><option value="">비장애</option><option>장애(경증)</option><option>장애(중증)</option></select></label>
@@ -494,6 +495,17 @@ dialog.modal[open] { animation: pop .22s cubic-bezier(.16, 1, .3, 1); }
   <div class="dlg-foot"><span class="grow"></span><button class="btn" type="button" id="confirmNo">취소</button><button class="btn dark" type="button" id="confirmYes">확인</button></div>
 </div></dialog>
 
+<dialog id="lockDialog" class="modal" style="width:min(460px, calc(100vw - 24px))"><form class="dlg" id="lockForm" method="dialog">
+  <div class="dlg-head"><span class="brand-mark" style="box-shadow:none"><i class="ph-fill ph-lock-simple"></i></span><div><h2 id="lockTitle">잠금 해제</h2><p id="lockSub"></p></div></div>
+  <div class="dlg-body" style="display:grid;gap:12px">
+    <label class="field">잠금 비밀번호<input type="password" id="lockPass" autocomplete="current-password" /></label>
+    <label class="field" id="lockPass2Wrap">한 번 더 입력<input type="password" id="lockPass2" autocomplete="new-password" /></label>
+    <p class="small" id="lockErr" style="color:var(--brand);margin:0"></p>
+    <p class="muted small" style="margin:0">비밀번호는 어디에도 저장되지 않습니다. 잊으면 저장된 주민번호를 풀 수 없으니, 초기화 후 명부를 다시 올려야 합니다.</p>
+  </div>
+  <div class="dlg-foot"><button class="btn ghost grow" type="button" id="lockReset">비밀번호를 잊었어요</button><button class="btn" type="button" id="lockCancel">취소</button><button class="btn dark" type="submit" id="lockOk">확인</button></div>
+</form></dialog>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script type="module">
@@ -520,7 +532,7 @@ const DEFAULT_SETTINGS = {
   employmentTypes: ["정규직", "계약직", "파견/외주", "인턴"], locations: [], orgUnits: [], viewsSeeded: false, baselineDate: "",
 };
 
-const state = { user: null, employees: [], history: [], certs: [], views: [], settings: { ...DEFAULT_SETTINGS }, view: "dashboard", currentView: null, editing: null, pendingImport: null, empStatus: "active" };
+const state = { user: null, employees: [], history: [], certs: [], views: [], settings: { ...DEFAULT_SETTINGS }, view: "dashboard", currentView: null, editing: null, pendingImport: null, empStatus: "active", rrnKey: null, rrnCache: new Map(), afterUnlock: null };
 const charts = new Map();
 
 // ---------- 공통 ----------
@@ -583,13 +595,79 @@ function avatar(name, cls = "") {
   return h("span", { class: `av ${cls}`, style: { background: AV[k][0], color: AV[k][1] } }, n.length > 2 ? n.slice(-2) : n);
 }
 
+// ---------- 주민번호 잠금 ----------
+// 잠금 비밀번호로 만든 열쇠는 이 탭의 메모리에만 둔다. 새로고침·로그아웃하면 다시 잠긴다.
+const rrnOf = (e) => (e && state.rrnCache.get(e.empNo)?.plain) || "";
+async function syncRrnCache() {
+  if (!state.rrnKey) return;
+  let changed = false;
+  for (const e of state.employees) {
+    if (!e.rrnEnc) { if (state.rrnCache.delete(e.empNo)) changed = true; continue; }
+    const c = state.rrnCache.get(e.empNo);
+    if (c && c.enc === e.rrnEnc) continue;
+    try { state.rrnCache.set(e.empNo, { enc: e.rrnEnc, plain: await L.decryptText(state.rrnKey, e.rrnEnc) }); changed = true; } catch { /* 다른 열쇠로 만든 값 */ }
+  }
+  if (changed && ["certificates", "employees"].includes(state.view)) scheduleRender();
+}
+function updateLockBtn() {
+  const on = !!state.rrnKey;
+  $("#lockBtn").replaceChildren(icon(on ? "lock-simple-open" : "lock-simple", !on));
+  $("#lockBtn").title = on ? "주민번호 잠금 해제됨 (누르면 다시 잠금)" : "주민번호 잠금 (눌러서 해제)";
+  $("#lockBtn").style.color = on ? "var(--ok)" : "";
+}
+function openLock(after) {
+  state.afterUnlock = after || null;
+  const create = !state.settings.rrnCrypto;
+  $("#lockTitle").textContent = create ? "잠금 비밀번호 만들기" : "주민번호 잠금 해제";
+  $("#lockSub").textContent = create ? "주민등록번호를 암호화할 비밀번호를 정하세요. 8자 이상." : "증명서에 주민번호 전체를 넣으려면 잠금을 푸세요.";
+  $("#lockPass2Wrap").hidden = !create; $("#lockReset").hidden = create;
+  $("#lockPass").value = $("#lockPass2").value = ""; $("#lockErr").textContent = "";
+  $("#lockPass").autocomplete = create ? "new-password" : "current-password";
+  $("#lockDialog").showModal(); $("#lockPass").focus();
+}
+$("#lockBtn").addEventListener("click", () => {
+  if (state.rrnKey) { state.rrnKey = null; state.rrnCache.clear(); updateLockBtn(); render(); toast("주민번호를 다시 잠갔습니다."); return; }
+  openLock();
+});
+$("#lockCancel").addEventListener("click", () => { state.afterUnlock = null; $("#lockDialog").close(); });
+$("#lockForm").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const pass = $("#lockPass").value, cfg = state.settings.rrnCrypto;
+  $("#lockOk").disabled = true; $("#lockErr").textContent = "";
+  try {
+    if (!cfg) {
+      if (pass.length < 8) throw new Error("8자 이상으로 정하세요.");
+      if (pass !== $("#lockPass2").value) throw new Error("두 번 입력한 비밀번호가 다릅니다.");
+      const salt = L.newSalt(), key = await L.deriveKey(pass, salt);
+      await saveSettings({ rrnCrypto: { salt, iter: L.PBKDF2_ITER, check: await L.encryptText(key, L.RRN_CHECK) } });
+      state.rrnKey = key;
+    } else {
+      const key = await L.deriveKey(pass, cfg.salt, cfg.iter || L.PBKDF2_ITER);
+      try { if ((await L.decryptText(key, cfg.check)) !== L.RRN_CHECK) throw 0; } catch { throw new Error("비밀번호가 맞지 않습니다."); }
+      state.rrnKey = key;
+    }
+    $("#lockDialog").close(); updateLockBtn();
+    await syncRrnCache(); render();
+    toast("잠금을 풀었습니다. 이 탭을 닫거나 새로고침하면 다시 잠깁니다.");
+    const next = state.afterUnlock; state.afterUnlock = null; if (next) next();
+  } catch (e) { $("#lockErr").textContent = e.message; }
+  finally { $("#lockOk").disabled = false; }
+});
+$("#lockReset").addEventListener("click", async () => {
+  if (!(await confirmBox("잠금 비밀번호를 초기화합니다. 저장된 주민번호(암호문)가 모두 지워지고, 새 비밀번호를 만든 뒤 명부를 다시 올려야 합니다. 계속할까요?"))) return;
+  const ops = state.employees.filter((e) => e.rrnEnc).map((e) => { const { rrnEnc, ...rest } = e; return ["set", ref("employees", e.empNo), rest]; });
+  await commitOps(ops); await saveSettings({ rrnCrypto: null });
+  state.rrnKey = null; state.rrnCache.clear(); updateLockBtn();
+  $("#lockDialog").close(); toast("초기화했습니다. 자물쇠를 눌러 새 비밀번호를 만드세요.");
+});
+
 // ---------- 로그인·구독 ----------
 $("#loginBtn").addEventListener("click", () => signInWithPopup(auth, new GoogleAuthProvider()).catch((e) => toast(`로그인 실패: ${e.code || e.message}`)));
 $("#logoutBtn").addEventListener("click", () => signOut(auth));
 let unsubs = [];
 onAuthStateChanged(auth, async (user) => {
   unsubs.forEach((u) => u()); unsubs = [];
-  state.user = user;
+  state.user = user; state.rrnKey = null; state.rrnCache.clear(); updateLockBtn();
   if (!user) { $("#appShell").hidden = true; $("#loginScreen").hidden = false; return; }
   try {
     const ownerRef = ref("appMeta", "owner");
@@ -612,7 +690,7 @@ function subscribe() {
     if (!s.exists()) { setDoc(SETTINGS_REF(), DEFAULT_SETTINGS); return; }
     state.settings = { ...DEFAULT_SETTINGS, ...s.data() }; loaded.settings = true; maybeSeed(); scheduleRender();
   }, onErr));
-  unsubs.push(onSnapshot(col("employees"), (s) => { state.employees = s.docs.map((d) => d.data()); loaded.employees = true; scheduleRender(); }, onErr));
+  unsubs.push(onSnapshot(col("employees"), (s) => { state.employees = s.docs.map((d) => d.data()); loaded.employees = true; scheduleRender(); syncRrnCache(); }, onErr));
   unsubs.push(onSnapshot(col("employeeHistory"), (s) => { state.history = s.docs.map((d) => ({ id: d.id, ...d.data() })); scheduleRender(); }, onErr));
   unsubs.push(onSnapshot(col("certificates"), (s) => { state.certs = s.docs.map((d) => ({ id: d.id, ...d.data() })); scheduleRender(); }, onErr));
   unsubs.push(onSnapshot(col("statViews"), (s) => {
@@ -823,6 +901,9 @@ function openEmployee(empNo) {
   $("#empChip").replaceChildren(empNo ? h("span", { class: `chip ${statusOf(e)}` }, statusOf(e)) : "");
   $("#empDelete").hidden = $("#empCert").hidden = $("#empHistoryBox").hidden = !empNo;
   $("#empEffective").value = today();
+  const rr = $("#empRrn");
+  rr.disabled = !state.rrnKey; rr.value = state.rrnKey ? L.formatRrn(rrnOf(e)) : (e.rrnFront7 ? `${e.rrnFront7}******` : "");
+  rr.placeholder = state.rrnKey ? "13자리" : "잠금을 풀면 보이고 고칠 수 있습니다";
   const hist = state.history.filter((x) => x.empNo === empNo).sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.at || 0) - (a.at || 0));
   $("#empHistory").replaceChildren(...(hist.length ? hist.map((x) => h("div", {}, h("time", {}, dot(x.date)),
     h("span", {}, h("b", {}, L.FIELD_LABELS[x.field] || x.field), "  ", h("em", {}, x.before || "(없음)"), " → ", x.after || "(없음)"))) : [h("span", { class: "muted small" }, "변경 이력이 없습니다.")]));
@@ -841,6 +922,12 @@ $("#empSave").addEventListener("click", async () => {
   if (!old && empByNo()[data.empNo]) return toast("이미 있는 사번입니다.");
   const next = { ...(old || L.newEmployee({}, t)), ...data };
   next.status = L.statusFor(next, t);
+  if (state.rrnKey) {
+    const d = $("#empRrn").value.replace(/\D/g, "");
+    if (d && d.length !== 13) return toast("주민등록번호는 13자리로 입력하세요.");
+    if (d && d !== rrnOf(old)) { next.rrnEnc = await L.encryptText(state.rrnKey, d); next.rrnFront7 = L.birthFromRrn(d).rrnFront7; next.birthDate ||= L.birthFromRrn(d).birthDate; }
+    if (!d) { delete next.rrnEnc; }
+  }
   const ops = [["set", ref("employees", next.empNo), next]];
   if (old) L.historyEntries(next.empNo, L.diffFields(old, next), $("#empEffective").value || t).forEach((x) => ops.push(historyOp(x)));
   await commitOps(ops);
@@ -876,12 +963,24 @@ $("#empFile").addEventListener("change", async (ev) => {
     await ensureXlsx();
     const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
     const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "", raw: true });
-    const parsed = L.parseRoster(rows);
-    state.pendingImport = L.mergeRoster(empByNo(), parsed, today());
-    state.pendingImport.missing = state.employees.filter((e) => !parsed.some((p) => p.empNo === e.empNo) && statusOf(e) !== "퇴직");
-    showImportPreview(file.name, parsed.length);
+    await prepareImport(file.name, rows);
   } catch (e) { console.error(e); toast(e.message || "명부를 읽지 못했습니다."); }
 });
+async function prepareImport(fileName, rows) {
+  const parsed = L.parseRoster(rows), rrn = L.extractRrn(rows);
+  if (Object.keys(rrn).length && !state.rrnKey) { // 주민번호는 잠금을 푼 상태에서만 암호화해 넣는다
+    toast("명부의 주민번호를 암호화하려면 먼저 잠금을 풀어 주세요.");
+    openLock(() => prepareImport(fileName, rows).catch((e) => toast(e.message)));
+    return;
+  }
+  await syncRrnCache();
+  const existing = empByNo();
+  state.pendingImport = L.mergeRoster(existing, parsed, today());
+  state.pendingImport.missing = state.employees.filter((e) => !parsed.some((p) => p.empNo === e.empNo) && statusOf(e) !== "퇴직");
+  state.pendingImport.rrn = rrn;
+  state.pendingImport.rrnNeed = new Set(Object.keys(rrn).filter((no) => !existing[no]?.rrnEnc || rrnOf(existing[no]) !== rrn[no]));
+  showImportPreview(fileName, parsed.length);
+}
 function showImportPreview(fileName, total) {
   const { creates, updates, unchanged, missing } = state.pendingImport;
   const changeRows = updates.flatMap((u) => Object.entries(u.changes).filter(([f]) => f !== "rrnFront7").map(([f, c]) => [u.empNo, u.next.name, L.FIELD_LABELS[f] || f, c.before, c.after]));
@@ -889,7 +988,8 @@ function showImportPreview(fileName, total) {
   const stat = (label, n, cls) => h("div", {}, h("span", {}, label), h("b", { class: cls || "" }, fmtNum(n), h("small", {}, "명")));
   $("#importBody").replaceChildren(
     h("div", { class: "metric-trio" }, stat("신규", creates.length), stat("변경", updates.length), stat("변경 없음", unchanged)),
-    h("p", { class: "muted small" }, "명부의 항목(부서·직급·직종·입퇴사일·연락처 등)만 반영하고, 앱에서 입력한 직책·고용형태·근무지·장애·메모·휴직은 그대로 둡니다. 급여·보험·계좌·주민번호 뒷자리는 가져오지 않습니다."),
+    h("p", { class: "muted small" }, "명부의 항목(부서·직급·직종·입퇴사일·연락처 등)만 반영하고, 앱에서 입력한 직책·고용형태·근무지·장애·메모·휴직은 그대로 둡니다. 급여·보험·계좌는 가져오지 않고, 주민등록번호는 암호화해서만 저장합니다."),
+    state.pendingImport.rrnNeed.size ? h("p", { class: "small", style: { display: "flex", gap: "6px", alignItems: "center" } }, icon("lock-simple", true), `주민등록번호 ${state.pendingImport.rrnNeed.size}명분을 암호화해 저장합니다.`) : "",
     missing.length ? h("p", { class: "note" }, `명부에 없는 재직자 ${missing.length}명: ${missing.slice(0, 10).map((e) => e.name).join(", ")}${missing.length > 10 ? " 외" : ""}. 자동으로 지우지 않습니다.`) : "",
     changeRows.length ? h("table", { class: "data" }, h("thead", {}, h("tr", {}, ...["사번", "이름", "항목", "이전", "이후"].map((x) => h("th", {}, x)))),
       h("tbody", {}, ...changeRows.slice(0, 300).map((r) => h("tr", {}, ...r.map((x) => h("td", {}, x || "(없음)")))))) : "",
@@ -899,19 +999,25 @@ function showImportPreview(fileName, total) {
   $("#importDialog").showModal();
 }
 $("#importApply").addEventListener("click", async () => {
-  const { creates, updates } = state.pendingImport, eff = $("#importEffective").value || today();
-  const ops = [...creates.map((e) => ["set", ref("employees", e.empNo), e])];
+  const { creates, updates, rrn, rrnNeed } = state.pendingImport, eff = $("#importEffective").value || today();
+  $("#importApply").disabled = true;
+  const enc = async (e) => (rrnNeed.has(e.empNo) && state.rrnKey ? { ...e, rrnEnc: await L.encryptText(state.rrnKey, rrn[e.empNo]) } : e);
+  for (let i = 0; i < creates.length; i++) creates[i] = await enc(creates[i]);
+  for (const u of updates) u.next = await enc(u.next);
+  const touched = new Set([...creates, ...updates].map((e) => e.empNo));
+  const rrnOnly = [];
+  for (const no of rrnNeed) if (!touched.has(no) && empByNo()[no] && state.rrnKey) rrnOnly.push(await enc(empByNo()[no]));
+  const ops = [...creates.map((e) => ["set", ref("employees", e.empNo), e]), ...rrnOnly.map((e) => ["set", ref("employees", e.empNo), e])];
   for (const u of updates) {
     ops.push(["set", ref("employees", u.empNo), u.next]);
     const tracked = Object.fromEntries(Object.entries(u.changes).filter(([f]) => L.TRACKED.includes(f)));
     L.historyEntries(u.empNo, tracked, eff).forEach((x) => ops.push(historyOp(x)));
   }
-  $("#importApply").disabled = true;
   try {
     await commitOps(ops);
     await ensureCodes([...creates, ...updates.map((u) => u.next)]);
     if (!state.settings.baselineDate) await saveSettings({ baselineDate: today() });
-    $("#importDialog").close(); toast(`반영했습니다. 신규 ${creates.length}명, 변경 ${updates.length}명`);
+    $("#importDialog").close(); toast(`반영했습니다. 신규 ${creates.length}명, 변경 ${updates.length}명${rrnNeed.size ? `, 주민번호 ${rrnNeed.size}명 암호화` : ""}`);
   } catch (e) { console.error(e); toast("반영 중 오류가 났습니다. 다시 시도하세요."); }
   finally { $("#importApply").disabled = false; }
 });
@@ -965,7 +1071,10 @@ function certEmployee() {
 }
 const koDate = (iso, sp = false) => { if (!iso) return ""; const [y, m, d] = iso.split("-"); return sp ? `${y}  년  ${m}  월  ${d}  일` : `${y}년  ${m}월  ${d}일`; };
 function rrnDisplay(e) {
-  if ($("#certRrnFull").checked) { const d = $("#certRrn").value.replace(/\D/g, ""); if (d.length === 13) return `${d.slice(0, 6)}-${d.slice(6)}`; }
+  if ($("#certRrnMode").value === "full") {
+    const full = rrnOf(e) || $("#certRrn").value.replace(/\D/g, "");
+    if (full.length === 13) return L.formatRrn(full);
+  }
   return e.rrnFront7 ? `${e.rrnFront7}******` : "";
 }
 function certNumber(e, date) {
@@ -981,6 +1090,10 @@ function renderCertPreview() {
   const st = statusOf(e);
   if (type === "퇴직증명서" && !e.retireDate) box.append(h("p", { class: "cert-warn" }, "퇴사일이 없는 사원입니다. 사원 정보에 퇴사일을 입력하세요. (인쇄되지 않음)"));
   if (type === "재직증명서" && st === "퇴직") box.append(h("p", { class: "cert-warn" }, "퇴직한 사원입니다. 경력증명서나 퇴직증명서를 쓰세요. (인쇄되지 않음)"));
+  const needManual = $("#certRrnMode").value === "full" && !rrnOf(e);
+  $("#certRrn").hidden = !needManual;
+  if (needManual && $("#certRrn").value.replace(/\D/g, "").length !== 13)
+    box.append(h("p", { class: "cert-warn" }, state.rrnKey ? "이 사원은 저장된 주민번호가 없습니다. 왼쪽에 직접 입력하거나 명부를 다시 올리세요. (인쇄되지 않음)" : "주민번호가 잠겨 있어 뒷자리를 가렸습니다. 위 자물쇠로 잠금을 풀거나 왼쪽에 직접 입력하세요. (인쇄되지 않음)"));
   if (!state.settings.companyName) box.append(h("p", { class: "cert-warn" }, "회사명이 비어 있습니다. 설정에서 회사 정보를 입력하세요. (인쇄되지 않음)"));
   const end = type === "재직증명서" ? date : e.retireDate || date;
   const rows = [["성명", e.name], ["주민등록번호", rrnDisplay(e)], ["직급", e.grade], ...(e.position && e.position !== "팀원" ? [["직책", e.position]] : []),
@@ -1006,7 +1119,8 @@ function renderCertificates() {
     : [h("tr", {}, h("td", { colspan: 6, class: "empty", style: { padding: "32px" } }, "발급 기록이 없습니다."))]));
 }
 ["#certEmp", "#certType", "#certPurpose", "#certDest", "#certDate", "#certRrn"].forEach((s) => $(s).addEventListener("input", renderCertPreview));
-$("#certRrnFull").addEventListener("change", () => { $("#certRrn").hidden = !$("#certRrnFull").checked; $("#certRrn").value = ""; renderCertPreview(); });
+$("#certRrnMode").addEventListener("change", () => { $("#certRrn").value = ""; renderCertPreview(); });
+$("#certEmp").addEventListener("change", () => { $("#certRrn").value = ""; renderCertPreview(); });
 async function printCert(e, type) {
   const old = document.title;
   document.title = `[${state.settings.companyName || "회사"}]_[${e.name}]_[${type}]`;
@@ -1018,7 +1132,9 @@ async function printCert(e, type) {
 $("#certIssue").addEventListener("click", async () => {
   const e = certEmployee(), type = $("#certType").value, date = $("#certDate").value || today();
   if (!e) return toast("대상 사원을 고르세요.");
-  if ($("#certRrnFull").checked && $("#certRrn").value.replace(/\D/g, "").length !== 13) return toast("주민등록번호 13자리를 입력하세요.");
+  if ($("#certRrnMode").value === "full" && !rrnOf(e) && $("#certRrn").value.replace(/\D/g, "").length !== 13) {
+    if (!(await confirmBox("주민번호 전체를 표시할 수 없어 뒷자리를 가린 채 발급합니다. 계속할까요? (잠금을 풀면 전체 번호가 들어갑니다)"))) return;
+  }
   const rec = { number: certNumber(e, date), type, empNo: e.empNo, name: e.name, purpose: $("#certPurpose").value.trim(), destination: $("#certDest").value.trim(), issueDate: date, createdAt: new Date().toISOString() };
   await setDoc(doc(col("certificates")), rec);
   await printCert(e, type);
@@ -1027,7 +1143,7 @@ function reprint(c) {
   const e = empByNo()[c.empNo];
   if (!e) return toast("사원 정보가 없어 재출력할 수 없습니다.");
   $("#certEmp").value = `${e.name} (${e.empNo})`; $("#certType").value = c.type; $("#certPurpose").value = c.purpose || ""; $("#certDest").value = c.destination || ""; $("#certDate").value = c.issueDate;
-  $("#certRrnFull").checked = false; $("#certRrn").hidden = true;
+  $("#certRrn").value = "";
   printCert(e, c.type);
 }
 $("#certExport").addEventListener("click", () => downloadXlsx(`증명서발급대장_${today()}.xlsx`, [["발급대장", [["발급번호", "종류", "이름", "사번", "발급일", "용도", "제출처"],

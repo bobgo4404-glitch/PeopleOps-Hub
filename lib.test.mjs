@@ -123,3 +123,16 @@ test("상세 명부와 기본 보기", () => {
   assert.equal(v.length, 7);
   assert.equal(v[3].config.fromMonth, "2025-12");
 });
+
+test("주민번호 암호화: 왕복, 틀린 비밀번호 거부, 같은 값도 매번 다른 암호문", async () => {
+  const salt = L.newSalt();
+  const key = await L.deriveKey("correct horse", salt, 1000);
+  const a = await L.encryptText(key, "9001011234567"), b = await L.encryptText(key, "9001011234567");
+  assert.notEqual(a, b);
+  assert.ok(!a.includes("9001011234567"));
+  assert.equal(await L.decryptText(key, a), "9001011234567");
+  const wrong = await L.deriveKey("wrong", salt, 1000);
+  await assert.rejects(L.decryptText(wrong, a));
+  assert.deepEqual(L.extractRrn([{ 사원코드: "00001", "주민(외국인)등록번호": "900101-1234567" }, { 사원코드: "00002", "주민(외국인)등록번호": "900101-1" }]), { "00001": "9001011234567" });
+  assert.equal(L.formatRrn("9001011234567"), "900101-1234567");
+});
