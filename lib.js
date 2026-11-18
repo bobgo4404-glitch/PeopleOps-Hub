@@ -434,7 +434,9 @@ export function pivotCompare(employees, history, settings, cfg) {
   const metrics = cfg.metrics?.length ? cfg.metrics : ["count"];
   const cur = pivot(employees, history, settings, { ...cfg, compare: "", metrics });
   const c2 = compareCfg(cfg), prev = pivot(employees, history, settings, { ...c2, metrics });
-  const rowKeys = [...cur.rowKeys, ...prev.rowKeys.filter((k) => !cur.rowKeys.includes(k))];
+  const nz = (v) => v !== null && v !== 0;
+  const rowKeys = [...cur.rowKeys, ...prev.rowKeys.filter((k) => !cur.rowKeys.includes(k))]
+    .filter((k) => metrics.some((m) => nz(cur.value(k, m)) || nz(prev.value(k, m)))); // 양쪽 모두 0인 줄은 뺀다
   const delta = (a, b) => (a === null || b === null ? null : Math.round((a - b) * 10) / 10);
   return { compare: true, label: COMPARE[cfg.compare], prevDate: c2.date, rowKeys, metrics,
     cur: (r, m) => cur.value(r, m), prev: (r, m) => prev.value(r, m), delta: (r, m) => delta(cur.value(r, m), prev.value(r, m)),

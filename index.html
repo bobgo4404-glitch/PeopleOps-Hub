@@ -251,15 +251,23 @@ td.up { color: var(--ok); } td.down { color: var(--brand); }
   body.print-report { background: #fff !important; width: auto; }
   body.print-report > *:not(#appShell), body.print-report .topbar, body.print-report main > section:not(#view-report), body.print-report .report-tools { display: none !important; }
   body.print-report main { padding: 10mm !important; max-width: none; }
-  body.print-report .report-card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; } body.print-report .rise { animation: none !important; }
+  body.print-report .report-card.wide { break-inside: auto; }
+  body.print-report .report-sheet > header { border-bottom: 0.8mm solid #16171b; padding-bottom: 3mm; margin-bottom: 5mm; }
   body.print-report .report-grid { display: block !important; }
-  body.print-report .report-card { margin-bottom: 6mm; padding: 4mm 5mm; border-radius: 3mm; }
-  body.print-report .report-card .chart-box { height: auto !important; }
+  body.print-report .report-card { display: block; margin-bottom: 7mm !important; }
+  body.print-report .report-card:not(.wide) { display: inline-block; vertical-align: top; width: calc(50% - 3mm); }
+  body.print-report .report-card:not(.wide):nth-child(even) { margin-left: 5mm !important; }
+  body.print-report .report-card { background: none; box-shadow: none !important; border: 0; border-top: 0.5mm solid #16171b; border-radius: 0; padding: 2.5mm 0 0; margin: 0; }
+  body.print-report .report-card:not(.wide) { break-inside: avoid; }
+  body.print-report .report-card .panel-head { margin-bottom: 2mm; } body.print-report .report-card .panel-head h2 { font-size: 11.5pt; }
+  body.print-report .report-card .chart-box { height: auto !important; margin-bottom: 2mm; }
   body.print-report .report-card canvas { width: 100% !important; height: auto !important; max-width: 100% !important; }
-  body.print-report .table-scroll { overflow: visible !important; max-height: none !important; }
-  body.print-report table.data { font-size: 9pt; } body.print-report table.data th, body.print-report table.data td { padding: 1.6mm 2mm; }
-  body.print-report table.data thead th { position: static; }
-  body.print-report .result-meta { font-size: 8pt; margin-bottom: 2mm; }
+  body.print-report .table-scroll { display: contents; }
+  body.print-report .rise { animation: none !important; transform: none !important; opacity: 1 !important; }
+  body.print-report table.data { font-size: 8.5pt; } body.print-report table.data th, body.print-report table.data td { padding: 1.3mm 1.8mm; }
+  body.print-report table.data thead { display: table-header-group; } body.print-report table.data thead th { position: static; border-bottom: 0.3mm solid #999; }
+  body.print-report table.data tbody td { border-bottom: 0.15mm solid #e2e2e2; } body.print-report table.data tr { break-inside: avoid; }
+  body.print-report .result-meta { display: none; }
 }
 
 /* 설정 */
@@ -1418,11 +1426,14 @@ $("#rDelete").addEventListener("click", async () => {
 $("#rPrint").addEventListener("click", async () => {
   const old = document.title; document.title = `[${state.settings.companyName || "엔코스"}]_${state.currentReport.name}_${state.currentReport.date || today()}`;
   document.body.classList.add("print-report");
+  const grid = $("#reportSheet .report-grid"), order = grid ? [...grid.children] : [];
+  if (grid) [...order].sort((x, y) => x.classList.contains("wide") - y.classList.contains("wide")).forEach((c) => grid.append(c)); // 작은 표를 앞으로 모아 2개씩
   const inSheet = [...charts].filter(([b]) => $("#reportSheet").contains(b)).map(([, ch]) => ch);
   inSheet.forEach((ch) => ch.resize(680, 240)); // 종이 폭(약 180mm)에 맞춰 다시 그린다
   await new Promise((r) => setTimeout(r, 300));
   window.print(); document.body.classList.remove("print-report"); document.title = old;
   inSheet.forEach((ch) => ch.resize());
+  order.forEach((c) => grid.append(c));
 });
 $("#rExport").addEventListener("click", () => {
   const rp = state.currentReport, views = rp.viewIds.map((id) => state.views.find((v) => v.id === id)).filter(Boolean);
