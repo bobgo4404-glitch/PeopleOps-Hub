@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>PeopleOps Hub</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600&display=swap" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
 <script type="importmap">
 { "imports": {
   "firebase/app": "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js",
@@ -13,282 +17,439 @@
 } }
 </script>
 <style>
-  :root {
-    --bg: #f7f8fa; --panel: #fff; --surface-muted: #f2f3f6; --line: #e6e8ec; --line-strong: #cbd0d9;
-    --text: #16181d; --muted: #5c626e; --subtle: #8a909b;
-    --accent: #1f3b64; --accent-strong: #152a48; --accent-soft: #eef2f8; --accent-line: #c9d4e5;
-    --brand: #d92d20; --danger: #d92d20; --danger-soft: #fef3f2; --ok: #067647; --ok-soft: #ecfdf3; --warn: #b54708; --warn-soft: #fffaeb;
-    --shadow: 0 1px 2px rgba(16, 24, 40, .05); --shadow-lift: 0 4px 12px rgba(16, 24, 40, .07), 0 1px 3px rgba(16, 24, 40, .05);
-    --radius: 12px; --radius-sm: 8px;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 "Pretendard Variable", Pretendard, -apple-system, "Malgun Gothic", sans-serif; -webkit-font-smoothing: antialiased; }
-  button, input, select, textarea { font: inherit; color: inherit; }
-  [hidden] { display: none !important; }
-  .app { display: grid; grid-template-columns: 256px minmax(0, 1fr); min-height: 100vh; }
-  .sidebar { background: #fff; border-right: 1px solid var(--line); display: flex; flex-direction: column; padding: 18px 12px; position: sticky; top: 0; height: 100vh; }
-  .brand { display: flex; gap: 12px; align-items: center; padding: 4px 10px 18px; border-bottom: 1px solid var(--surface-muted); }
-  .brand-mark { width: 40px; height: 40px; border-radius: 12px; background: var(--brand); color: #fff; display: grid; place-items: center; box-shadow: 0 2px 8px rgba(217, 45, 32, .28); flex: none; }
-  .brand-mark svg { width: 22px; height: 22px; }
-  .brand strong { display: block; font-size: 1rem; font-weight: 700; } .brand span { display: block; color: var(--muted); font-size: .78rem; }
-  .nav { display: grid; gap: 2px; margin-top: 14px; align-content: start; flex: 1; overflow-y: auto; }
-  .nav-label { margin: 14px 10px 4px; color: var(--muted); font-size: .72rem; font-weight: 700; letter-spacing: .06em; }
-  .nav a { display: flex; gap: 10px; align-items: center; min-height: 40px; padding: 0 12px; border-radius: var(--radius-sm); color: var(--muted); text-decoration: none; font-weight: 500; transition: background .16s, color .16s; }
-  .nav a:hover { background: var(--surface-muted); color: var(--text); }
-  .nav a.active { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
-  .nav svg { width: 18px; height: 18px; flex: none; }
-  .who { margin-top: auto; border-top: 1px solid var(--surface-muted); padding: 14px 10px 2px; font-size: .8rem; color: var(--muted); display: grid; gap: 4px; }
-  .who strong { color: var(--text); font-size: .88rem; } .who span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .who .btn { margin-top: 8px; justify-content: center; width: 100%; }
-  main { padding: 28px 32px 56px; min-width: 0; max-width: 1480px; }
-  .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
-  h1 { font-size: 1.45rem; line-height: 1.3; margin: 0; letter-spacing: -.01em; } .page-head p { margin: 4px 0 0; color: var(--muted); font-size: .9rem; }
-  h2 { font-size: 1.02rem; margin: 0 0 12px; } h3 { font-size: .92rem; margin: 0 0 8px; }
-  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); min-width: 0; }
-  .grid { display: grid; gap: 16px; } .cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
-  .toolbar .grow { flex: 1; min-width: 200px; }
-  .btn { display: inline-flex; gap: 7px; align-items: center; justify-content: center; min-height: 38px; border: 1px solid var(--line-strong); background: #fff; border-radius: var(--radius-sm); padding: 0 14px; cursor: pointer; white-space: nowrap; font-weight: 600; font-size: .9rem; transition: background .16s, border-color .16s; }
-  .btn:hover { background: var(--surface-muted); } .btn svg { width: 17px; height: 17px; flex: none; }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; } .btn.primary:hover { background: var(--accent-strong); }
-  .btn.danger { color: var(--danger); border-color: #f4c4bf; } .btn.danger:hover { background: var(--danger-soft); }
-  .btn.small { min-height: 30px; padding: 0 10px; font-size: .8rem; } .btn.ghost { border-color: transparent; background: transparent; }
-  input[type=text], input[type=date], input[type=month], input[type=search], input[type=email], select, textarea { min-height: 38px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 6px 11px; background: #fff; min-width: 0; font-size: .92rem; }
-  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-line); outline-offset: 0; border-color: var(--accent); }
-  textarea { width: 100%; min-height: 70px; }
-  label.field { display: grid; gap: 5px; font-size: .78rem; font-weight: 600; color: var(--muted); } label.field > * { font-weight: 400; color: var(--text); }
-  .muted { color: var(--muted); } .small { font-size: .8rem; } .right { text-align: right; } .nowrap { white-space: nowrap; }
-  .table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; box-shadow: var(--shadow); max-height: calc(100vh - 220px); }
-  table.data { border-collapse: collapse; width: 100%; font-size: .9rem; }
-  table.data th, table.data td { padding: 10px 14px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
-  table.data thead th { position: sticky; top: 0; background: #f9fafb; z-index: 1; font-weight: 600; font-size: .8rem; color: var(--muted); }
-  table.data tbody tr:last-child td { border-bottom: 0; }
-  table.data tbody tr:hover { background: #f8fafc; } table.data tr.click { cursor: pointer; }
-  table.data td.num, table.data th.num { text-align: right; font-variant-numeric: tabular-nums; }
-  table.data tr.total td, table.data td.total { font-weight: 700; background: #fafbfc; }
-  table.data td.cell { cursor: pointer; } table.data td.cell:hover { background: var(--accent-soft); color: var(--accent); }
-  .empty { padding: 48px 16px !important; text-align: center !important; white-space: normal !important; color: var(--muted); }
-  .empty b { display: block; color: var(--text); font-size: 1rem; margin-bottom: 4px; } .empty .btn { margin-top: 14px; }
-  .badge { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: .76rem; font-weight: 600; background: var(--surface-muted); }
-  .badge.재직 { background: var(--ok-soft); color: var(--ok); } .badge.휴직 { background: var(--warn-soft); color: var(--warn); } .badge.퇴직 { background: var(--surface-muted); color: var(--subtle); }
-  .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 18px; }
-  .kpi { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); display: grid; gap: 6px; }
-  .kpi .k-head { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: .85rem; font-weight: 600; }
-  .kpi .k-icon { width: 30px; height: 30px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; } .kpi .k-icon svg { width: 16px; height: 16px; }
-  .kpi b { font-size: 1.9rem; line-height: 1.1; font-variant-numeric: tabular-nums; letter-spacing: -.02em; } .kpi small { color: var(--subtle); font-size: .78rem; }
-  .note { background: var(--warn-soft); border: 1px solid #fedf89; border-radius: var(--radius-sm); padding: 9px 13px; font-size: .82rem; color: #93370d; margin: 0 0 12px; }
-  dialog { border: 0; border-radius: 14px; padding: 0; width: min(940px, calc(100vw - 24px)); max-height: calc(100vh - 32px); box-shadow: 0 24px 64px rgba(16, 24, 40, .22); }
-  dialog::backdrop { background: rgba(16, 24, 40, .45); }
-  .dlg-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 22px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: #fff; z-index: 2; }
-  .dlg-body { padding: 18px 22px; } .dlg-foot { display: flex; gap: 8px; justify-content: flex-end; align-items: flex-end; padding: 14px 22px; border-top: 1px solid var(--line); position: sticky; bottom: 0; background: #fff; }
-  .form-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 14px; }
-  .form-grid .span-2 { grid-column: span 2; } .form-grid .span-3 { grid-column: 1 / -1; }
-  fieldset { border: 1px solid var(--line); border-radius: 10px; margin: 0 0 14px; padding: 12px 16px 16px; } legend { font-weight: 700; font-size: .85rem; padding: 0 6px; }
-  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #16181d; color: #fff; padding: 11px 18px; border-radius: 10px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 50; font-size: .9rem; }
-  .toast.show { opacity: 1; }
-  .login { min-height: 100vh; display: grid; place-items: center; } .login .panel { width: min(400px, 92vw); text-align: center; padding: 40px 32px; box-shadow: var(--shadow-lift); }
-  .login .brand-mark { width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 16px; } .login .brand-mark svg { width: 30px; height: 30px; }
-  .login h1 { margin-bottom: 6px; } .login .btn { width: 100%; margin-top: 18px; min-height: 44px; }
-  /* 조직도 */
-  .org details { margin-left: 20px; border-left: 2px solid var(--line); padding-left: 14px; }
-  .org > details { margin-left: 0; }
-  .org summary { cursor: pointer; padding: 7px 0; font-weight: 700; } .org summary .muted { font-weight: 500; font-size: .85rem; }
-  .org .members { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
-  .org .person { border: 1px solid var(--line); border-radius: 8px; padding: 5px 11px; background: #fff; cursor: pointer; font-size: .85rem; box-shadow: var(--shadow); }
-  .org .person:hover { border-color: var(--accent-line); } .org .person.lead { border-color: var(--accent-line); background: var(--accent-soft); }
-  /* 통계 */
-  .stats { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 16px; align-items: start; }
-  .views-list { display: grid; gap: 2px; } .views-list button { text-align: left; border: 0; background: none; padding: 8px 10px; border-radius: 8px; cursor: pointer; display: flex; gap: 6px; align-items: center; font-size: .9rem; color: var(--muted); }
-  .views-list button:hover { background: var(--surface-muted); color: var(--text); }
-  .views-list button.active { background: var(--accent-soft); color: var(--accent); font-weight: 700; } .views-list .star { color: #dc9b00; width: 12px; }
-  .builder { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 14px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; } .chips label { border: 1px solid var(--line-strong); border-radius: 99px; padding: 4px 12px; cursor: pointer; font-size: .85rem; color: var(--text); background: #fff; }
-  .chips label:has(input:checked) { background: var(--accent); color: #fff; border-color: var(--accent); } .chips input { display: none; }
-  .sub-label { font-size: .78rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
-  .filter-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
-  .multi { position: relative; } .multi > button { min-width: 170px; justify-content: space-between; font-weight: 500; } .multi .menu { position: absolute; z-index: 5; background: #fff; border: 1px solid var(--line-strong); border-radius: 10px; padding: 6px; max-height: 280px; overflow: auto; min-width: 220px; box-shadow: var(--shadow-lift); }
-  .multi .menu label { display: flex; gap: 8px; padding: 4px 6px; font-size: .85rem; border-radius: 6px; } .multi .menu label:hover { background: var(--surface-muted); }
-  .chart-box { position: relative; height: 320px; margin: 12px 0 16px; } .dash-views { display: grid; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 16px; }
-  .dash-views .chart-box { height: 250px; margin: 0; } .dash-views .table-wrap { max-height: 320px; box-shadow: none; }
-  /* 설정 */
-  .code-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; } .code-tabs button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .code-list { max-height: 520px; overflow: auto; }
-  .code-row { display: flex; gap: 6px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); } .code-row input[type=text] { flex: 1; min-height: 34px; }
-  .code-row select { min-height: 34px; max-width: 170px; }
-  /* 증명서 */
-  .cert-layout { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 14px; align-items: start; }
-  .certificate-document { min-height: 820px; border: 1px solid var(--line-strong); background: #fff; padding: 70px 54px; color: #111; display: flex; flex-direction: column; align-items: center; font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; }
-  .certificate-document h3 { margin: 18px auto 66px; text-align: center; font-size: 1.75rem; letter-spacing: .44em; padding-left: .44em; font-weight: 700; }
-  .certificate-grid { width: min(100%, 680px); border-collapse: collapse; border: 1px solid #222; table-layout: fixed; margin: 0 auto 48px; }
-  .certificate-grid th, .certificate-grid td { padding: 12px 16px; border: 1px solid #222; font-size: 1rem; line-height: 1.55; }
-  .certificate-grid th { width: 38%; background: #e3e3e3; font-weight: 600; letter-spacing: .22em; text-align: center; }
-  .certificate-body { margin: 0 auto; line-height: 2; text-align: center; font-size: 1rem; }
-  .certificate-footer { width: min(100%, 780px); margin-top: 36px; display: grid; gap: 22px; justify-items: end; }
-  .certificate-company-info { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 16px 24px; align-items: center; font-size: 1rem; }
-  .certificate-stamp-image { width: 112px; height: auto; margin-left: 18px; vertical-align: middle; }
-  .certificate-stamp { display: inline-flex; width: 48px; height: 48px; border: 2px solid var(--danger); color: var(--danger); border-radius: 50%; align-items: center; justify-content: center; font-size: .74rem; font-weight: 700; margin-left: 18px; transform: rotate(-12deg); }
-  .cert-warn { width: min(100%, 680px); margin: 0 auto 16px; padding: 10px 14px; border: 1px solid #e0b4b0; border-radius: 6px; background: #fdf3f2; color: #9e2b25; font-size: .88rem; }
-  @page { size: A4 portrait; margin: 0; }
-  @media print {
-    html, body { background: #fff; width: 210mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    body > *:not(.app), .sidebar, main > section:not(#view-certificates), #view-certificates > *:not(.cert-layout), .cert-layout > .panel:first-child, .cert-warn, .cert-register { display: none !important; }
-    .app, main, .cert-layout { display: block !important; padding: 0 !important; margin: 0 !important; }
-    .certificate-document { border: 0; width: 100%; max-width: 210mm; height: 297mm; min-height: 0; margin: 0 auto; padding: 26mm 18mm 18mm; overflow: hidden; }
-    .certificate-document h3 { margin: 8mm auto 20mm; }
-    .certificate-grid { width: 148mm !important; margin-bottom: 14mm; } .certificate-grid th, .certificate-grid td { height: 10mm; padding-top: 2.5mm; padding-bottom: 2.5mm; }
-    .certificate-footer { margin: 11mm auto 0; width: 148mm; } .certificate-stamp-image { width: 27mm; max-height: 20mm; }
-  }
-  @media (max-width: 900px) {
-    .app { grid-template-columns: 1fr; } .sidebar { position: static; height: auto; flex-direction: row; flex-wrap: wrap; padding: 10px 16px; gap: 8px; align-items: center; }
-    .brand { border: 0; padding: 0; } .nav { display: flex; overflow-x: auto; flex: 1 1 100%; margin: 0; } .nav a { flex: none; } .nav-label { display: none; }
-    .who { border: 0; padding: 0; display: flex; align-items: center; margin-left: auto; } .who strong, .who span { display: none; } .who .btn { margin: 0; width: auto; }
-    main { padding: 18px 16px 40px; } .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .cols-2, .stats, .cert-layout { grid-template-columns: 1fr; } .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .dash-views { grid-template-columns: 1fr; }
-    .certificate-document { padding: 32px 18px; min-height: 0; }
-  }
+/*
+  디자인 시스템 (PeopleOps Hub, 2026-11-18)
+  읽기: 인사담당자 1인용 관리 콘솔. 차분한 회색 캔버스 + 흰 판 + 먹색 강조 카드 1장 + 엔코스 빨강 단일 강조.
+  글자: 한글 Pretendard / 숫자 Outfit(가는 굵기, 큰 크기). 크기 단계 64·40·28·20·15·13·12.
+  모서리: 판 22px, 입력·버튼 12px, 메뉴·칩 999px(알약). 이 규칙만 쓴다.
+  간격: 4·8·12·16·20·24·32·48. 그림자: 회청색 1단계.
+  움직임: 판 등장 260ms(아래→위, 순차 40ms), 누를 때 0.98 축소. 동작 줄이기 설정 시 끔.
+*/
+:root {
+  --canvas: #eef0f3; --surface: #ffffff; --surface-2: #f6f7f9; --ink: #16171b; --ink-2: #3b3e46; --muted: #7a808b; --faint: #a7acb5;
+  --line: #e6e8ec; --line-2: #d6d9df;
+  --brand: #d92d20; --brand-ink: #b3221a; --brand-soft: #fdecea; --brand-line: #f6c5c0;
+  --ok: #12805c; --ok-soft: #e4f4ec; --warn: #a15c07; --warn-soft: #fdf1dc;
+  --r-panel: 22px; --r-ctl: 12px;
+  --shadow: 0 1px 2px rgba(22, 30, 46, .04), 0 6px 24px rgba(22, 30, 46, .05);
+  --shadow-pop: 0 18px 48px rgba(22, 30, 46, .16);
+  --num: "Outfit", "Pretendard Variable", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; color: var(--ink); font: 15px/1.55 "Pretendard Variable", Pretendard, -apple-system, "Malgun Gothic", sans-serif; -webkit-font-smoothing: antialiased; }
+body { background: radial-gradient(900px 420px at 88% -8%, rgba(217, 45, 32, .07), transparent 65%), var(--canvas); min-height: 100dvh; }
+button, input, select, textarea { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
+.ph, .ph-fill { line-height: 1; }
+.num { font-family: var(--num); font-variant-numeric: tabular-nums; }
+
+/* 상단바 */
+.topbar { position: sticky; top: 0; z-index: 20; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 20px; padding: 14px 32px; background: rgba(238, 240, 243, .82); backdrop-filter: blur(14px); }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+.brand-mark { width: 38px; height: 38px; border-radius: 12px; background: var(--brand); color: #fff; display: grid; place-items: center; font-size: 20px; box-shadow: 0 6px 16px rgba(217, 45, 32, .28); }
+.brand b { display: block; font-size: 16px; letter-spacing: -.01em; } .brand small { display: block; color: var(--muted); font-size: 12px; margin-top: -2px; }
+.nav { justify-self: center; display: flex; gap: 2px; padding: 5px; background: var(--surface); border-radius: 999px; box-shadow: var(--shadow); }
+.nav a { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 16px; border-radius: 999px; color: var(--ink-2); text-decoration: none; font-weight: 600; font-size: 14px; white-space: nowrap; transition: background .18s, color .18s; }
+.nav a i { font-size: 17px; } .nav a:hover { background: var(--surface-2); }
+.nav a.active { background: var(--ink); color: #fff; }
+.me { display: flex; align-items: center; gap: 10px; }
+.me-chip { display: flex; align-items: center; gap: 9px; padding: 4px 14px 4px 4px; background: var(--surface); border-radius: 999px; box-shadow: var(--shadow); }
+.me-chip b { font-size: 14px; } .me-chip small { display: block; color: var(--muted); font-size: 11px; line-height: 1.2; }
+.icon-btn { width: 40px; height: 40px; border-radius: 999px; border: 0; background: var(--surface); box-shadow: var(--shadow); display: grid; place-items: center; cursor: pointer; font-size: 18px; color: var(--ink-2); }
+.icon-btn:hover { color: var(--brand); }
+
+main { max-width: 1440px; margin: 0 auto; padding: 12px 32px 64px; }
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 12px 0 22px; }
+.page-head h1 { margin: 0; font-size: 30px; line-height: 1.25; letter-spacing: -.025em; font-weight: 700; text-wrap: balance; }
+.page-head p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* 판·버튼·입력 */
+.panel { background: var(--surface); border-radius: var(--r-panel); box-shadow: var(--shadow); padding: 22px 24px; min-width: 0; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.panel-head h2 { margin: 0; font-size: 17px; letter-spacing: -.01em; }
+.panel-head .sub { color: var(--muted); font-size: 13px; font-weight: 500; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 42px; padding: 0 16px; border-radius: var(--r-ctl); border: 1px solid var(--line-2); background: var(--surface); font-weight: 600; font-size: 14px; cursor: pointer; white-space: nowrap; transition: background .16s, border-color .16s, transform .12s; }
+.btn i { font-size: 17px; } .btn:hover { background: var(--surface-2); } .btn:active { transform: scale(.98); }
+.btn.dark { background: var(--ink); border-color: var(--ink); color: #fff; } .btn.dark:hover { background: #2b2d33; }
+.btn.brand { background: var(--brand); border-color: var(--brand); color: #fff; } .btn.brand:hover { background: var(--brand-ink); }
+.btn.danger { color: var(--brand); border-color: var(--brand-line); } .btn.danger:hover { background: var(--brand-soft); }
+.btn.sm { height: 32px; padding: 0 12px; font-size: 13px; border-radius: 10px; } .btn.ghost { border-color: transparent; background: transparent; }
+.btn:disabled { opacity: .5; cursor: default; }
+input[type=text], input[type=date], input[type=month], input[type=search], input[type=email], select, textarea {
+  height: 42px; border: 1px solid var(--line-2); border-radius: var(--r-ctl); padding: 0 12px; background: var(--surface); min-width: 0; font-size: 14px; }
+textarea { height: auto; min-height: 76px; padding: 10px 12px; width: 100%; }
+input:focus, select:focus, textarea:focus { outline: 3px solid rgba(217, 45, 32, .14); border-color: var(--brand); }
+:focus-visible { outline: 3px solid rgba(217, 45, 32, .28); outline-offset: 2px; }
+label.field { display: grid; gap: 6px; font-size: 12px; font-weight: 600; color: var(--muted); } label.field > * { font-weight: 400; color: var(--ink); }
+.search { position: relative; } .search i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--faint); font-size: 17px; } .search input { padding-left: 38px; width: 100%; }
+.seg { display: inline-flex; padding: 4px; gap: 2px; background: var(--surface-2); border-radius: 999px; }
+.seg button { border: 0; background: transparent; height: 34px; padding: 0 14px; border-radius: 999px; font-weight: 600; font-size: 13px; color: var(--muted); cursor: pointer; }
+.seg button.on { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(22, 30, 46, .12); }
+.muted { color: var(--muted); } .small { font-size: 12px; }
+
+/* 칩·아바타 */
+.chip { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.chip.재직 { background: var(--ok-soft); color: var(--ok); } .chip.휴직 { background: var(--warn-soft); color: var(--warn); } .chip.퇴직 { background: #eceef1; color: var(--muted); }
+.chip.in { background: var(--ink); color: #fff; } .chip.out { background: var(--brand-soft); color: var(--brand); }
+.av { width: 36px; height: 36px; border-radius: 999px; display: grid; place-items: center; font-size: 12px; font-weight: 700; flex: none; letter-spacing: -.02em; }
+.av.lg { width: 64px; height: 64px; font-size: 20px; }
+.who-cell { display: flex; align-items: center; gap: 12px; } .who-cell b { display: block; font-size: 14px; } .who-cell small { display: block; color: var(--muted); font-size: 12px; font-family: var(--num); }
+
+/* 표 */
+.table-card { padding: 6px 8px 8px; }
+.table-scroll { overflow: auto; max-height: calc(100dvh - 300px); border-radius: 16px; }
+table.data { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 14px; }
+table.data th, table.data td { padding: 12px 16px; text-align: left; white-space: nowrap; }
+table.data thead th { position: sticky; top: 0; z-index: 1; background: var(--surface); color: var(--muted); font-size: 12px; font-weight: 600; border-bottom: 1px solid var(--line); }
+table.data tbody td { border-bottom: 1px solid var(--surface-2); }
+table.data tbody tr:last-child td { border-bottom: 0; }
+table.data tbody tr.click { cursor: pointer; } table.data tbody tr:hover td { background: #fafbfc; }
+table.data .r { text-align: right; font-family: var(--num); font-variant-numeric: tabular-nums; }
+table.data tr.total td { font-weight: 700; background: var(--surface-2); }
+table.data td.cell { cursor: pointer; } table.data td.cell:hover { background: var(--brand-soft) !important; color: var(--brand); }
+.empty { text-align: center; padding: 56px 16px; color: var(--muted); }
+.empty i { font-size: 40px; color: var(--faint); } .empty b { display: block; color: var(--ink); font-size: 17px; margin: 10px 0 4px; } .empty .btn { margin-top: 16px; }
+
+/* 대시보드 */
+.hero-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; margin: 12px 0 24px; }
+.hero-row h1 { margin: 0; font-size: 40px; font-weight: 600; letter-spacing: -.03em; line-height: 1.15; }
+.hero-row h1 span { color: var(--muted); font-weight: 300; }
+.hero-row .date { color: var(--muted); margin-top: 6px; font-size: 14px; }
+.hero-stats { display: flex; gap: 28px; }
+.hero-stats div { display: grid; gap: 2px; } .hero-stats b { font-family: var(--num); font-weight: 300; font-size: 46px; line-height: 1; letter-spacing: -.03em; }
+.hero-stats b small { font-size: 18px; color: var(--muted); margin-left: 3px; } .hero-stats span { color: var(--muted); font-size: 13px; display: flex; align-items: center; gap: 5px; }
+.bento { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
+.c4 { grid-column: span 4; } .c5 { grid-column: span 5; } .c7 { grid-column: span 7; } .c8 { grid-column: span 8; } .c6 { grid-column: span 6; } .c12 { grid-column: 1 / -1; }
+.ink-card { background: var(--ink); color: #fff; border-radius: var(--r-panel); padding: 24px; display: flex; flex-direction: column; gap: 14px; position: relative; overflow: hidden; }
+.ink-card::after { content: ""; position: absolute; width: 260px; height: 260px; right: -90px; top: -110px; border-radius: 50%; background: radial-gradient(circle, rgba(217, 45, 32, .55), transparent 70%); pointer-events: none; }
+.ink-card .lbl { display: flex; align-items: center; gap: 8px; color: #b9bcc4; font-size: 14px; font-weight: 600; }
+.ink-card .big { font-family: var(--num); font-weight: 200; font-size: 84px; line-height: .95; letter-spacing: -.04em; }
+.ink-card .big small { font-size: 24px; font-weight: 300; color: #9a9ea8; margin-left: 4px; }
+.ink-card .delta { display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 10px; border-radius: 999px; background: rgba(255, 255, 255, .1); font-size: 12px; font-weight: 600; width: fit-content; }
+.ink-card .spark { flex: 1; min-height: 110px; position: relative; } .ink-card .spark svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ink-card .foot { display: flex; gap: 18px; color: #b9bcc4; font-size: 13px; margin-top: auto; } .ink-card .foot b { color: #fff; font-family: var(--num); font-weight: 500; }
+.metric-trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 8px; }
+.metric-trio div { background: var(--surface-2); border-radius: 14px; padding: 12px 14px; } .metric-trio span { color: var(--muted); font-size: 12px; font-weight: 600; }
+.metric-trio b { display: block; font-family: var(--num); font-weight: 400; font-size: 26px; letter-spacing: -.02em; } .metric-trio b small { font-size: 13px; color: var(--muted); margin-left: 2px; }
+.chart-box { position: relative; height: 240px; }
+.stackbar { display: flex; height: 44px; border-radius: 12px; overflow: hidden; gap: 3px; margin: 4px 0 18px; }
+.stackbar i { display: block; height: 100%; border-radius: 6px; }
+.stackbar i.hatch { background: repeating-linear-gradient(135deg, #d6d9df 0 6px, #eceef1 6px 12px) !important; }
+.legend-list { display: grid; gap: 10px; }
+.legend-list div { display: grid; grid-template-columns: 12px 1fr auto auto; align-items: center; gap: 10px; font-size: 14px; }
+.legend-list i { width: 10px; height: 10px; border-radius: 3px; } .legend-list b { font-family: var(--num); font-weight: 500; } .legend-list span.p { color: var(--muted); font-family: var(--num); font-size: 13px; width: 48px; text-align: right; }
+.feed { display: grid; gap: 4px; } .feed-row { display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: center; padding: 8px; border-radius: 14px; cursor: pointer; }
+.feed-row:hover { background: var(--surface-2); } .feed-row b { font-size: 14px; display: block; } .feed-row small { color: var(--muted); font-size: 12px; }
+.feed-row .when { text-align: right; display: grid; gap: 3px; justify-items: end; font-size: 12px; color: var(--muted); font-family: var(--num); }
+.bars { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; align-items: end; height: 170px; padding-top: 18px; }
+.bars div { display: grid; grid-template-rows: auto 1fr auto; height: 100%; text-align: center; gap: 6px; }
+.bars .v { font-family: var(--num); font-size: 13px; font-weight: 500; } .bars .col { display: flex; align-items: flex-end; } .bars .col i { width: 100%; border-radius: 10px 10px 4px 4px; background: #e3e5ea; min-height: 4px; }
+.bars .peak i { background: var(--brand); } .bars small { color: var(--muted); font-size: 11px; white-space: nowrap; }
+.section-title { display: flex; align-items: center; justify-content: space-between; margin: 32px 0 14px; } .section-title h2 { margin: 0; font-size: 20px; letter-spacing: -.02em; }
+.view-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 16px; }
+.view-cards .chart-box { height: 230px; } .view-cards .table-scroll { max-height: 300px; }
+
+/* 사원 관리 */
+.filterbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+.filterbar .search { flex: 1; min-width: 240px; } .filterbar .count { margin-left: auto; color: var(--muted); font-size: 13px; }
+
+/* 상세 창(오른쪽) */
+dialog { border: 0; padding: 0; color: var(--ink); background: var(--surface); box-shadow: var(--shadow-pop); }
+dialog::backdrop { background: rgba(22, 23, 27, .38); backdrop-filter: blur(2px); }
+dialog.drawer { margin: 0 0 0 auto; width: min(640px, 100vw); height: 100dvh; max-height: 100dvh; border-radius: var(--r-panel) 0 0 var(--r-panel); }
+dialog.drawer[open] { animation: slide .26s cubic-bezier(.16, 1, .3, 1); }
+dialog.modal { width: min(760px, calc(100vw - 24px)); max-height: calc(100dvh - 40px); border-radius: var(--r-panel); }
+dialog.modal[open] { animation: pop .22s cubic-bezier(.16, 1, .3, 1); }
+@keyframes slide { from { transform: translateX(40px); opacity: 0; } }
+@keyframes pop { from { transform: translateY(10px) scale(.98); opacity: 0; } }
+.dlg { display: flex; flex-direction: column; height: 100%; max-height: inherit; }
+.dlg-head { display: flex; gap: 16px; align-items: center; padding: 24px 28px 18px; border-bottom: 1px solid var(--line); }
+.dlg-head h2 { margin: 0; font-size: 22px; letter-spacing: -.02em; } .dlg-head p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+.dlg-head .x { margin-left: auto; }
+.dlg-body { padding: 20px 28px; overflow: auto; flex: 1; }
+.dlg-foot { display: flex; gap: 8px; align-items: flex-end; padding: 16px 28px; border-top: 1px solid var(--line); background: var(--surface); }
+.dlg-foot .grow { margin-right: auto; }
+.form-sec { margin-bottom: 22px; } .form-sec h3 { font-size: 13px; color: var(--muted); margin: 0 0 10px; font-weight: 700; }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; } .form-grid .full { grid-column: 1 / -1; }
+.timeline { display: grid; gap: 0; position: relative; } .timeline div { display: grid; grid-template-columns: 92px 1fr; gap: 12px; padding: 8px 0; font-size: 14px; border-bottom: 1px dashed var(--line); }
+.timeline time { color: var(--muted); font-family: var(--num); font-size: 13px; } .timeline em { font-style: normal; color: var(--muted); }
+
+/* 조직도 */
+.org-wrap { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); align-items: start; }
+.org-card { background: var(--surface); border-radius: var(--r-panel); box-shadow: var(--shadow); padding: 20px 22px 12px; }
+.org-card > header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; } .org-card > header h2 { margin: 0; font-size: 18px; letter-spacing: -.02em; } .org-card > header .lead { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.team { border-top: 1px solid var(--surface-2); } .team summary { list-style: none; display: flex; align-items: center; gap: 10px; padding: 12px 0; cursor: pointer; font-weight: 600; font-size: 14px; } .team summary::-webkit-details-marker { display: none; }
+.team summary i.car { color: var(--faint); transition: transform .2s; } .team[open] > summary i.car { transform: rotate(90deg); } .team .team { margin-left: 22px; }
+.stack { display: flex; margin-left: auto; align-items: center; } .stack .av { width: 28px; height: 28px; font-size: 10px; margin-left: -8px; border: 2px solid #fff; } .stack .more { margin-left: 6px; font-size: 12px; color: var(--muted); font-family: var(--num); }
+.team .people { padding: 0 0 14px 24px; }
+.org-unit { background: var(--surface); border-radius: var(--r-panel); box-shadow: var(--shadow); padding: 4px 22px; }
+.org-unit details details { margin-left: 18px; padding-left: 16px; border-left: 2px solid var(--line); }
+.org-unit summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 14px 0; font-weight: 700; font-size: 16px; }
+.org-unit details details summary { font-size: 15px; padding: 10px 0; }
+.org-unit summary::-webkit-details-marker { display: none; }
+.org-unit summary i.car { transition: transform .2s; color: var(--muted); } details[open] > summary i.car { transform: rotate(90deg); }
+.org-unit summary .chip { margin-left: 2px; }
+.people { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 0 14px 28px; }
+.person { display: flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px; border-radius: 999px; background: var(--surface-2); cursor: pointer; font-size: 13px; }
+.person:hover { background: #eceef1; } .person .av { width: 28px; height: 28px; font-size: 11px; } .person small { color: var(--muted); }
+.person.lead { background: var(--ink); color: #fff; } .person.lead small { color: #b9bcc4; }
+
+/* 통계 */
+.stats { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 16px; align-items: start; }
+.views-list { display: grid; gap: 2px; }
+.views-list button { display: flex; align-items: center; gap: 8px; border: 0; background: none; text-align: left; padding: 10px 12px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 14px; color: var(--ink-2); }
+.views-list button:hover { background: var(--surface-2); } .views-list button.active { background: var(--ink); color: #fff; }
+.views-list i { font-size: 16px; color: var(--faint); } .views-list .on i.star { color: #f5a623; } .views-list button.active i { color: #fff; }
+.builder { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips label { height: 34px; padding: 0 14px; display: inline-flex; align-items: center; border-radius: 999px; border: 1px solid var(--line-2); cursor: pointer; font-size: 13px; font-weight: 600; color: var(--ink-2); background: var(--surface); }
+.chips label:has(input:checked) { background: var(--ink); border-color: var(--ink); color: #fff; } .chips input { display: none; }
+.sub-label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+.filter-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+.multi { position: relative; } .multi > .btn { min-width: 180px; justify-content: space-between; font-weight: 500; }
+.multi .menu { position: absolute; z-index: 5; top: 46px; background: var(--surface); border-radius: 14px; padding: 6px; max-height: 300px; overflow: auto; min-width: 230px; box-shadow: var(--shadow-pop); }
+.multi .menu label { display: flex; gap: 8px; align-items: center; padding: 6px 8px; font-size: 13px; border-radius: 8px; cursor: pointer; } .multi .menu label:hover { background: var(--surface-2); }
+.note { background: var(--warn-soft); color: #7a4504; border-radius: 12px; padding: 10px 14px; font-size: 13px; margin: 0 0 14px; }
+.result-meta { color: var(--muted); font-size: 12px; margin: 0 0 10px; }
+.result .chart-box { height: 300px; margin-bottom: 14px; }
+
+/* 증명서 */
+.cert-layout { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 16px; align-items: start; }
+.cert-form { display: grid; gap: 14px; }
+.paper-stage { background: #e4e6ea; border-radius: var(--r-panel); padding: 28px; display: grid; place-items: center; }
+.certificate-document { width: 100%; max-width: 760px; min-height: 900px; background: #fff; padding: 70px 54px; color: #111; display: flex; flex-direction: column; align-items: center; font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; box-shadow: 0 10px 30px rgba(22, 30, 46, .12); border-radius: 4px; }
+.certificate-document h3 { margin: 18px auto 66px; text-align: center; font-size: 1.75rem; letter-spacing: .44em; padding-left: .44em; font-weight: 700; }
+.certificate-grid { width: min(100%, 680px); border-collapse: collapse; border: 1px solid #222; table-layout: fixed; margin: 0 auto 48px; }
+.certificate-grid th, .certificate-grid td { padding: 12px 16px; border: 1px solid #222; font-size: 1rem; line-height: 1.55; }
+.certificate-grid th { width: 38%; background: #e3e3e3; font-weight: 600; letter-spacing: .22em; text-align: center; }
+.certificate-body { margin: 0 auto; line-height: 2; text-align: center; font-size: 1rem; }
+.certificate-footer { width: min(100%, 680px); margin-top: 36px; display: grid; gap: 22px; justify-items: end; }
+.certificate-company-info { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 16px 24px; align-items: center; font-size: 1rem; }
+.certificate-stamp-image { width: 112px; height: auto; margin-left: 18px; vertical-align: middle; }
+.cert-warn { width: min(100%, 680px); margin: 0 auto 16px; padding: 10px 14px; border-radius: 10px; background: var(--brand-soft); color: var(--brand-ink); font-size: 13px; font-family: "Pretendard Variable", sans-serif; }
+@page { size: A4 portrait; margin: 0; }
+@media print {
+  html, body { background: #fff !important; width: 210mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body > *:not(#appShell), .topbar, main > section:not(#view-certificates), #view-certificates > *:not(.cert-layout), .cert-layout > .panel, .cert-warn { display: none !important; }
+  #appShell, main, .cert-layout, .paper-stage { display: block !important; padding: 0 !important; margin: 0 !important; background: none !important; max-width: none !important; }
+  .certificate-document { box-shadow: none; border-radius: 0; width: 100%; max-width: 210mm; height: 297mm; min-height: 0; margin: 0 auto; padding: 26mm 18mm 18mm; overflow: hidden; }
+  .certificate-document h3 { margin: 8mm auto 20mm; }
+  .certificate-grid { width: 148mm !important; margin-bottom: 14mm; } .certificate-grid th, .certificate-grid td { height: 10mm; padding-top: 2.5mm; padding-bottom: 2.5mm; }
+  .certificate-footer { margin: 11mm auto 0; width: 148mm; } .certificate-stamp-image { width: 27mm; max-height: 20mm; }
+}
+
+/* 설정 */
+.settings { display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: 16px; align-items: start; }
+.code-tabs { margin-bottom: 14px; overflow-x: auto; max-width: 100%; }
+.code-list { display: grid; gap: 2px; max-height: 560px; overflow: auto; }
+.code-row { display: flex; gap: 6px; align-items: center; padding: 6px 8px; border-radius: 12px; } .code-row:hover { background: var(--surface-2); }
+.code-row input[type=text] { flex: 1; height: 36px; } .code-row select { height: 36px; width: 170px; flex: none; } .code-row .n { width: 48px; text-align: right; color: var(--muted); font-family: var(--num); font-size: 13px; }
+.seal-box { display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 14px; background: var(--surface-2); } .seal-box img { height: 64px; }
+
+/* 로그인 */
+.login { min-height: 100dvh; display: grid; grid-template-columns: 1.1fr 1fr; background: var(--surface); }
+.login-art { background: var(--ink); color: #fff; padding: 56px; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
+.login-art::after { content: ""; position: absolute; width: 640px; height: 640px; right: -220px; bottom: -260px; border-radius: 50%; background: radial-gradient(circle, rgba(217, 45, 32, .6), transparent 68%); }
+.login-art h1 { font-size: 56px; line-height: 1.08; letter-spacing: -.04em; margin: 0; font-weight: 600; position: relative; z-index: 1; }
+.login-art h1 span { color: #9a9ea8; font-weight: 300; }
+.login-art p { color: #b9bcc4; margin: 16px 0 0; max-width: 34ch; position: relative; z-index: 1; }
+.login-form { display: grid; place-items: center; padding: 40px; }
+.login-form > div { width: min(380px, 100%); display: grid; gap: 14px; }
+.login-form h2 { margin: 0; font-size: 26px; letter-spacing: -.02em; } .login-form .btn { height: 52px; font-size: 15px; }
+
+.toast { position: fixed; bottom: 28px; left: 50%; transform: translate(-50%, 8px); background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 14px; opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; z-index: 60; font-size: 14px; box-shadow: var(--shadow-pop); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* 등장 */
+@media (prefers-reduced-motion: no-preference) {
+  .rise { animation: rise .26s cubic-bezier(.16, 1, .3, 1) both; animation-delay: calc(var(--i, 0) * 40ms); }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+}
+@media (prefers-reduced-motion: reduce) { dialog[open] { animation: none !important; } }
+
+@media (max-width: 1100px) {
+  .topbar { grid-template-columns: auto 1fr; } .nav { grid-column: 1 / -1; grid-row: 2; justify-self: stretch; overflow-x: auto; }
+  .c4, .c5, .c7, .c8, .c6 { grid-column: 1 / -1; } .stats, .cert-layout, .settings { grid-template-columns: 1fr; }
+  .hero-stats b { font-size: 34px; } .login { grid-template-columns: 1fr; } .login-art { min-height: 260px; padding: 32px; } .login-art h1 { font-size: 40px; }
+}
+@media (max-width: 640px) {
+  .topbar, main { padding-left: 16px; padding-right: 16px; } .me-chip div { display: none; } .me-chip { padding-right: 4px; }
+  .form-grid { grid-template-columns: 1fr; } .view-cards { grid-template-columns: 1fr; } .hero-row h1 { font-size: 30px; }
+  .certificate-document { padding: 32px 18px; min-height: 0; } .paper-stage { padding: 12px; }
+}
 </style>
 </head>
 <body>
 <div class="login" id="loginScreen" hidden>
-  <div class="panel">
-    <div class="brand-mark"><i data-lucide="users-round"></i></div>
-    <h1>PeopleOps Hub</h1>
-    <p class="muted" id="loginMsg">Google 계정으로 로그인하세요.</p>
-    <button class="btn primary" id="loginBtn" type="button">Google 로그인</button>
+  <div class="login-art">
+    <div class="brand"><div class="brand-mark"><i class="ph-fill ph-users-three"></i></div><div><b>PeopleOps Hub</b><small style="color:#9a9ea8">엔코스</small></div></div>
+    <div><h1>사람의 기록을<br><span>한곳에서.</span></h1><p>사원 정보, 조직도, 증명서, 인사 통계를 관리하는 엔코스 인사 콘솔입니다.</p></div>
   </div>
+  <div class="login-form"><div>
+    <h2>로그인</h2>
+    <p class="muted" id="loginMsg" style="margin:0">등록된 Google 계정으로 로그인하세요.</p>
+    <button class="btn dark" id="loginBtn" type="button"><i class="ph ph-google-logo"></i>Google 계정으로 계속</button>
+  </div></div>
 </div>
 
-<div class="app" id="appShell" hidden>
-  <aside class="sidebar">
-    <div class="brand"><div class="brand-mark"><i data-lucide="users-round"></i></div><div><strong>PeopleOps Hub</strong><span>엔코스</span></div></div>
-    <nav class="nav" id="nav">
-      <a href="#dashboard" data-view="dashboard"><i data-lucide="layout-dashboard"></i>대시보드</a>
-      <div class="nav-label">인사 정보</div>
-      <a href="#employees" data-view="employees"><i data-lucide="id-card"></i>사원 관리</a>
-      <a href="#org" data-view="org"><i data-lucide="network"></i>조직도</a>
-      <a href="#certificates" data-view="certificates"><i data-lucide="file-text"></i>증명서 발급</a>
-      <div class="nav-label">조회·분석</div>
-      <a href="#stats" data-view="stats"><i data-lucide="chart-no-axes-combined"></i>인사 통계</a>
-      <div class="nav-label">관리</div>
-      <a href="#settings" data-view="settings"><i data-lucide="settings"></i>운영 설정</a>
+<div id="appShell" hidden>
+  <header class="topbar">
+    <a class="brand" href="#dashboard"><div class="brand-mark"><i class="ph-fill ph-users-three"></i></div><div><b>PeopleOps Hub</b><small>엔코스</small></div></a>
+    <nav class="nav" id="nav" aria-label="메뉴">
+      <a href="#dashboard" data-view="dashboard"><i class="ph ph-squares-four"></i>대시보드</a>
+      <a href="#employees" data-view="employees"><i class="ph ph-identification-card"></i>사원 관리</a>
+      <a href="#org" data-view="org"><i class="ph ph-tree-structure"></i>조직도</a>
+      <a href="#certificates" data-view="certificates"><i class="ph ph-seal-check"></i>증명서</a>
+      <a href="#stats" data-view="stats"><i class="ph ph-chart-bar"></i>인사 통계</a>
+      <a href="#settings" data-view="settings"><i class="ph ph-gear-six"></i>설정</a>
     </nav>
-    <div class="who"><strong id="whoName"></strong><span id="whoEmail"></span><button class="btn" id="logoutBtn" type="button"><i data-lucide="log-out"></i>로그아웃</button></div>
-  </aside>
+    <div class="me">
+      <div class="me-chip"><span class="av" id="meAv"></span><div><b id="whoName"></b><small id="whoEmail"></small></div></div>
+      <button class="icon-btn" id="logoutBtn" type="button" title="로그아웃" aria-label="로그아웃"><i class="ph ph-sign-out"></i></button>
+    </div>
+  </header>
 
   <main>
     <section id="view-dashboard" data-view-panel="dashboard">
-      <div class="page-head"><div><h1>대시보드</h1><p>오늘 기준 인원 현황과 즐겨찾기한 통계</p></div></div>
-      <div class="kpis" id="kpis"></div>
-      <div class="dash-views" id="dashViews"></div>
-      <p class="muted small" id="dashEmpty" hidden>인사 통계에서 보기 옆 ★를 누르면 여기에 표시됩니다.</p>
+      <div class="hero-row">
+        <div><h1 id="greet"></h1><div class="date" id="today"></div></div>
+        <div class="hero-stats" id="heroStats"></div>
+      </div>
+      <div class="bento" id="bento"></div>
+      <div class="section-title"><h2>즐겨찾기 통계</h2><a class="btn sm" href="#stats"><i class="ph ph-arrow-up-right"></i>인사 통계</a></div>
+      <div class="view-cards" id="dashViews"></div>
+      <p class="muted small" id="dashEmpty" hidden>인사 통계에서 보기 옆 별을 누르면 여기에 표시됩니다.</p>
     </section>
 
     <section id="view-employees" data-view-panel="employees" hidden>
-      <div class="page-head"><div><h1>사원 관리</h1><p>사원 명부 엑셀을 올리면 바뀐 항목만 반영하고 변경 이력을 남깁니다</p></div></div>
-      <div class="toolbar">
-        <input type="search" class="grow" id="empSearch" placeholder="이름·사번·부서 검색" />
-        <select id="empStatus"><option value="active">재직+휴직</option><option value="재직">재직</option><option value="휴직">휴직</option><option value="퇴직">퇴직</option><option value="">전체</option></select>
-        <select id="empDept"><option value="">전체 부서</option></select>
-        <span class="muted small" id="empCount"></span>
-        <button class="btn" id="empNew" type="button"><i data-lucide="user-plus"></i>신규 등록</button>
-        <button class="btn" id="empImport" type="button"><i data-lucide="upload"></i>명부 업로드</button>
-        <button class="btn" id="empExport" type="button"><i data-lucide="download"></i>엑셀 내보내기</button>
-        <input type="file" id="empFile" accept=".xlsx,.xls,.csv" hidden />
+      <div class="page-head">
+        <div><h1>사원 관리</h1><p>명부 엑셀을 올리면 바뀐 항목만 반영하고 변경 이력을 남깁니다.</p></div>
+        <div class="actions">
+          <button class="btn" id="empExport" type="button"><i class="ph ph-download-simple"></i>엑셀</button>
+          <button class="btn" id="empNew" type="button"><i class="ph ph-user-plus"></i>신규 등록</button>
+          <button class="btn dark" id="empImport" type="button"><i class="ph ph-upload-simple"></i>명부 업로드</button>
+          <input type="file" id="empFile" accept=".xlsx,.xls,.csv" hidden />
+        </div>
       </div>
-      <div class="table-wrap"><table class="data"><thead><tr><th>사번</th><th>이름</th><th>부서</th><th>직급</th><th>직책</th><th>직종</th><th>입사일</th><th class="num">근속</th><th>상태</th></tr></thead><tbody id="empRows"></tbody></table></div>
+      <div class="filterbar">
+        <div class="search"><i class="ph ph-magnifying-glass"></i><input type="search" id="empSearch" placeholder="이름, 사번, 부서로 검색" /></div>
+        <div class="seg" id="empStatus">
+          <button type="button" data-v="active" class="on">재직·휴직</button><button type="button" data-v="재직">재직</button><button type="button" data-v="휴직">휴직</button><button type="button" data-v="퇴직">퇴직</button><button type="button" data-v="">전체</button>
+        </div>
+        <select id="empDept" aria-label="부서"><option value="">전체 부서</option></select>
+        <span class="count num" id="empCount"></span>
+      </div>
+      <div class="panel table-card"><div class="table-scroll"><table class="data"><thead><tr><th>사원</th><th>부서</th><th>직급 · 직책</th><th>직종</th><th>입사일</th><th class="r">근속</th><th>상태</th></tr></thead><tbody id="empRows"></tbody></table></div></div>
     </section>
 
     <section id="view-org" data-view-panel="org" hidden>
-      <div class="page-head"><div><h1>조직도</h1><p>재직·휴직자 기준 · 상위 조직은 운영 설정 › 조직에서 지정</p></div></div>
-      <div class="toolbar"><button class="btn" id="orgOpen" type="button"><i data-lucide="chevrons-down"></i>모두 펼치기</button><button class="btn" id="orgClose" type="button"><i data-lucide="chevrons-up"></i>모두 접기</button></div>
-      <div class="panel org" id="orgTree"></div>
+      <div class="page-head">
+        <div><h1>조직도</h1><p id="orgSub">재직·휴직자 기준 · 상위 조직은 설정에서 지정합니다.</p></div>
+        <div class="actions"><button class="btn" id="orgOpen" type="button"><i class="ph ph-arrows-out-simple"></i>모두 펼치기</button><button class="btn" id="orgClose" type="button"><i class="ph ph-arrows-in-simple"></i>모두 접기</button></div>
+      </div>
+      <div class="org-wrap" id="orgTree"></div>
     </section>
 
     <section id="view-certificates" data-view-panel="certificates" hidden>
-      <div class="page-head"><div><h1>증명서 발급</h1><p>재직·경력·퇴직증명서를 발급하고 대장에 기록합니다</p></div></div>
+      <div class="page-head"><div><h1>증명서 발급</h1><p>재직·경력·퇴직증명서를 발급하고 대장에 기록합니다.</p></div></div>
       <div class="cert-layout">
-        <div class="panel grid">
-          <label class="field">대상 사원<input type="text" id="certEmp" list="certEmpList" placeholder="이름 또는 사번" autocomplete="off" /></label>
+        <div class="panel cert-form">
+          <label class="field">대상 사원<div class="search"><i class="ph ph-magnifying-glass"></i><input type="text" id="certEmp" list="certEmpList" placeholder="이름 또는 사번" autocomplete="off" /></div></label>
           <datalist id="certEmpList"></datalist>
           <label class="field">종류<select id="certType"><option>재직증명서</option><option>경력증명서</option><option>퇴직증명서</option></select></label>
           <label class="field">용도<input type="text" id="certPurpose" value="제출용" /></label>
           <label class="field">제출처<input type="text" id="certDest" placeholder="예: 은행" /></label>
           <label class="field">발급일<input type="date" id="certDate" /></label>
-          <label class="small"><input type="checkbox" id="certRrnFull" /> 주민등록번호 전체 표시(저장하지 않음)</label>
+          <label class="small" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="certRrnFull" /> 주민등록번호 전체 표시(저장하지 않음)</label>
           <input type="text" id="certRrn" placeholder="주민등록번호 13자리" hidden />
-          <button class="btn primary" id="certIssue" type="button"><i data-lucide="printer"></i>발급 기록 후 인쇄</button>
+          <button class="btn dark" id="certIssue" type="button"><i class="ph ph-printer"></i>발급 기록 후 인쇄</button>
         </div>
-        <div><div class="certificate-document" id="certPreview"></div></div>
+        <div class="paper-stage"><div class="certificate-document" id="certPreview"></div></div>
       </div>
-      <div class="panel cert-register" style="margin-top:14px">
-        <div class="toolbar"><h2 style="margin:0">발급대장</h2><span class="muted small" id="certCount"></span><span class="grow"></span><button class="btn" id="certExport" type="button"><i data-lucide="download"></i>엑셀</button></div>
-        <div class="table-wrap" style="max-height:360px"><table class="data"><thead><tr><th>발급번호</th><th>종류</th><th>이름(사번)</th><th>발급일</th><th>용도/제출처</th><th></th></tr></thead><tbody id="certRows"></tbody></table></div>
+      <div class="panel" style="margin-top:16px">
+        <div class="panel-head"><h2>발급대장 <span class="sub num" id="certCount"></span></h2><button class="btn sm" id="certExport" type="button"><i class="ph ph-download-simple"></i>엑셀</button></div>
+        <div class="table-scroll" style="max-height:380px"><table class="data"><thead><tr><th>발급번호</th><th>종류</th><th>사원</th><th>발급일</th><th>용도 · 제출처</th><th></th></tr></thead><tbody id="certRows"></tbody></table></div>
       </div>
     </section>
 
     <section id="view-stats" data-view-panel="stats" hidden>
-      <div class="page-head"><div><h1>인사 통계</h1><p>항목을 골라 표·차트를 만들고 보기로 저장합니다. 숫자를 누르면 명단이 열립니다</p></div></div>
+      <div class="page-head"><div><h1>인사 통계</h1><p>항목을 골라 표와 차트를 만들고 보기로 저장합니다. 숫자를 누르면 명단이 열립니다.</p></div></div>
       <div class="stats">
-        <div class="panel">
-          <div class="toolbar" style="margin-bottom:6px"><h3 style="margin:0">저장된 보기</h3><span class="grow"></span><button class="btn small" id="viewNew" type="button">+ 새 보기</button></div>
+        <div class="panel" style="padding:16px">
+          <div class="panel-head" style="margin-bottom:8px"><h2 style="font-size:15px">저장된 보기</h2><button class="btn sm" id="viewNew" type="button"><i class="ph ph-plus"></i>새 보기</button></div>
           <div class="views-list" id="viewsList"></div>
         </div>
-        <div class="panel">
-          <div class="toolbar">
-            <input type="text" class="grow" id="vName" placeholder="보기 이름" />
-            <button class="btn" id="vStar" type="button" title="대시보드에 표시">☆</button>
-            <button class="btn primary" id="vSave" type="button">저장</button>
-            <button class="btn" id="vSaveAs" type="button">다른 이름으로 저장</button>
-            <button class="btn danger" id="vDelete" type="button">삭제</button>
-            <button class="btn" id="vExport" type="button"><i data-lucide="download"></i>엑셀</button>
+        <div class="grid" style="display:grid;gap:16px">
+          <div class="panel">
+            <div class="filterbar" style="margin-bottom:18px">
+              <input type="text" id="vName" placeholder="보기 이름" style="flex:1;min-width:200px;font-weight:700;font-size:16px" />
+              <button class="btn" id="vStar" type="button" title="대시보드에 표시"><i class="ph ph-star"></i></button>
+              <button class="btn" id="vExport" type="button"><i class="ph ph-download-simple"></i>엑셀</button>
+              <button class="btn danger" id="vDelete" type="button"><i class="ph ph-trash"></i></button>
+              <button class="btn" id="vSaveAs" type="button">다른 이름으로</button>
+              <button class="btn dark" id="vSave" type="button">저장</button>
+            </div>
+            <div class="builder">
+              <label class="field">방식<select id="vMode"><option value="point">기준일 시점</option><option value="trend">월별 추이</option><option value="list">상세 명부</option></select></label>
+              <label class="field" data-for="point list">기준일 (비우면 오늘)<input type="date" id="vDate" /></label>
+              <label class="field" data-for="point">입퇴사 집계 시작일<input type="date" id="vFrom" /></label>
+              <label class="field" data-for="trend">시작월<input type="month" id="vFromMonth" /></label>
+              <label class="field" data-for="trend">종료월<input type="month" id="vToMonth" /></label>
+              <label class="field" data-for="point trend">행<select id="vRows"></select></label>
+              <label class="field" data-for="point">열<select id="vCols"></select></label>
+              <label class="field" data-for="point trend">차트<select id="vChart"><option value="">표만</option><option value="bar">막대</option><option value="stack">누적 막대</option><option value="line">꺾은선</option><option value="pie">도넛</option></select></label>
+            </div>
+            <div data-for="point trend" style="margin-bottom:16px"><div class="sub-label">지표 <span id="vMetricHint" style="font-weight:400"></span></div><div class="chips" id="vMetrics"></div></div>
+            <div><div class="sub-label">조건</div><div id="vFilters"></div><button class="btn sm" id="vAddFilter" type="button"><i class="ph ph-funnel-simple"></i>조건 추가</button></div>
           </div>
-          <div class="builder">
-            <label class="field">방식<select id="vMode"><option value="point">기준일 시점</option><option value="trend">월별 추이</option><option value="list">상세 명부</option></select></label>
-            <label class="field" data-for="point list">기준일<input type="date" id="vDate" /></label>
-            <label class="field" data-for="point">입퇴사 집계 시작일<input type="date" id="vFrom" /></label>
-            <label class="field" data-for="trend">시작월<input type="month" id="vFromMonth" /></label>
-            <label class="field" data-for="trend">종료월<input type="month" id="vToMonth" /></label>
-            <label class="field" data-for="point trend">행<select id="vRows"></select></label>
-            <label class="field" data-for="point">열<select id="vCols"></select></label>
-            <label class="field" data-for="point trend">표시<select id="vChart"><option value="">표만</option><option value="bar">막대</option><option value="stack">누적 막대</option><option value="line">꺾은선</option><option value="pie">원</option></select></label>
-          </div>
-          <div data-for="point trend" style="margin-bottom:14px"><div class="sub-label">지표 <span id="vMetricHint" style="font-weight:400"></span></div><div class="chips" id="vMetrics"></div></div>
-          <div style="margin-bottom:14px"><div class="sub-label">조건</div><div id="vFilters"></div><button class="btn small" id="vAddFilter" type="button">+ 조건 추가</button></div>
-          <p class="note" id="vNote" hidden></p>
-          <div id="vResult"></div>
+          <div class="panel result"><p class="note" id="vNote" hidden></p><div id="vResult"></div></div>
         </div>
       </div>
     </section>
 
     <section id="view-settings" data-view-panel="settings" hidden>
-      <div class="page-head"><div><h1>운영 설정</h1><p>회사 정보와 기준코드(조직·직급·직책 등)</p></div></div>
-      <div class="grid cols-2">
-        <div class="panel grid">
-          <h2>회사 정보(증명서 하단)</h2>
+      <div class="page-head"><div><h1>설정</h1><p>증명서에 찍히는 회사 정보와 조직·직급 등 기준코드</p></div></div>
+      <div class="settings">
+        <div class="panel" style="display:grid;gap:14px">
+          <div class="panel-head" style="margin:0"><h2>회사 정보</h2></div>
           <label class="field">회사명<input type="text" id="setCompany" /></label>
           <label class="field">회사주소<input type="text" id="setAddress" /></label>
           <label class="field">대표이사<input type="text" id="setCeo" /></label>
-          <label class="field">직인 이미지(PNG·JPG, 비우면 기본 직인 파일)<input type="file" id="setSeal" accept="image/png,image/jpeg" /></label>
-          <div class="toolbar"><img id="setSealPreview" alt="직인 미리보기" style="height:60px" /><button class="btn small" id="setSealReset" type="button">기본 직인으로</button></div>
-          <div><button class="btn primary" id="setSaveCompany" type="button">저장</button></div>
+          <div class="seal-box"><img id="setSealPreview" alt="직인" /><div style="display:grid;gap:6px"><label class="btn sm" style="cursor:pointer"><i class="ph ph-image"></i>직인 바꾸기<input type="file" id="setSeal" accept="image/png,image/jpeg" hidden /></label><button class="btn sm ghost" id="setSealReset" type="button">기본 직인</button></div></div>
+          <button class="btn dark" id="setSaveCompany" type="button">저장</button>
         </div>
         <div class="panel">
-          <h2>기준코드</h2>
-          <div class="code-tabs" id="codeTabs"></div>
+          <div class="panel-head"><h2>기준코드</h2></div>
+          <div class="seg code-tabs" id="codeTabs"></div>
           <div id="codeList" class="code-list"></div>
-          <div class="toolbar" style="margin-top:10px"><input type="text" class="grow" id="codeNew" placeholder="새 항목 이름" /><button class="btn" id="codeAdd" type="button">추가</button></div>
-          <p class="muted small" id="codeHint"></p>
+          <div class="filterbar" style="margin:14px 0 6px"><input type="text" id="codeNew" placeholder="새 항목 이름" style="flex:1" /><button class="btn" id="codeAdd" type="button"><i class="ph ph-plus"></i>추가</button></div>
+          <p class="muted small" id="codeHint" style="margin:0"></p>
         </div>
       </div>
     </section>
   </main>
 </div>
 
-<dialog id="empDialog">
-  <form method="dialog" id="empForm">
-    <div class="dlg-head"><h2 style="margin:0" id="empTitle">사원</h2><button class="btn ghost" value="cancel" formnovalidate>닫기</button></div>
+<dialog id="empDialog" class="drawer">
+  <form method="dialog" id="empForm" class="dlg">
+    <div class="dlg-head"><span class="av lg" id="empAv"></span><div><h2 id="empTitle" tabindex="-1" autofocus>사원</h2><p id="empSub"></p></div><span id="empChip"></span><button class="icon-btn x" value="cancel" formnovalidate aria-label="닫기"><i class="ph ph-x"></i></button></div>
     <div class="dlg-body">
-      <fieldset><legend>기본</legend><div class="form-grid">
+      <div class="form-sec"><h3>소속</h3><div class="form-grid">
+        <label class="field">부서<select name="dept" data-code="orgUnits"></select></label>
+        <label class="field">직급<select name="grade" data-code="grades"></select></label>
+        <label class="field">직책<select name="position" data-code="positions" data-blank="팀원(공란)"></select></label>
+        <label class="field">직종<select name="jobType" data-code="jobTypes"></select></label>
+        <label class="field">고용형태<select name="employmentType" data-code="employmentTypes"></select></label>
+        <label class="field">근무지<select name="location" data-code="locations" data-blank="(없음)"></select></label>
+      </div></div>
+      <div class="form-sec"><h3>입퇴사</h3><div class="form-grid">
+        <label class="field">입사일<input type="date" name="joinDate" required /></label>
+        <label class="field">퇴사일<input type="date" name="retireDate" /></label>
+        <label class="field">재직상태<select name="status"><option>재직</option><option>휴직</option></select></label>
+        <label class="field">호봉<input type="text" name="step" /></label>
+      </div><p class="muted small" style="margin:8px 0 0">퇴사일이 오늘 이전이면 자동으로 퇴직 처리됩니다.</p></div>
+      <div class="form-sec"><h3>기본</h3><div class="form-grid">
         <label class="field">사번<input type="text" name="empNo" required /></label>
         <label class="field">이름<input type="text" name="name" required /></label>
         <label class="field">성별<select name="gender"><option></option><option>남</option><option>여</option></select></label>
@@ -297,59 +458,44 @@
         <label class="field">내외국인<select name="foreigner"><option>내국인</option><option>외국인</option></select></label>
         <label class="field">국적<input type="text" name="nationality" /></label>
         <label class="field">장애<select name="disability"><option value="">비장애</option><option>장애(경증)</option><option>장애(중증)</option></select></label>
-      </div></fieldset>
-      <fieldset><legend>소속</legend><div class="form-grid">
-        <label class="field">부서<select name="dept" data-code="orgUnits"></select></label>
-        <label class="field">직급<select name="grade" data-code="grades"></select></label>
-        <label class="field">직책<select name="position" data-code="positions" data-blank="팀원(공란)"></select></label>
-        <label class="field">직종<select name="jobType" data-code="jobTypes"></select></label>
-        <label class="field">고용형태<select name="employmentType" data-code="employmentTypes"></select></label>
-        <label class="field">근무지<select name="location" data-code="locations" data-blank="(없음)"></select></label>
-        <label class="field">호봉<input type="text" name="step" /></label>
-      </div></fieldset>
-      <fieldset><legend>입퇴사</legend><div class="form-grid">
-        <label class="field">입사일<input type="date" name="joinDate" required /></label>
-        <label class="field">퇴사일<input type="date" name="retireDate" /></label>
-        <label class="field">재직상태<select name="status"><option>재직</option><option>휴직</option></select></label>
-      </div><p class="muted small" style="margin:6px 0 0">퇴사일이 오늘 이전이면 자동으로 퇴직 처리됩니다.</p></fieldset>
-      <fieldset><legend>연락처</legend><div class="form-grid">
+      </div></div>
+      <div class="form-sec"><h3>연락처</h3><div class="form-grid">
         <label class="field">휴대폰<input type="text" name="mobile" /></label>
         <label class="field">전화<input type="text" name="tel" /></label>
-        <label class="field">이메일<input type="email" name="email" /></label>
+        <label class="field full">이메일<input type="email" name="email" /></label>
         <label class="field">우편번호<input type="text" name="zip" /></label>
-        <label class="field span-2">주소<input type="text" name="address" /></label>
-        <label class="field span-3">메모<textarea name="memo"></textarea></label>
-      </div></fieldset>
-      <fieldset id="empHistoryBox"><legend>변경 이력</legend><div id="empHistory" class="small"></div></fieldset>
+        <label class="field full">주소<input type="text" name="address" /></label>
+        <label class="field full">메모<textarea name="memo"></textarea></label>
+      </div></div>
+      <div class="form-sec" id="empHistoryBox"><h3>변경 이력</h3><div id="empHistory" class="timeline"></div></div>
     </div>
     <div class="dlg-foot">
-      <label class="field" style="margin-right:auto">변경 적용일(이력에 기록)<input type="date" id="empEffective" /></label>
-      <button class="btn danger" type="button" id="empDelete">삭제</button>
-      <button class="btn" type="button" id="empCert">증명서</button>
-      <button class="btn primary" type="button" id="empSave">저장</button>
+      <label class="field grow">변경 적용일<input type="date" id="empEffective" /></label>
+      <button class="btn danger" type="button" id="empDelete"><i class="ph ph-trash"></i></button>
+      <button class="btn" type="button" id="empCert"><i class="ph ph-seal-check"></i>증명서</button>
+      <button class="btn dark" type="button" id="empSave">저장</button>
     </div>
   </form>
 </dialog>
 
-<dialog id="importDialog">
-  <div class="dlg-head"><h2 style="margin:0">명부 업로드 미리보기</h2><button class="btn ghost" type="button" data-close>닫기</button></div>
+<dialog id="importDialog" class="modal"><div class="dlg">
+  <div class="dlg-head"><div><h2>명부 업로드 미리보기</h2><p id="importSub"></p></div><button class="icon-btn x" type="button" data-close aria-label="닫기"><i class="ph ph-x"></i></button></div>
   <div class="dlg-body" id="importBody"></div>
-  <div class="dlg-foot"><label class="field" style="margin-right:auto">변경 적용일(부서·직급 등 이력)<input type="date" id="importEffective" /></label><button class="btn" type="button" data-close>취소</button><button class="btn primary" type="button" id="importApply">반영</button></div>
-</dialog>
+  <div class="dlg-foot"><label class="field grow">변경 적용일<input type="date" id="importEffective" /></label><button class="btn" type="button" data-close>취소</button><button class="btn dark" type="button" id="importApply">반영</button></div>
+</div></dialog>
 
-<dialog id="listDialog">
-  <div class="dlg-head"><h2 style="margin:0" id="listTitle">명단</h2><button class="btn ghost" type="button" data-close>닫기</button></div>
-  <div class="dlg-body"><div class="table-wrap" style="max-height:60vh"><table class="data"><thead><tr><th>사번</th><th>이름</th><th>부서</th><th>직급</th><th>입사일</th><th>퇴사일</th></tr></thead><tbody id="listRows"></tbody></table></div></div>
-</dialog>
+<dialog id="listDialog" class="modal"><div class="dlg">
+  <div class="dlg-head"><div><h2 id="listTitle">명단</h2></div><button class="icon-btn x" type="button" data-close aria-label="닫기"><i class="ph ph-x"></i></button></div>
+  <div class="dlg-body"><table class="data"><thead><tr><th>사원</th><th>부서</th><th>직급</th><th>입사일</th><th>퇴사일</th></tr></thead><tbody id="listRows"></tbody></table></div>
+</div></dialog>
 
-<dialog id="confirmDialog" style="width:min(440px, calc(100vw - 24px))">
-  <div class="dlg-body" id="confirmText"></div>
-  <div class="dlg-foot"><button class="btn" type="button" id="confirmNo">취소</button><button class="btn primary" type="button" id="confirmYes">확인</button></div>
-</dialog>
+<dialog id="confirmDialog" class="modal" style="width:min(440px, calc(100vw - 24px))"><div class="dlg">
+  <div class="dlg-body" id="confirmText" style="padding-top:26px"></div>
+  <div class="dlg-foot"><span class="grow"></span><button class="btn" type="button" id="confirmNo">취소</button><button class="btn dark" type="button" id="confirmYes">확인</button></div>
+</div></dialog>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="https://unpkg.com/lucide@1.33.0/dist/umd/lucide.min.js"></script>
 <script type="module">
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
@@ -374,7 +520,7 @@ const DEFAULT_SETTINGS = {
   employmentTypes: ["정규직", "계약직", "파견/외주", "인턴"], locations: [], orgUnits: [], viewsSeeded: false, baselineDate: "",
 };
 
-const state = { user: null, employees: [], history: [], certs: [], views: [], settings: { ...DEFAULT_SETTINGS }, view: "dashboard", currentView: null, editing: null, pendingImport: null };
+const state = { user: null, employees: [], history: [], certs: [], views: [], settings: { ...DEFAULT_SETTINGS }, view: "dashboard", currentView: null, editing: null, pendingImport: null, empStatus: "active" };
 const charts = new Map();
 
 // ---------- 공통 ----------
@@ -384,12 +530,13 @@ function h(tag, props = {}, ...kids) {
   const el = document.createElement(tag);
   for (const [k, v] of Object.entries(props || {})) {
     if (v === undefined || v === null || v === false) continue;
-    if (k === "class") el.className = v; else if (k === "text") el.textContent = v;
+    if (k === "class") el.className = v; else if (k === "text") el.textContent = v; else if (k === "style" && typeof v === "object") Object.assign(el.style, v);
     else if (k.startsWith("on")) el.addEventListener(k.slice(2), v); else el.setAttribute(k, v === true ? "" : v);
   }
   for (const kid of kids.flat()) if (kid !== null && kid !== undefined && kid !== false) el.append(kid instanceof Node ? kid : String(kid));
   return el;
 }
+const icon = (name, fill) => h("i", { class: `${fill ? "ph-fill" : "ph"} ph-${name}` });
 const today = () => L.todayISO();
 function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 2600); }
 function confirmBox(message) {
@@ -405,16 +552,21 @@ const statusOf = (e) => L.statusFor(e, today());
 const gradeIdx = (g) => { const i = state.settings.grades.indexOf(g); return i === -1 ? 999 : i; };
 const tenureText = (e) => { const t = L.tenureAt(e, today()); return t === null ? "" : `${t.toFixed(1)}년`; };
 const fmtNum = (v) => (v === null || v === undefined ? "-" : typeof v === "number" ? v.toLocaleString("ko-KR") : v);
+const dot = (iso) => (iso ? iso.replaceAll("-", ".") : "");
 function loadScript(src) { return new Promise((res, rej) => { if ($(`script[src="${src}"]`)) return res(); document.head.append(h("script", { src, onload: res, onerror: rej })); }); }
 const ensureXlsx = () => window.XLSX ? Promise.resolve() : loadScript("https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js");
-const ensureChart = () => window.Chart ? Promise.resolve() : loadScript("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js");
+const ensureChart = () => window.Chart ? Promise.resolve() : loadScript("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js").then(() => {
+  Chart.defaults.font.family = '"Pretendard Variable", Pretendard, sans-serif'; Chart.defaults.font.size = 12; Chart.defaults.color = "#7a808b";
+  Chart.defaults.plugins.legend.labels.usePointStyle = true; Chart.defaults.plugins.legend.labels.boxWidth = 8;
+  Chart.defaults.plugins.tooltip.backgroundColor = "#16171b"; Chart.defaults.plugins.tooltip.padding = 10; Chart.defaults.plugins.tooltip.cornerRadius = 10;
+});
 async function downloadXlsx(fileName, sheets) {
   await ensureXlsx();
   const wb = XLSX.utils.book_new();
   for (const [name, aoa] of sheets) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), name.slice(0, 31));
   XLSX.writeFile(wb, fileName);
 }
-async function commitOps(ops) { // ops: [["set"|"delete", ref, data?]] — 400개씩 나눠 쓴다
+async function commitOps(ops) { // ops: [["set"|"delete", ref, data?]] 400개씩 나눠 쓴다
   for (let i = 0; i < ops.length; i += 400) {
     const b = writeBatch(db);
     for (const [kind, r, data] of ops.slice(i, i + 400)) kind === "delete" ? b.delete(r) : b.set(r, data);
@@ -423,6 +575,13 @@ async function commitOps(ops) { // ops: [["set"|"delete", ref, data?]] — 400�
 }
 const historyOp = (entry) => ["set", doc(col("employeeHistory")), { ...entry, at: Date.now() }];
 const saveSettings = (patch) => setDoc(SETTINGS_REF(), { ...state.settings, ...patch });
+
+// 아바타: 이름 끝 두 글자 + 이름으로 정한 옅은 색
+const AV = [["#fde3e0", "#a3231a"], ["#e5e9f3", "#33415c"], ["#e3f1ea", "#1d6b4b"], ["#f6ecda", "#7a5410"], ["#ece6f3", "#56407a"], ["#e1eff1", "#25606a"]];
+function avatar(name, cls = "") {
+  const n = (name || "?").trim(), k = [...n].reduce((s, c) => s + c.charCodeAt(0), 0) % AV.length;
+  return h("span", { class: `av ${cls}`, style: { background: AV[k][0], color: AV[k][1] } }, n.length > 2 ? n.slice(-2) : n);
+}
 
 // ---------- 로그인·구독 ----------
 $("#loginBtn").addEventListener("click", () => signInWithPopup(auth, new GoogleAuthProvider()).catch((e) => toast(`로그인 실패: ${e.code || e.message}`)));
@@ -440,7 +599,10 @@ onAuthStateChanged(auth, async (user) => {
   } catch {
     $("#loginMsg").textContent = "이 계정은 사용 권한이 없습니다."; await signOut(auth); return;
   }
-  $("#loginScreen").hidden = true; $("#appShell").hidden = false; $("#whoEmail").textContent = user.email || ""; $("#whoName").textContent = user.displayName || "사용자";
+  $("#loginScreen").hidden = true; $("#appShell").hidden = false;
+  const name = user.displayName || "사용자";
+  $("#whoName").textContent = name; $("#whoEmail").textContent = user.email || "";
+  const av = avatar(name); $("#meAv").replaceWith(Object.assign(av, { id: "meAv" }));
   subscribe();
 });
 
@@ -450,7 +612,7 @@ function subscribe() {
     if (!s.exists()) { setDoc(SETTINGS_REF(), DEFAULT_SETTINGS); return; }
     state.settings = { ...DEFAULT_SETTINGS, ...s.data() }; loaded.settings = true; maybeSeed(); scheduleRender();
   }, onErr));
-  unsubs.push(onSnapshot(col("employees"), (s) => { state.employees = s.docs.map((d) => d.data()); scheduleRender(); }, onErr));
+  unsubs.push(onSnapshot(col("employees"), (s) => { state.employees = s.docs.map((d) => d.data()); loaded.employees = true; scheduleRender(); }, onErr));
   unsubs.push(onSnapshot(col("employeeHistory"), (s) => { state.history = s.docs.map((d) => ({ id: d.id, ...d.data() })); scheduleRender(); }, onErr));
   unsubs.push(onSnapshot(col("certificates"), (s) => { state.certs = s.docs.map((d) => ({ id: d.id, ...d.data() })); scheduleRender(); }, onErr));
   unsubs.push(onSnapshot(col("statViews"), (s) => {
@@ -458,7 +620,7 @@ function subscribe() {
     loaded.views = true; maybeSeed(); scheduleRender();
   }, onErr));
 }
-const loaded = { settings: false, views: false };
+const loaded = { settings: false, views: false, employees: false };
 let seeding = false;
 async function maybeSeed() { // 처음 한 번만 기본 보기 7개를 만든다(사용자가 다 지워도 다시 만들지 않음)
   if (seeding || !loaded.settings || !loaded.views || state.views.length || state.settings.viewsSeeded) return;
@@ -479,42 +641,133 @@ function route() {
   state.view = $(`[data-view-panel="${v}"]`) ? v : "dashboard";
   $$("[data-view-panel]").forEach((p) => (p.hidden = p.dataset.viewPanel !== state.view));
   $$("#nav a").forEach((a) => a.classList.toggle("active", a.dataset.view === state.view));
-  render();
+  render(); window.scrollTo(0, 0);
 }
 window.addEventListener("hashchange", route);
 function render() {
   if (!state.user) return;
   ({ dashboard: renderDashboard, employees: renderEmployees, org: renderOrg, certificates: renderCertificates, stats: renderStats, settings: renderSettings })[state.view]?.();
-  window.lucide?.createIcons();
 }
+const rise = (el, i) => { el.classList.add("rise"); el.style.setProperty("--i", i); return el; };
 
 // ---------- 대시보드 ----------
+const P = (cfg) => L.pivot(state.employees, state.history, state.settings, cfg);
 function renderDashboard() {
-  const t = today(), ym = t.slice(0, 7), y = t.slice(0, 4);
-  const p = L.pivot(state.employees, state.history, state.settings, { mode: "point", date: t, from: `${ym}-01`, rows: "", metrics: ["count", "hires", "exits"] });
-  const yr = L.pivot(state.employees, state.history, state.settings, { mode: "point", date: t, from: `${y}-01-01`, rows: "", metrics: ["exits", "exitRate"] });
+  const t = today(), ym = t.slice(0, 7), y = t.slice(0, 4), d = new Date(`${t}T00:00:00`);
+  const first = (state.user?.displayName || "").trim();
+  $("#greet").replaceChildren(`안녕하세요, ${first ? first.slice(-2) : ""}님 `, h("span", {}, "오늘 인원 현황입니다"));
+  $("#today").textContent = `${y}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${"일월화수목금토"[d.getDay()]}요일 · ${state.settings.companyName || "엔코스"}`;
+  if (!state.employees.length) {
+    $("#heroStats").replaceChildren();
+    $("#bento").replaceChildren(h("div", { class: "panel c12 empty" }, icon("users-three"), h("b", {}, loaded.employees ? "등록된 사원이 없습니다" : "불러오는 중입니다"),
+      loaded.employees ? [h("span", {}, "사원 명부 엑셀을 올리면 대시보드가 채워집니다."), h("br"), h("button", { class: "btn dark", type: "button", onclick: () => { location.hash = "#employees"; setTimeout(() => $("#empFile").click(), 50); } }, icon("upload-simple"), "명부 업로드")] : ""));
+    $("#dashViews").replaceChildren(); $("#dashEmpty").hidden = true; return;
+  }
+  const prevEnd = L.addDays(`${ym}-01`, -1);
+  const now = P({ mode: "point", date: t, from: `${ym}-01`, rows: "", metrics: ["count", "hires", "exits", "avgAge", "avgTenure"] });
+  const prev = P({ mode: "point", date: prevEnd, from: `${prevEnd.slice(0, 7)}-01`, rows: "", metrics: ["count", "hires", "exits"] });
+  const year = P({ mode: "point", date: t, from: `${y}-01-01`, rows: "", metrics: ["hires", "exits", "exitRate"] });
+  const v = (p, m) => p.value("합계", m) ?? 0;
+  const fromMonth = L.monthsBetween(`${Number(y) - 1}-${t.slice(5, 7)}`, ym)[1];
+  const trend = P({ mode: "trend", fromMonth, toMonth: ym, rows: "", metrics: ["count", "hires", "exits"] });
+  const months = trend.colKeys;
+  const gender = P({ mode: "point", date: t, rows: "gender", metrics: ["count"] });
   const leave = state.employees.filter((e) => statusOf(e) === "휴직").length;
-  const kpi = (icon, label, value, note) => h("div", { class: "kpi" }, h("div", { class: "k-head" }, h("span", { class: "k-icon" }, h("i", { "data-lucide": icon })), label), h("b", {}, value), h("small", {}, note || ""));
-  $("#kpis").replaceChildren(
-    kpi("users-round", "재직 인원", `${fmtNum(p.value("합계", "count") ?? 0)}명`, `휴직 ${leave}명 포함`),
-    kpi("user-plus", `${Number(ym.slice(5))}월 입사`, `${fmtNum(p.value("합계", "hires") ?? 0)}명`, `${ym}-01 ~ 오늘`),
-    kpi("user-minus", `${Number(ym.slice(5))}월 퇴사`, `${fmtNum(p.value("합계", "exits") ?? 0)}명`, `${ym}-01 ~ 오늘`),
-    kpi("trending-down", `${y}년 퇴사율`, `${fmtNum(yr.value("합계", "exitRate") ?? 0)}%`, `퇴사 ${yr.value("합계", "exits") ?? 0}명 ÷ 평균 인원`),
+  const depts = new Set(state.employees.filter((e) => statusOf(e) !== "퇴직").map((e) => e.dept)).size;
+
+  $("#heroStats").replaceChildren(
+    h("div", {}, h("b", {}, fmtNum(depts), h("small", {}, "개")), h("span", {}, icon("tree-structure"), "부서")),
+    h("div", {}, h("b", {}, fmtNum(v(now, "avgTenure")), h("small", {}, "년")), h("span", {}, icon("hourglass-medium"), "평균 근속")),
+    h("div", {}, h("b", {}, fmtNum(v(now, "avgAge")), h("small", {}, "세")), h("span", {}, icon("cake"), "평균 연령")),
   );
-  const starred = state.views.filter((v) => v.star);
+
+  const cnt = v(now, "count"), diff = cnt - v(prev, "count");
+  const ink = h("div", { class: "ink-card c4" },
+    h("div", { class: "lbl" }, icon("users-three", true), "재직 인원"),
+    h("div", { class: "big" }, fmtNum(cnt), h("small", {}, "명")),
+    h("span", { class: "delta" }, icon(diff >= 0 ? "arrow-up-right" : "arrow-down-right"), `지난달 말보다 ${diff >= 0 ? "+" : ""}${diff}명`),
+    h("div", { class: "spark" }, spark(months.map((m) => trend.value("count", m)), 300, 120)),
+    h("div", { class: "foot" }, h("span", {}, "남 ", h("b", {}, fmtNum(gender.value("남", "count") ?? 0))), h("span", {}, "여 ", h("b", {}, fmtNum(gender.value("여", "count") ?? 0))), h("span", {}, "휴직 ", h("b", {}, leave))));
+
+  const flowBox = h("div", { class: "chart-box" }, h("canvas", {}));
+  const flow = h("div", { class: "panel c8" },
+    h("div", { class: "panel-head" }, h("h2", {}, "입퇴사 추이"), h("span", { class: "sub" }, "최근 12개월 · 월별")),
+    h("div", { class: "metric-trio" },
+      h("div", {}, h("span", {}, `${Number(ym.slice(5))}월 입사 / 퇴사`), h("b", {}, `${v(now, "hires")} / ${v(now, "exits")}`, h("small", {}, "명"))),
+      h("div", {}, h("span", {}, `${y}년 입사 / 퇴사`), h("b", {}, `${v(year, "hires")} / ${v(year, "exits")}`, h("small", {}, "명"))),
+      h("div", {}, h("span", {}, `${y}년 퇴사율`), h("b", {}, fmtNum(v(year, "exitRate")), h("small", {}, "%")))),
+    flowBox);
+
+  // 직종 구성
+  const jt = P({ mode: "point", date: t, rows: "jobType", metrics: ["count"] });
+  const tones = ["#16171b", "#d92d20", "#6b7079", "#f19a92", "#b9bcc4", "#3b3e46"];
+  const parts = jt.rowKeys.map((k, i) => ({ k, n: jt.value(k, "count"), c: k === "(없음)" ? null : tones[i % tones.length] })).filter((x) => x.n);
+  const comp = h("div", { class: "panel c4" },
+    h("div", { class: "panel-head" }, h("h2", {}, "직종 구성"), h("span", { class: "sub" }, "재직 기준")),
+    h("div", { class: "stackbar" }, ...parts.map((x) => h("i", { class: x.c ? "" : "hatch", style: { flex: String(x.n), background: x.c || "" }, title: `${x.k} ${x.n}명` }))),
+    h("div", { class: "legend-list" }, ...parts.map((x) => h("div", {}, h("i", { class: x.c ? "" : "hatch", style: { background: x.c || "#d6d9df" } }), h("span", {}, x.k === "(없음)" ? "미입력" : x.k), h("b", {}, fmtNum(x.n)), h("span", { class: "p" }, `${Math.round((x.n / cnt) * 1000) / 10}%`)))));
+
+  // 최근 입퇴사
+  const since = L.addDays(t, -45);
+  const moves = [
+    ...state.employees.filter((e) => e.joinDate >= since && e.joinDate <= t).map((e) => ({ e, d: e.joinDate, kind: "in" })),
+    ...state.employees.filter((e) => e.retireDate && e.retireDate >= since && e.retireDate <= t).map((e) => ({ e, d: e.retireDate, kind: "out" })),
+  ].sort((a, b) => b.d.localeCompare(a.d)).slice(0, 6);
+  const feed = h("div", { class: "panel c4" },
+    h("div", { class: "panel-head" }, h("h2", {}, "최근 입퇴사"), h("span", { class: "sub" }, "45일")),
+    moves.length ? h("div", { class: "feed" }, ...moves.map(({ e, d, kind }) => h("div", { class: "feed-row", onclick: () => openEmployee(e.empNo) },
+      avatar(e.name), h("div", {}, h("b", {}, e.name), h("small", {}, [e.dept, e.grade].filter(Boolean).join(" · "))),
+      h("div", { class: "when" }, h("span", { class: `chip ${kind}` }, kind === "in" ? "입사" : "퇴사"), dot(d).slice(5)))))
+      : h("div", { class: "empty", style: { padding: "28px 0" } }, h("span", {}, "최근 45일 동안 입퇴사가 없습니다.")));
+
+  // 연령대
+  const ab = P({ mode: "point", date: t, rows: "ageBand", metrics: ["count"] });
+  const bands = L.AGE_BANDS.map((k) => ({ k, n: ab.value(k, "count") ?? 0 }));
+  const maxN = Math.max(1, ...bands.map((b) => b.n));
+  const ages = h("div", { class: "panel c4" },
+    h("div", { class: "panel-head" }, h("h2", {}, "연령대 분포"), h("span", { class: "sub" }, "만 나이")),
+    h("div", { class: "bars" }, ...bands.map((b) => h("div", { class: b.n === maxN ? "peak" : "" }, h("span", { class: "v" }, b.n), h("div", { class: "col" }, h("i", { style: { height: `${(b.n / maxN) * 100}%` } })), h("small", {}, b.k)))));
+
+  $("#bento").replaceChildren(...[ink, flow, comp, feed, ages].map(rise));
+  drawFlow(flowBox.firstChild, months, months.map((m) => trend.value("hires", m)), months.map((m) => trend.value("exits", m)));
+
+  const starred = state.views.filter((x) => x.star);
   $("#dashEmpty").hidden = starred.length > 0;
-  $("#dashViews").replaceChildren(...starred.map((v) => {
+  $("#dashViews").replaceChildren(...starred.map((x, i) => {
     const box = h("div", {});
-    const card = h("div", { class: "panel" }, h("div", { class: "toolbar" }, h("h2", { style: "margin:0" }, v.name), h("span", { class: "grow" }),
-      h("button", { class: "btn small", type: "button", onclick: () => { state.currentView = structuredClone(v); location.hash = "#stats"; } }, "열기")), box);
-    renderResult(box, withDates(v.config), true);
-    return card;
+    const card = h("div", { class: "panel" }, h("div", { class: "panel-head" }, h("h2", {}, x.name),
+      h("button", { class: "btn sm", type: "button", onclick: () => { state.currentView = structuredClone(x); location.hash = "#stats"; } }, "열기", icon("arrow-up-right"))), box);
+    renderResult(box, withDates(x.config), true);
+    return rise(card, i + 5);
   }));
+}
+function spark(vals, w, hgt) {
+  const max = Math.max(...vals), min = Math.min(...vals), pad = 4;
+  const x = (i) => pad + (i * (w - pad * 2)) / Math.max(1, vals.length - 1), y = (v) => pad + (1 - (v - min) / Math.max(1, max - min)) * (hgt - pad * 2);
+  const line = vals.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join("");
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", `0 0 ${w} ${hgt}`); svg.setAttribute("preserveAspectRatio", "none");
+  svg.setAttribute("aria-label", `12개월 인원 ${vals[0]}명에서 ${vals.at(-1)}명`);
+  svg.innerHTML = `<defs><linearGradient id="sg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#d92d20" stop-opacity=".45"/><stop offset="1" stop-color="#d92d20" stop-opacity="0"/></linearGradient></defs>
+    <path d="${line}L${x(vals.length - 1)},${hgt}L${x(0)},${hgt}Z" fill="url(#sg)"/><path d="${line}" fill="none" stroke="#f3a39b" stroke-width="2" vector-effect="non-scaling-stroke"/>
+    `;
+  return svg;
+}
+async function drawFlow(canvas, months, hires, exits) {
+  await ensureChart();
+  if (!canvas.isConnected) return;
+  const key = canvas.parentElement;
+  charts.get(key)?.destroy();
+  charts.set(key, new Chart(canvas, { type: "bar", data: { labels: months.map((m) => `${m.slice(2, 4)}.${m.slice(5)}`), datasets: [
+    { label: "입사", data: hires, backgroundColor: "#16171b", borderRadius: 6, barPercentage: .7, categoryPercentage: .62 },
+    { label: "퇴사", data: exits, backgroundColor: "#d92d20", borderRadius: 6, barPercentage: .7, categoryPercentage: .62 }] },
+    options: { responsive: true, maintainAspectRatio: false, animation: { duration: 400 }, plugins: { legend: { position: "top", align: "end" } },
+      scales: { x: { grid: { display: false }, border: { display: false } }, y: { beginAtZero: true, grid: { color: "#f0f1f4" }, border: { display: false }, ticks: { precision: 0 } } } } }));
 }
 
 // ---------- 사원 관리 ----------
 function filteredEmployees() {
-  const q = $("#empSearch").value.trim().toLowerCase(), st = $("#empStatus").value, dept = $("#empDept").value;
+  const q = $("#empSearch").value.trim().toLowerCase(), st = state.empStatus, dept = $("#empDept").value;
   return state.employees.filter((e) => {
     const s = statusOf(e);
     if (st === "active" ? s === "퇴직" : st && s !== st) return false;
@@ -526,15 +779,22 @@ function renderEmployees() {
   const sel = $("#empDept"), cur = sel.value;
   sel.replaceChildren(h("option", { value: "" }, "전체 부서"), ...state.settings.orgUnits.map((u) => h("option", { value: u.name }, u.name)));
   sel.value = cur;
+  $$("#empStatus button").forEach((b) => b.classList.toggle("on", b.dataset.v === state.empStatus));
   const rows = filteredEmployees();
   $("#empCount").textContent = `${rows.length}명`;
   $("#empRows").replaceChildren(...(rows.length ? rows.map((e) => h("tr", { class: "click", onclick: () => openEmployee(e.empNo) },
-    h("td", {}, e.empNo), h("td", {}, h("b", {}, e.name)), h("td", {}, e.dept), h("td", {}, e.grade), h("td", {}, e.position || ""), h("td", {}, e.jobType),
-    h("td", {}, e.joinDate), h("td", { class: "num" }, tenureText(e)), h("td", {}, h("span", { class: `badge ${statusOf(e)}` }, statusOf(e)))))
-    : [h("tr", {}, h("td", { colspan: 9, class: "empty" }, state.employees.length ? "조건에 맞는 사원이 없습니다."
-      : [h("b", {}, "등록된 사원이 없습니다"), "사원 명부 엑셀(사원등록 파일)을 올리면 한 번에 등록됩니다.", h("br"), h("button", { class: "btn primary", type: "button", onclick: () => $("#empFile").click() }, "명부 업로드")]))]));
+    h("td", {}, h("div", { class: "who-cell" }, avatar(e.name), h("div", {}, h("b", {}, e.name), h("small", {}, e.empNo)))),
+    h("td", {}, e.dept ? h("span", { class: "chip" }, e.dept) : ""),
+    h("td", {}, e.grade, e.position ? h("span", { class: "muted" }, ` · ${e.position}`) : ""),
+    h("td", {}, e.jobType || h("span", { class: "muted" }, "-")),
+    h("td", { class: "num" }, dot(e.joinDate)), h("td", { class: "r" }, tenureText(e)),
+    h("td", {}, h("span", { class: `chip ${statusOf(e)}` }, statusOf(e)))))
+    : [h("tr", {}, h("td", { colspan: 7, class: "empty" }, icon(state.employees.length ? "magnifying-glass" : "users-three"),
+      h("b", {}, state.employees.length ? "조건에 맞는 사원이 없습니다" : "등록된 사원이 없습니다"),
+      state.employees.length ? "검색어나 상태를 바꿔 보세요." : [h("span", {}, "사원 명부 엑셀을 올리면 한 번에 등록됩니다."), h("br"), h("button", { class: "btn dark", type: "button", onclick: () => $("#empFile").click() }, icon("upload-simple"), "명부 업로드")]))]));
 }
-["#empSearch", "#empStatus", "#empDept"].forEach((s) => $(s).addEventListener("input", renderEmployees));
+$("#empSearch").addEventListener("input", renderEmployees); $("#empDept").addEventListener("input", renderEmployees);
+$("#empStatus").addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (!b) return; state.empStatus = b.dataset.v; renderEmployees(); });
 
 function fillCodeSelects(form, current) {
   $$("select[data-code]", form).forEach((sel) => {
@@ -550,19 +810,24 @@ function fillCodeSelects(form, current) {
 }
 function openEmployee(empNo) {
   const e = empNo ? empByNo()[empNo] : L.newEmployee({ joinDate: today(), foreigner: "내국인", nationality: "대한민국" }, today());
+  if (!e) return;
   state.editing = empNo || null;
   const f = $("#empForm");
   fillCodeSelects(f, e);
   for (const el of f.elements) if (el.name && !el.dataset.code) el.value = e[el.name] ?? "";
   if (e.status === "퇴직") f.elements.status.value = "재직";
   f.elements.empNo.readOnly = !!empNo;
-  $("#empTitle").textContent = empNo ? `${e.name} (${e.empNo})` : "신규 사원";
+  $("#empAv").replaceWith(Object.assign(avatar(empNo ? e.name : "신규", "lg"), { id: "empAv" }));
+  $("#empTitle").textContent = empNo ? e.name : "신규 사원";
+  $("#empSub").textContent = empNo ? [e.empNo, e.dept, e.grade].filter(Boolean).join(" · ") : "사번과 이름, 입사일은 꼭 입력하세요";
+  $("#empChip").replaceChildren(empNo ? h("span", { class: `chip ${statusOf(e)}` }, statusOf(e)) : "");
   $("#empDelete").hidden = $("#empCert").hidden = $("#empHistoryBox").hidden = !empNo;
   $("#empEffective").value = today();
   const hist = state.history.filter((x) => x.empNo === empNo).sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.at || 0) - (a.at || 0));
-  $("#empHistory").replaceChildren(hist.length ? h("table", { class: "data" }, h("tbody", {}, ...hist.map((x) => h("tr", {},
-    h("td", {}, x.date), h("td", {}, L.FIELD_LABELS[x.field] || x.field), h("td", {}, `${x.before || "(없음)"} → ${x.after || "(없음)"}`))))) : h("span", { class: "muted" }, "변경 이력이 없습니다."));
+  $("#empHistory").replaceChildren(...(hist.length ? hist.map((x) => h("div", {}, h("time", {}, dot(x.date)),
+    h("span", {}, h("b", {}, L.FIELD_LABELS[x.field] || x.field), "  ", h("em", {}, x.before || "(없음)"), " → ", x.after || "(없음)"))) : [h("span", { class: "muted small" }, "변경 이력이 없습니다.")]));
   $("#empDialog").showModal();
+  $(".dlg-body", $("#empDialog")).scrollTop = 0;
 }
 $("#empNew").addEventListener("click", () => openEmployee(null));
 $("#empForm").addEventListener("submit", (ev) => { if (ev.submitter?.value !== "cancel") ev.preventDefault(); });
@@ -620,12 +885,14 @@ $("#empFile").addEventListener("change", async (ev) => {
 function showImportPreview(fileName, total) {
   const { creates, updates, unchanged, missing } = state.pendingImport;
   const changeRows = updates.flatMap((u) => Object.entries(u.changes).filter(([f]) => f !== "rrnFront7").map(([f, c]) => [u.empNo, u.next.name, L.FIELD_LABELS[f] || f, c.before, c.after]));
+  $("#importSub").textContent = `${fileName} · ${total}명 읽음`;
+  const stat = (label, n, cls) => h("div", {}, h("span", {}, label), h("b", { class: cls || "" }, fmtNum(n), h("small", {}, "명")));
   $("#importBody").replaceChildren(
-    h("p", {}, `${fileName} · ${total}명 읽음 — 신규 `, h("b", {}, creates.length), "명, 변경 ", h("b", {}, updates.length), `명, 변경 없음 ${unchanged}명`),
+    h("div", { class: "metric-trio" }, stat("신규", creates.length), stat("변경", updates.length), stat("변경 없음", unchanged)),
     h("p", { class: "muted small" }, "명부의 항목(부서·직급·직종·입퇴사일·연락처 등)만 반영하고, 앱에서 입력한 직책·고용형태·근무지·장애·메모·휴직은 그대로 둡니다. 급여·보험·계좌·주민번호 뒷자리는 가져오지 않습니다."),
-    missing.length ? h("p", { class: "note" }, `명부에 없는 재직자 ${missing.length}명: ${missing.slice(0, 10).map((e) => e.name).join(", ")}${missing.length > 10 ? " 외" : ""} — 자동으로 지우지 않습니다.`) : "",
-    changeRows.length ? h("div", { class: "table-wrap", style: "max-height:46vh" }, h("table", { class: "data" }, h("thead", {}, h("tr", {}, ...["사번", "이름", "항목", "이전", "이후"].map((x) => h("th", {}, x)))),
-      h("tbody", {}, ...changeRows.slice(0, 300).map((r) => h("tr", {}, ...r.map((x) => h("td", {}, x || "(없음)"))))))) : "",
+    missing.length ? h("p", { class: "note" }, `명부에 없는 재직자 ${missing.length}명: ${missing.slice(0, 10).map((e) => e.name).join(", ")}${missing.length > 10 ? " 외" : ""}. 자동으로 지우지 않습니다.`) : "",
+    changeRows.length ? h("table", { class: "data" }, h("thead", {}, h("tr", {}, ...["사번", "이름", "항목", "이전", "이후"].map((x) => h("th", {}, x)))),
+      h("tbody", {}, ...changeRows.slice(0, 300).map((r) => h("tr", {}, ...r.map((x) => h("td", {}, x || "(없음)")))))) : "",
     changeRows.length > 300 ? h("p", { class: "muted small" }, `변경 ${changeRows.length}건 중 300건만 표시`) : "",
   );
   $("#importEffective").value = today();
@@ -644,7 +911,7 @@ $("#importApply").addEventListener("click", async () => {
     await commitOps(ops);
     await ensureCodes([...creates, ...updates.map((u) => u.next)]);
     if (!state.settings.baselineDate) await saveSettings({ baselineDate: today() });
-    $("#importDialog").close(); toast(`반영했습니다: 신규 ${creates.length}명, 변경 ${updates.length}명`);
+    $("#importDialog").close(); toast(`반영했습니다. 신규 ${creates.length}명, 변경 ${updates.length}명`);
   } catch (e) { console.error(e); toast("반영 중 오류가 났습니다. 다시 시도하세요."); }
   finally { $("#importApply").disabled = false; }
 });
@@ -660,18 +927,31 @@ function renderOrg() {
   const active = state.employees.filter((e) => statusOf(e) !== "퇴직");
   const byDept = {}; for (const e of active) (byDept[e.dept || "(부서 없음)"] ||= []).push(e);
   const children = (name) => units.filter((u) => (u.parent || "") === name);
-  const count = (name) => (byDept[name]?.length || 0) + children(name).reduce((s, c) => s + count(c.name), 0);
-  const person = (e) => h("span", { class: `person${e.position ? " lead" : ""}`, onclick: () => openEmployee(e.empNo) }, e.name, " ", h("span", { class: "muted small" }, [e.grade, e.position].filter(Boolean).join(" · ")));
+  const members = (name) => [...(byDept[name] || []), ...children(name).flatMap((c) => members(c.name))];
   const sortP = (list) => [...list].sort((a, b) => (b.position ? 1 : 0) - (a.position ? 1 : 0) || gradeIdx(a.grade) - gradeIdx(b.grade) || a.name.localeCompare(b.name, "ko"));
-  const node = (u) => h("details", { open: true }, h("summary", {}, u.name, " ", h("span", { class: "muted" }, `${count(u.name)}명`)),
-    byDept[u.name]?.length ? h("div", { class: "members" }, ...sortP(byDept[u.name]).map(person)) : "", ...children(u.name).map(node));
+  const person = (e) => h("span", { class: `person${e.position ? " lead" : ""}`, onclick: () => openEmployee(e.empNo) }, avatar(e.name), e.name, h("small", {}, [e.grade, e.position].filter(Boolean).join(" · ")));
+  const stack = (list) => { const s = sortP(list); return h("span", { class: "stack" }, ...s.slice(0, 6).map((e) => avatar(e.name)), s.length > 6 ? h("span", { class: "more" }, `+${s.length - 6}`) : ""); };
+  const team = (u) => { // u.self: 상위 조직 직속 인원만
+    const list = u.self ? byDept[u.name] || [] : members(u.name);
+    return h("details", { class: "team" }, h("summary", {}, icon("caret-right"), u.self ? "직속" : u.name, h("span", { class: "chip" }, `${list.length}명`), stack(list)),
+      byDept[u.name]?.length ? h("div", { class: "people" }, ...sortP(byDept[u.name]).map(person)) : "", ...(u.self ? [] : children(u.name).filter((c) => members(c.name).length).map(team)));
+  };
   const known = new Set(units.map((u) => u.name));
-  const orphan = Object.keys(byDept).filter((d) => !known.has(d));
-  $("#orgTree").replaceChildren(
-    h("div", { style: "font-weight:800;margin-bottom:6px" }, `${state.settings.companyName || "회사"} `, h("span", { class: "muted" }, `${active.length}명`)),
-    ...children("").map(node),
-    ...orphan.map((d) => h("details", { open: true }, h("summary", {}, d, " ", h("span", { class: "muted" }, `${byDept[d].length}명 · 설정에 없는 부서`)), h("div", { class: "members" }, ...sortP(byDept[d]).map(person)))),
-  );
+  const orphan = Object.keys(byDept).filter((d) => !known.has(d)).map((d) => ({ name: d, parent: "" }));
+  $("#orgSub").textContent = `${state.settings.companyName || "엔코스"} 재직·휴직 ${active.length}명 · 상위 조직은 설정에서 지정합니다.`;
+  const tops = [...children(""), ...orphan].filter((u) => members(u.name).length).sort((a, b) => members(b.name).length - members(a.name).length);
+  const card = (u, i) => {
+    const all = members(u.name), leads = sortP(all.filter((e) => e.position));
+    const kids = children(u.name).filter((c) => members(c.name).length);
+    return rise(h("div", { class: "org-card" },
+      h("header", {}, h("h2", {}, u.name), h("span", { class: "chip" }, `${all.length}명`),
+        leads.length ? h("span", { class: "lead" }, avatar(leads[0].name), `${leads[0].name} ${leads[0].position}`, leads.length > 1 ? ` 외 ${leads.length - 1}` : "") : ""),
+      kids.length ? [byDept[u.name]?.length ? team({ name: u.name, self: true }) : "", ...kids.map(team)]
+        : h("details", { class: "team", open: true }, h("summary", {}, icon("caret-right"), "구성원", stack(all)), h("div", { class: "people" }, ...sortP(all).map(person)))), Math.min(i, 10));
+  };
+  $("#orgTree").replaceChildren(...(tops.length ? tops.map(card)
+    : [h("div", { class: "panel empty", style: { gridColumn: "1 / -1" } }, icon("tree-structure"), h("b", {}, "조직 정보가 없습니다"), "명부를 올리면 부서별로 자동 구성됩니다.")]));
+  $$("#orgTree summary > i").forEach((i) => i.classList.add("car"));
 }
 $("#orgOpen").addEventListener("click", () => $$("#orgTree details").forEach((d) => (d.open = true)));
 $("#orgClose").addEventListener("click", () => $$("#orgTree details").forEach((d) => (d.open = false)));
@@ -696,10 +976,11 @@ function sealSrc() { return state.settings.companySealImage || "company-seals.pn
 function renderCertPreview() {
   const box = $("#certPreview"), e = certEmployee(), type = $("#certType").value, date = $("#certDate").value || today();
   box.replaceChildren();
-  if (!e) { box.append(h("p", { class: "muted" }, "대상 사원을 고르세요.")); return; }
+  if (!e) { box.append(h("div", { class: "empty", style: { margin: "auto", fontFamily: "Pretendard Variable, sans-serif" } }, icon("seal-check"), h("b", {}, "대상 사원을 고르세요"), "왼쪽에서 이름이나 사번을 입력하면 미리보기가 나옵니다.")); return; }
   const st = statusOf(e);
   if (type === "퇴직증명서" && !e.retireDate) box.append(h("p", { class: "cert-warn" }, "퇴사일이 없는 사원입니다. 사원 정보에 퇴사일을 입력하세요. (인쇄되지 않음)"));
   if (type === "재직증명서" && st === "퇴직") box.append(h("p", { class: "cert-warn" }, "퇴직한 사원입니다. 경력증명서나 퇴직증명서를 쓰세요. (인쇄되지 않음)"));
+  if (!state.settings.companyName) box.append(h("p", { class: "cert-warn" }, "회사명이 비어 있습니다. 설정에서 회사 정보를 입력하세요. (인쇄되지 않음)"));
   const end = type === "재직증명서" ? date : e.retireDate || date;
   const rows = [["성명", e.name], ["주민등록번호", rrnDisplay(e)], ["직급", e.grade], ...(e.position && e.position !== "팀원" ? [["직책", e.position]] : []),
     ["부서", e.dept], ["현주소", e.address], [type === "재직증명서" ? "재직기간" : "근무기간", `${koDate(e.joinDate)}부터  ${koDate(end)}까지`], ["용도", $("#certPurpose").value || "제출용"], ["제출처", $("#certDest").value || ""]];
@@ -709,7 +990,7 @@ function renderCertPreview() {
     h("table", { class: "certificate-grid" }, h("tbody", {}, ...rows.map(([k, v]) => h("tr", {}, h("th", { scope: "row" }, k), h("td", {}, v || ""))))),
     h("p", { class: "certificate-body" }, body),
     h("footer", { class: "certificate-footer" }, h("div", {}, koDate(date, true)),
-      h("div", { class: "certificate-company-info" }, h("span", {}, "회 사 명 :"), h("span", {}, s.companyName || "회사명(설정에서 입력)"), h("span", {}, "회사주소 :"), h("span", {}, s.companyAddress || ""),
+      h("div", { class: "certificate-company-info" }, h("span", {}, "회 사 명 :"), h("span", {}, s.companyName || ""), h("span", {}, "회사주소 :"), h("span", {}, s.companyAddress || ""),
         h("span", {}, "대표이사 :"), h("span", {}, s.representativeName || "", h("img", { class: "certificate-stamp-image", src: sealSrc(), alt: "직인" })))));
 }
 function renderCertificates() {
@@ -718,9 +999,10 @@ function renderCertificates() {
   renderCertPreview();
   const list = [...state.certs].sort((a, b) => (b.issueDate || "").localeCompare(a.issueDate || "") || (b.createdAt || "").localeCompare(a.createdAt || ""));
   $("#certCount").textContent = `${list.length}건`;
-  $("#certRows").replaceChildren(...(list.length ? list.map((c) => h("tr", {}, h("td", {}, c.number), h("td", {}, c.type), h("td", {}, `${c.name} (${c.empNo})`), h("td", {}, c.issueDate),
-    h("td", {}, [c.purpose, c.destination].filter(Boolean).join(" / ")), h("td", {}, h("button", { class: "btn small", type: "button", onclick: () => reprint(c) }, "재출력"))))
-    : [h("tr", {}, h("td", { colspan: 6, class: "muted" }, "발급 기록이 없습니다."))]));
+  $("#certRows").replaceChildren(...(list.length ? list.map((c) => h("tr", {}, h("td", { class: "num" }, c.number), h("td", {}, h("span", { class: "chip" }, c.type)),
+    h("td", {}, h("div", { class: "who-cell" }, avatar(c.name), h("div", {}, h("b", {}, c.name), h("small", {}, c.empNo)))), h("td", { class: "num" }, dot(c.issueDate)),
+    h("td", {}, [c.purpose, c.destination].filter(Boolean).join(" · ")), h("td", {}, h("button", { class: "btn sm", type: "button", onclick: () => reprint(c) }, icon("printer"), "재출력"))))
+    : [h("tr", {}, h("td", { colspan: 6, class: "empty", style: { padding: "32px" } }, "발급 기록이 없습니다."))]));
 }
 ["#certEmp", "#certType", "#certPurpose", "#certDest", "#certDate", "#certRrn"].forEach((s) => $(s).addEventListener("input", renderCertPreview));
 $("#certRrnFull").addEventListener("change", () => { $("#certRrn").hidden = !$("#certRrnFull").checked; $("#certRrn").value = ""; renderCertPreview(); });
@@ -766,12 +1048,13 @@ function ensureCurrentView() {
 function renderStats() {
   ensureCurrentView();
   const v = state.currentView, c = v.config;
-  $("#viewsList").replaceChildren(...state.views.map((x) => h("button", { type: "button", class: x.id === v.id ? "active" : "", onclick: () => { state.currentView = structuredClone(x); renderStats(); } },
-    h("span", { class: "star" }, x.star ? "★" : ""), x.name)));
-  $("#vName").value = v.name; $("#vStar").textContent = v.star ? "★" : "☆"; $("#vDelete").hidden = !v.id;
+  $("#viewsList").replaceChildren(...state.views.map((x) => h("button", { type: "button", class: `${x.id === v.id ? "active" : ""} ${x.star ? "on" : ""}`, onclick: () => { state.currentView = structuredClone(x); renderStats(); } },
+    h("i", { class: `${x.star ? "ph-fill star" : "ph"} ph-${x.star ? "star" : modeIcon(x.config.mode)}` }), x.name)));
+  $("#vName").value = v.name;
+  $("#vStar").replaceChildren(h("i", { class: `${v.star ? "ph-fill" : "ph"} ph-star`, style: { color: v.star ? "#f5a623" : "" } }));
+  $("#vDelete").hidden = !v.id;
   const filled = withDates(c);
   $("#vMode").value = c.mode || "point"; $("#vDate").value = c.date || ""; $("#vFrom").value = c.from || ""; $("#vFromMonth").value = c.fromMonth || filled.fromMonth; $("#vToMonth").value = c.toMonth || "";
-  $("#vDate").placeholder = "오늘";
   const dimOpts = (sel, val, none) => { sel.replaceChildren(h("option", { value: "" }, none), ...L.DIMENSIONS.map((d) => h("option", { value: d.key }, d.label))); sel.value = val || ""; };
   dimOpts($("#vRows"), c.rows, c.mode === "trend" ? "(지표별)" : "(전체)"); dimOpts($("#vCols"), c.cols, "(지표별)");
   $("#vChart").value = c.chart || "";
@@ -785,20 +1068,21 @@ function renderStats() {
   $("#vNote").textContent = `${base} 이전 시점의 부서·직급·직책은 변경 이력이 없어 현재 소속 기준으로 계산합니다. 인원·입퇴사 수는 입사일·퇴사일로 계산해 정확합니다.`;
   renderResult($("#vResult"), filled, false);
 }
+const modeIcon = (m) => (m === "trend" ? "chart-line" : m === "list" ? "list-bullets" : "table");
 function renderFilters() {
   const c = state.currentView.config;
   c.filters ||= [];
   $("#vFilters").replaceChildren(...c.filters.map((f, i) => {
     const values = filterValues(f.dim);
     const menu = h("div", { class: "menu", hidden: true }, ...values.map((val) => h("label", {}, h("input", { type: "checkbox", value: val, checked: f.values.includes(val),
-      onchange: (ev) => { f.values = ev.target.checked ? [...f.values, val] : f.values.filter((x) => x !== val); renderStats(); state.reopenFilter = i; } }), val)));
-    const btn = h("button", { class: "btn", type: "button", onclick: () => (menu.hidden = !menu.hidden) }, f.values.length ? f.values.join(", ").slice(0, 40) : "값 고르기 ▾");
+      onchange: (ev) => { f.values = ev.target.checked ? [...f.values, val] : f.values.filter((x) => x !== val); state.reopenFilter = i; renderStats(); } }), val)));
+    const btn = h("button", { class: "btn", type: "button", onclick: () => (menu.hidden = !menu.hidden) }, h("span", {}, f.values.length ? f.values.join(", ").slice(0, 36) : "값 고르기"), icon("caret-down"));
     if (state.reopenFilter === i) { menu.hidden = false; state.reopenFilter = null; }
     return h("div", { class: "filter-row" },
       h("select", { onchange: (ev) => { f.dim = ev.target.value; f.values = []; renderStats(); } }, ...L.DIMENSIONS.map((d) => { const o = h("option", { value: d.key }, d.label); o.selected = d.key === f.dim; return o; })),
       h("select", { onchange: (ev) => { f.op = ev.target.value; renderStats(); } }, h("option", { value: "in", selected: f.op !== "not" }, "포함"), h("option", { value: "not", selected: f.op === "not" }, "제외")),
       h("div", { class: "multi" }, btn, menu),
-      h("button", { class: "btn small ghost", type: "button", onclick: () => { c.filters.splice(i, 1); renderStats(); } }, "✕"));
+      h("button", { class: "btn sm ghost", type: "button", "aria-label": "조건 삭제", onclick: () => { c.filters.splice(i, 1); renderStats(); } }, icon("x")));
   }));
 }
 function filterValues(dim) {
@@ -807,7 +1091,7 @@ function filterValues(dim) {
   if (dim === "status") ["재직", "휴직", "퇴직"].forEach((x) => vals.add(x));
   return [...vals].sort((a, b) => a.localeCompare(b, "ko"));
 }
-// 빌더 입력 → 현재 보기 설정
+document.addEventListener("click", (ev) => { if (!ev.target.closest(".multi")) $$(".multi .menu").forEach((m) => (m.hidden = true)); });
 function bindBuilder() {
   const c = () => state.currentView.config;
   const on = (sel, fn) => $(sel).addEventListener("change", (ev) => { fn(ev.target.value); renderStats(); });
@@ -818,7 +1102,7 @@ function bindBuilder() {
   $("#vName").addEventListener("input", (ev) => (state.currentView.name = ev.target.value));
   $("#vStar").addEventListener("click", () => { state.currentView.star = !state.currentView.star; renderStats(); });
   $("#vAddFilter").addEventListener("click", () => { c().filters.push({ dim: "status", op: "in", values: [] }); renderStats(); });
-  $("#viewNew").addEventListener("click", () => { state.currentView = { name: "새 보기", star: false, config: { mode: "point", rows: "dept", cols: "", metrics: ["count"], filters: [] } }; renderStats(); });
+  $("#viewNew").addEventListener("click", () => { state.currentView = { name: "새 보기", star: false, config: { mode: "point", rows: "dept", cols: "", metrics: ["count"], filters: [] } }; renderStats(); $("#vName").focus(); });
   const save = async (asNew) => {
     const v = state.currentView, name = v.name.trim() || "새 보기";
     const data = { name, star: !!v.star, order: v.order ?? state.views.length, config: v.config };
@@ -844,7 +1128,7 @@ bindBuilder();
 function showMembers(title, list) {
   $("#listTitle").textContent = `${title} · ${list.length}명`;
   $("#listRows").replaceChildren(...[...list].sort((a, b) => a.empNo.localeCompare(b.empNo)).map((e) => h("tr", { class: "click", onclick: () => { $("#listDialog").close(); openEmployee(e.empNo); } },
-    h("td", {}, e.empNo), h("td", {}, e.name), h("td", {}, e.dept), h("td", {}, e.grade), h("td", {}, e.joinDate), h("td", {}, e.retireDate || ""))));
+    h("td", {}, h("div", { class: "who-cell" }, avatar(e.name), h("div", {}, h("b", {}, e.name), h("small", {}, e.empNo)))), h("td", {}, e.dept), h("td", {}, e.grade), h("td", { class: "num" }, dot(e.joinDate)), h("td", { class: "num" }, dot(e.retireDate)))));
   $("#listDialog").showModal();
 }
 
@@ -868,7 +1152,7 @@ function renderResult(box, cfg, compact) {
   const r = computeResult(cfg);
   if (r.list) {
     const list = [...r.list].sort((a, b) => a.empNo.localeCompare(b.empNo));
-    box.replaceChildren(h("p", { class: "small muted" }, `${list.length}명`), h("div", { class: "table-wrap" }, h("table", { class: "data" },
+    box.replaceChildren(h("p", { class: "result-meta" }, `${list.length}명`), h("div", { class: "table-scroll" }, h("table", { class: "data" },
       h("thead", {}, h("tr", {}, ...LIST_COLS.map((c) => h("th", {}, L.FIELD_LABELS[c])))),
       h("tbody", {}, ...list.slice(0, compact ? 50 : 2000).map((e) => h("tr", { class: "click", onclick: () => openEmployee(e.empNo) }, ...LIST_COLS.map((c) => h("td", {}, e[c] ?? ""))))))));
     return;
@@ -880,39 +1164,40 @@ function renderResult(box, cfg, compact) {
   const cellTitle = (rk, ck) => [rowHead(rk), ck === "합계" ? "" : r.trend ? ck : colHead(ck)].filter(Boolean).join(" · ");
   const td = (rk, ck, extra = "") => {
     const v = r.value(rk, ck);
-    return h("td", { class: `num cell ${extra}`, onclick: () => showMembers(cellTitle(rk, ck), r.members(rk, ck)) }, v === null ? "-" : fmtNum(v));
+    return h("td", { class: `r cell ${extra}`, onclick: () => showMembers(cellTitle(rk, ck), r.members(rk, ck)) }, v === null ? "-" : fmtNum(v));
   };
   const table = h("table", { class: "data" },
-    h("thead", {}, h("tr", {}, h("th", {}, r.rowsAreMetrics ? "지표" : dimLabel(cfg.rows) || ""), ...r.colKeys.map((k) => h("th", { class: "num" }, colHead(k))), ...(showColTotal ? [h("th", { class: "num" }, "합계")] : []))),
+    h("thead", {}, h("tr", {}, h("th", {}, r.rowsAreMetrics ? "지표" : dimLabel(cfg.rows) || ""), ...r.colKeys.map((k) => h("th", { class: "r" }, colHead(k))), ...(showColTotal ? [h("th", { class: "r" }, "합계")] : []))),
     h("tbody", {}, ...rowKeys.map((rk) => h("tr", { class: rk === "합계" ? "total" : "" }, h("td", {}, rk === "합계" ? "합계" : rowHead(rk)),
       ...r.colKeys.map((ck) => td(rk, ck)), ...(showColTotal ? [td(rk, "합계", "total")] : [])))));
-  const wrap = h("div", { class: "table-wrap", style: compact ? "" : "max-height:52vh" }, table);
+  const wrap = h("div", { class: "table-scroll", style: compact ? {} : { maxHeight: "52vh" } }, table);
   const parts = [];
-  if (!compact) parts.push(h("p", { class: "small muted", style: "margin:0 0 6px" }, cfg.mode === "trend" ? `${cfg.fromMonth} ~ ${cfg.toMonth} · 각 월말 기준 · 숫자를 누르면 명단` : `기준일 ${cfg.date} · 입퇴사 집계 ${cfg.from} ~ ${cfg.date} · 숫자를 누르면 명단`));
+  if (!compact) parts.push(h("p", { class: "result-meta" }, cfg.mode === "trend" ? `${cfg.fromMonth} ~ ${cfg.toMonth} · 각 월말 기준 · 숫자를 누르면 명단이 열립니다` : `기준일 ${cfg.date} · 입퇴사 집계 ${cfg.from} ~ ${cfg.date} · 숫자를 누르면 명단이 열립니다`));
   if (cfg.chart) { const cb = h("div", { class: "chart-box" }, h("canvas", {})); parts.push(cb); drawChart(box, cb.firstChild, r, cfg, rowHead, colHead); }
   parts.push(wrap);
   box.replaceChildren(...parts);
   if (compact && cfg.chart) wrap.hidden = true;
 }
-const PALETTE = ["#1f3b64", "#c41e22", "#2f7f8a", "#d39b00", "#6b4fa0", "#3d8b4f", "#b5651d", "#8a8f98", "#d36ba6", "#4a90d9"];
+const PALETTE = ["#16171b", "#d92d20", "#8a8f99", "#f19a92", "#c9ccd3", "#4b4f58", "#b3221a", "#e3e5ea", "#6b7079", "#fbd0cb"];
 async function drawChart(box, canvas, r, cfg, rowHead, colHead) {
   await ensureChart();
   if (!canvas.isConnected) return;
   const rows = r.rowKeys, cols = r.colKeys;
   let labels, datasets;
-  if (r.trend) { labels = cols.map(colHead); datasets = rows.map((rk, i) => ({ label: rowHead(rk), data: cols.map((ck) => r.value(rk, ck)) })); }
+  if (r.trend) { labels = cols.map(colHead); datasets = rows.map((rk) => ({ label: rowHead(rk), data: cols.map((ck) => r.value(rk, ck)) })); }
   else { labels = rows.map(rowHead); datasets = cols.map((ck) => ({ label: colHead(ck), data: rows.map((rk) => r.value(rk, ck)) })); }
-  const type = cfg.chart === "pie" ? "pie" : cfg.chart === "line" ? "line" : "bar";
-  if (type === "pie") datasets = [{ ...datasets[0], backgroundColor: labels.map((_, i) => PALETTE[i % PALETTE.length]) }];
-  else datasets.forEach((d, i) => Object.assign(d, { backgroundColor: PALETTE[i % PALETTE.length], borderColor: PALETTE[i % PALETTE.length], tension: 0.2 }));
+  const type = cfg.chart === "pie" ? "doughnut" : cfg.chart === "line" ? "line" : "bar";
+  if (type === "doughnut") datasets = [{ ...datasets[0], backgroundColor: labels.map((_, i) => PALETTE[i % PALETTE.length]), borderWidth: 2, borderColor: "#fff" }];
+  else datasets.forEach((d, i) => Object.assign(d, { backgroundColor: PALETTE[i % PALETTE.length], borderColor: PALETTE[i % PALETTE.length], borderRadius: type === "bar" ? 6 : 0, tension: .3, pointRadius: 3, borderWidth: type === "line" ? 2 : 0 }));
   const stacked = cfg.chart === "stack";
   charts.get(box)?.destroy();
-  charts.set(box, new Chart(canvas, { type, data: { labels, datasets }, options: { responsive: true, maintainAspectRatio: false, animation: false,
-    plugins: { legend: { position: "bottom" } }, scales: type === "pie" ? {} : { x: { stacked }, y: { stacked, beginAtZero: true } } } }));
+  charts.set(box, new Chart(canvas, { type, data: { labels, datasets }, options: { responsive: true, maintainAspectRatio: false, animation: { duration: 350 }, cutout: type === "doughnut" ? "62%" : undefined,
+    plugins: { legend: { position: type === "doughnut" ? "right" : "top", align: "end" } },
+    scales: type === "doughnut" ? {} : { x: { stacked, grid: { display: false }, border: { display: false } }, y: { stacked, beginAtZero: true, grid: { color: "#f0f1f4" }, border: { display: false } } } } }));
 }
 
 // ---------- 설정 ----------
-const CODE_TABS = [["orgUnits", "조직(부서)"], ["grades", "직급"], ["positions", "직책"], ["jobTypes", "직종"], ["employmentTypes", "고용형태"], ["locations", "근무지"]];
+const CODE_TABS = [["orgUnits", "조직"], ["grades", "직급"], ["positions", "직책"], ["jobTypes", "직종"], ["employmentTypes", "고용형태"], ["locations", "근무지"]];
 const CODE_FIELD = { orgUnits: "dept", grades: "grade", positions: "position", jobTypes: "jobType", employmentTypes: "employmentType", locations: "location" };
 let codeTab = "orgUnits";
 function renderSettings() {
@@ -921,25 +1206,25 @@ function renderSettings() {
     $("#setCompany").value = s.companyName || ""; $("#setAddress").value = s.companyAddress || ""; $("#setCeo").value = s.representativeName || "";
   }
   $("#setSealPreview").src = sealSrc();
-  $("#codeTabs").replaceChildren(...CODE_TABS.map(([k, label]) => h("button", { class: `btn small${k === codeTab ? " active" : ""}`, type: "button", onclick: () => { codeTab = k; renderSettings(); } }, label)));
+  $("#codeTabs").replaceChildren(...CODE_TABS.map(([k, label]) => h("button", { class: k === codeTab ? "on" : "", type: "button", onclick: () => { codeTab = k; renderSettings(); } }, label)));
   const isOrg = codeTab === "orgUnits";
   const names = isOrg ? s.orgUnits.map((u) => u.name) : s[codeTab] || [];
   const field = CODE_FIELD[codeTab];
   const used = (name) => state.employees.filter((e) => e[field] === name).length;
   $("#codeHint").textContent = isOrg ? "상위 조직을 지정하면 조직도와 통계의 '상위조직'에 반영됩니다. 본부처럼 사원이 없는 묶음도 추가할 수 있습니다." : "순서는 통계 표와 목록 정렬에 쓰입니다. 이름을 바꾸면 해당 사원 값도 함께 바뀝니다.";
   $("#codeList").replaceChildren(...names.map((name, i) => {
-    const input = h("input", { type: "text", value: name });
+    const input = h("input", { type: "text", value: name, "aria-label": "이름" });
     input.addEventListener("change", () => renameCode(name, input.value.trim()));
     const row = h("div", { class: "code-row" },
-      h("button", { class: "btn small ghost", type: "button", title: "위로", onclick: () => moveCode(i, -1) }, "▲"),
-      h("button", { class: "btn small ghost", type: "button", title: "아래로", onclick: () => moveCode(i, 1) }, "▼"), input);
+      h("button", { class: "btn sm ghost", type: "button", "aria-label": "위로", onclick: () => moveCode(i, -1) }, icon("caret-up")),
+      h("button", { class: "btn sm ghost", type: "button", "aria-label": "아래로", onclick: () => moveCode(i, 1) }, icon("caret-down")), input);
     if (isOrg) {
-      const sel = h("select", { title: "상위 조직", onchange: (ev) => setParent(name, ev.target.value) }, h("option", { value: "" }, "(회사 직속)"),
+      const sel = h("select", { title: "상위 조직", "aria-label": "상위 조직", onchange: (ev) => setParent(name, ev.target.value) }, h("option", { value: "" }, "(회사 직속)"),
         ...names.filter((n) => n !== name && !isDescendant(n, name)).map((n) => h("option", { value: n }, n)));
       sel.value = s.orgUnits[i].parent || ""; row.append(sel);
     }
-    row.append(h("span", { class: "muted small nowrap" }, `${used(name)}명`),
-      h("button", { class: "btn small danger", type: "button", onclick: () => deleteCode(name) }, "삭제"));
+    row.append(h("span", { class: "n" }, `${used(name)}명`),
+      h("button", { class: "btn sm ghost", type: "button", "aria-label": "삭제", onclick: () => deleteCode(name) }, icon("trash")));
     return row;
   }));
 }
@@ -959,7 +1244,7 @@ async function renameCode(from, to) {
   if (list.some((x) => nameOf(x) === to)) { toast("같은 이름이 있습니다."); return renderSettings(); }
   const field = CODE_FIELD[codeTab];
   const targets = state.employees.filter((e) => e[field] === from);
-  if (targets.length && !(await confirmBox(`'${from}' → '${to}'로 바꾸고 사원 ${targets.length}명의 값도 바꿉니다. 코드 이름 변경이라 변경 이력은 남기지 않습니다.`))) return renderSettings();
+  if (targets.length && !(await confirmBox(`'${from}'을 '${to}'로 바꾸고 사원 ${targets.length}명의 값도 바꿉니다. 코드 이름 변경이라 변경 이력은 남기지 않습니다.`))) return renderSettings();
   const next = list.map((x) => (codeTab === "orgUnits" ? { ...x, name: x.name === from ? to : x.name, parent: x.parent === from ? to : x.parent } : x === from ? to : x));
   await commitOps(targets.map((e) => ["set", ref("employees", e.empNo), { ...e, [field]: to }]));
   await saveSettings({ [codeTab]: next }); toast("이름을 바꿨습니다.");
