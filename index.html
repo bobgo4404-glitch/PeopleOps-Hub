@@ -939,7 +939,7 @@ function renderOrg() {
   const known = new Set(units.map((u) => u.name));
   const orphan = Object.keys(byDept).filter((d) => !known.has(d)).map((d) => ({ name: d, parent: "" }));
   $("#orgSub").textContent = `${state.settings.companyName || "엔코스"} 재직·휴직 ${active.length}명 · 상위 조직은 설정에서 지정합니다.`;
-  const tops = [...children(""), ...orphan].filter((u) => members(u.name).length).sort((a, b) => members(b.name).length - members(a.name).length);
+  const tops = [...children(""), ...orphan].filter((u) => members(u.name).length); // 설정의 조직 순서 그대로
   const card = (u, i) => {
     const all = members(u.name), leads = sortP(all.filter((e) => e.position));
     const kids = children(u.name).filter((c) => members(c.name).length);
