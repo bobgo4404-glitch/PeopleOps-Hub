@@ -714,7 +714,8 @@ $("#lockReset").addEventListener("click", async () => {
 });
 
 // ---------- 로그인·구독 ----------
-$("#loginBtn").addEventListener("click", () => signInWithPopup(auth, new GoogleAuthProvider()).catch((e) => toast(`로그인 실패: ${e.code || e.message}`)));
+$("#loginBtn").addEventListener("click", () => signInWithPopup(auth, new GoogleAuthProvider()).catch((e) => toast(e.code === "auth/network-request-failed" || e.code === "auth/popup-blocked"
+  ? "로그인 창을 열지 못했습니다. 앱 안 브라우저가 아닌 Chrome·Edge에서 열어 주세요." : `로그인 실패: ${e.code || e.message}`)));
 $("#logoutBtn").addEventListener("click", () => signOut(auth));
 let unsubs = [];
 onAuthStateChanged(auth, async (user) => {
@@ -726,8 +727,10 @@ onAuthStateChanged(auth, async (user) => {
     const owner = await getDoc(ownerRef);
     if (!owner.exists()) await setDoc(ownerRef, { ownerUid: user.uid, ownerEmail: user.email || "", createdAt: new Date().toISOString() });
     else if (owner.data().ownerUid !== user.uid) throw new Error("denied");
-  } catch {
-    $("#loginMsg").textContent = "이 계정은 사용 권한이 없습니다."; await signOut(auth); return;
+  } catch (e) {
+    const denied = e.message === "denied" || e.code === "permission-denied";
+    $("#loginMsg").textContent = denied ? `이 계정(${user.email || ""})은 사용 권한이 없습니다.` : `데이터 서버에 연결하지 못했습니다(${e.code || e.message}). Chrome에서 다시 열어 보세요.`;
+    await signOut(auth); return;
   }
   $("#loginScreen").hidden = true; $("#appShell").hidden = false;
   const name = user.displayName || "사용자";
