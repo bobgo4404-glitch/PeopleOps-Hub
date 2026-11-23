@@ -729,8 +729,9 @@ onAuthStateChanged(auth, async (user) => {
     else if (owner.data().ownerUid !== user.uid) throw new Error("denied");
   } catch (e) {
     const denied = e.message === "denied" || e.code === "permission-denied";
-    $("#loginMsg").textContent = denied ? `이 계정(${user.email || ""})은 사용 권한이 없습니다.` : `데이터 서버에 연결하지 못했습니다(${e.code || e.message}). Chrome에서 다시 열어 보세요.`;
-    await signOut(auth); return;
+    if (denied) { $("#loginMsg").textContent = `이 계정(${user.email || ""})은 사용 권한이 없습니다.`; await signOut(auth); return; }
+    // 일시적 연결 오류: 로그아웃하지 않고 새로고침으로 다시 시도
+    $("#loginMsg").textContent = `데이터 서버에 연결하지 못했습니다(${e.code || e.message}). 잠시 후 새로고침(F5)하세요.`; return;
   }
   $("#loginScreen").hidden = true; $("#appShell").hidden = false;
   const name = user.displayName || "사용자";
